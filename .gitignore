@@ -1,0 +1,27 @@
+.env
+
+# Dependencies
+vendor/
+node_modules/
+
+# Uploads and extracted/generated content
+storage/uploads/resources/*
+!storage/uploads/resources/.gitkeep
+storage/extracted_text/*
+!storage/extracted_text/.gitkeep
+
+# Logs, cache, and temporary files
+*.log
+logs/
+cache/
+tmp/
+temp/
+*.tmp
+*.cache
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
