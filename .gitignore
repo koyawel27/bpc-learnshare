@@ -25,3 +25,5 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Local-only AI feasibility-spike artifacts
+.local/ai-feasibility-spike/
