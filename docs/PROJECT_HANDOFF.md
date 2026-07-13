@@ -2,10 +2,10 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0
-**Last Updated:** 2026-07-12
+**Last Updated:** 2026-07-13
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Purpose:** Reflect the current accepted planning, AI-scope, schema, security, and privacy state — including the D041–D042 AI-scope revision and its propagation into `PROJECT_BRIEF.md`, `USER_ROLES.md`, and `WORKFLOWS.md` — so a new Claude or GPT conversation can continue directly into planning the AI feasibility spike without reopening settled decisions or re-deriving context from old chat history. This document summarizes accepted decisions and current work; it does not itself introduce new decisions.
+**Purpose:** Reflect the current accepted planning, AI-scope, verified schema, security, privacy, and feasibility-spike state — including the accepted `AI_FEASIBILITY_SPIKE.md` specification and the completed MariaDB 10.4.32 schema-compatibility verification — so a new Claude or GPT conversation can continue into the clean hardware baseline and measured spike execution without reopening settled decisions or re-deriving context from old chat history. This document summarizes accepted decisions, completed verification, and current work; it does not itself introduce new decisions.
 
 ---
 
@@ -61,10 +61,11 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `WORKFLOWS.md`       | Accepted and aligned through D042. Includes Admin AI configuration, Pending-resource AI assistance, Approved-resource extraction/processing, semantic search, related-resource suggestions, repository-grounded inquiry, session-scoped follow-up, planned AI enhancement boundaries, and AI/retrieval-derived-data lifecycle workflows. No provider, model, vector database, final retrieval architecture, table, or column was locked. |
 | `DATABASE_DESIGN.md` | Accepted **pre-D041/D042** conceptual baseline. Retrieval architecture, extraction/chunk/embedding storage, and any resulting schema expansion are intentionally not yet propagated. Its current silence on retrieval structures must not be treated as a decision that no additional structure will be needed.                                                                                                                          |
 | `DECISIONS.md`       | Complete through **D042**. D041–D042 establish the required completed-capstone AI package, the Required/Planned/Deferred AI tiers, and the feasibility-gated architecture direction.                                                                                                                                                                                                                                                     |
-| `schema.sql`         | Accepted 18-table SQL baseline corresponding to the current pre-D041/D042 database design. Includes the D039 `audit_log` patch and D040 removal-time behavior documentation. It is not yet expanded for extraction, chunks, embeddings, retrieval indexes, or repository-grounded inquiry support. The schema has not yet been executed against a live database.                                                                         |
-| `SECURITY_NOTES.md`  | Complete and accepted, Sections 1–15, through Draft 1.2 and aligned through D040. It predates D041–D042. Its existing security baseline remains accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older wording that treats the newly required inquiry capability as optional is superseded by D041.                                                                                        |
-| `DATA_PRIVACY.md`    | Complete and accepted, Sections 1–15, through the pre-D041/D042 baseline. Its existing privacy principles remain accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older optional/stretch framing for inquiry is superseded by D041.                                                                                                                                                        |
-| `PROJECT_HANDOFF.md` | This version. It supersedes the prior handoff, which still described `DATA_PRIVACY.md` as in progress, repository-grounded inquiry as optional Phase 5 stretch scope, and `BUILD_PLAN.md` as the immediate next major document.                                                                                                                                                                                                          |
+| `schema.sql`         | Accepted and live-verified 18-table SQL baseline corresponding to the current pre-D041/D042 database design. MariaDB 10.4.32 successfully creates all 18 tables and enforces the remaining 13 `CHECK` constraints. The incompatible direct self-replacement `CHECK` was removed because MariaDB rejects a comparison against the `AUTO_INCREMENT` `resources.id`; PHP must enforce direct self-replacement and longer-cycle prevention under D037. No retrieval-related schema expansion has been authorized. |
+| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the pre-run feasibility-spike specification, Sections 1–26. The specification defines the corpus, measurements, guardrails, pre-run criteria, evidence package, recommendation format, and architecture/schema handoff. The spike itself has not yet been executed, and no provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
+| `SECURITY_NOTES.md`  | Complete and accepted, Sections 1–15, through Draft 1.2 and aligned through D040. It predates D041–D042. Its existing security baseline remains accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older wording that treats the newly required inquiry capability as optional is superseded by D041. |
+| `DATA_PRIVACY.md`    | Complete and accepted, Sections 1–15, through the pre-D041/D042 baseline. Its existing privacy principles remain accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older optional/stretch framing for inquiry is superseded by D041. |
+| `PROJECT_HANDOFF.md` | This updated version. It records the accepted feasibility-spike specification, the verified MariaDB 10.4.32 schema baseline, the targeted compatibility patch, and the clean-hardware baseline as the next execution checkpoint. |
 
 **Not yet substantively completed:**
 
@@ -73,7 +74,7 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 * `TESTING_CHECKLIST.md`
 * `CHANGELOG.md`
 
-The immediate next planning artifact is a focused AI feasibility-spike specification, not one of the unfinished documents above. See Sections 12A and 13.
+`AI_FEASIBILITY_SPIKE.md` is now complete and accepted. The immediate next execution checkpoint is the clean hardware and runtime baseline defined in Sections 12A and 13, followed by measured spike execution.
 
 ---
 
@@ -560,7 +561,7 @@ Most recent decisions:
 
 ---
 
-## 10. Accepted 18-Table Schema Baseline
+## 10. Accepted and Verified 18-Table Schema Baseline
 
 `schema.sql` is the accepted current SQL baseline.
 
@@ -619,7 +620,7 @@ The current baseline does not yet contain dedicated structures for:
 
 Whether any such structure is required remains subject to the feasibility spike, architecture selection, and explicit later decision described in Section 7B.
 
-The schema has not yet been executed against the actual target XAMPP/MariaDB environment.
+The baseline has now been executed against a fresh MariaDB 10.4.32 database in the actual XAMPP environment. All 18 tables were created successfully. MariaDB recognized and enforced the remaining 13 `CHECK` constraints; an invalid `system_settings.ai_enabled = 'maybe'` update was rejected while the valid value remained unchanged. The original `chk_resources_no_self_replace` definition was removed because MariaDB 10.4.32 rejects a `CHECK` that compares against the `AUTO_INCREMENT` `resources.id` column. PHP application logic remains responsible for rejecting both direct self-replacement and longer replacement cycles under D037.
 
 ---
 
@@ -673,13 +674,20 @@ No notification structure was changed.
 
 ## 12. Known Implementation and Verification Items
 
+The following verification checkpoint is complete:
+
+* **MariaDB/XAMPP schema compatibility is verified.**
+
+  * Actual server and client version: MariaDB 10.4.32.
+  * The canonical schema creates exactly 18 tables in a fresh verification database.
+  * The remaining 13 `CHECK` constraints are recognized and enforced.
+  * An invalid `ai_enabled = 'maybe'` update was rejected with a constraint error, and the prior valid value remained unchanged.
+  * MariaDB 10.4.32 rejected `chk_resources_no_self_replace` because it compared `replaces_resource_id` with the `AUTO_INCREMENT` `resources.id` column.
+  * That incompatible `CHECK` was removed without changing the 18-table design.
+  * PHP application logic must reject direct self-replacement and longer replacement cycles.
+  * D037 remains controlling: database checks are defense-in-depth, and PHP validation is mandatory regardless of database enforcement.
+
 The following remain open and must not be treated as already resolved:
-
-* **Local MariaDB/MySQL CHECK-constraint enforcement remains unconfirmed.**
-
-  * Confirm the actual server version through phpMyAdmin or an equivalent query.
-  * PHP validation remains mandatory regardless of the result.
-  * Schema verification must occur before later implementation planning treats a CHECK constraint as effective enforcement.
 
 * **The 20 MB file-size limit remains a working, unvalidated default.**
 
@@ -724,11 +732,6 @@ The following remain open and must not be treated as already resolved:
   * Database writes should be atomic where required.
   * Filesystem deletion cannot be assumed to roll back with a database transaction.
 
-* **`schema.sql` has not yet been executed against a live XAMPP/MariaDB database.**
-
-  * This must occur as a separate verification step.
-  * Do not redesign the schema during execution verification.
-
 * **AI/retrieval architecture remains unresolved pending the feasibility spike.**
 
   * No provider, model, embedding approach, vector-storage method, retrieval infrastructure, or schema expansion may be treated as decided before measured results are reviewed.
@@ -741,19 +744,21 @@ The following remain open and must not be treated as already resolved:
 
 ---
 
-## 12A. AI Feasibility Spike — Next Planning Artifact
+## 12A. AI Feasibility Spike — Accepted Pre-Run Specification
 
-The next substantive planning artifact is a **focused AI feasibility-spike specification**.
+`AI_FEASIBILITY_SPIKE.md` is complete and accepted as the project's pre-run measurement specification.
 
-It is not:
+It is:
 
-* `AI_FEATURES.md`;
-* `BUILD_PLAN.md`;
-* `TESTING_CHECKLIST.md`;
-* a final architecture decision;
-* a schema revision.
+* a bounded decision-support and measurement plan;
+* the controlling specification for the next clean-baseline and spike-execution phase;
+* not `AI_FEATURES.md`;
+* not `BUILD_PLAN.md`;
+* not `TESTING_CHECKLIST.md`;
+* not a final architecture decision;
+* not a schema revision.
 
-The specification is not drafted inside this handoff.
+Specification completion does not mean that the spike has been executed or that a provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected.
 
 ### 12A.1 Purpose
 
@@ -771,9 +776,9 @@ The initial candidate direction is:
 
 The spike must determine whether that direction is workable or whether a database upgrade, second database, dedicated vector/retrieval layer, different provider mix, or other architecture change is actually justified.
 
-### 12A.2 Expected specification coverage
+### 12A.2 Accepted specification coverage
 
-The specification should define:
+The accepted specification defines:
 
 * representative PDF test files;
 * representative DOCX test files;
@@ -839,26 +844,29 @@ The planned clean-baseline checkpoint appears in Section 13.
 
 ## 13. Current Documentation and Verification Order
 
-Follow this sequence:
+Completed checkpoints:
 
-1. **Update and accept this `PROJECT_HANDOFF.md` revision.**
+1. **Accepted the current planning baseline through D042.**
 
-2. **Create and review the focused AI feasibility-spike specification.**
+2. **Completed and accepted `AI_FEASIBILITY_SPIKE.md`.**
 
-   * Review its scope, representative files, measurements, test matrix, and decision criteria before executing it.
+   * Sections 1–26 are complete.
+   * Required capability coverage, measurements, mandatory guardrails, pre-run criteria, evidence rules, and architecture/schema handoff are accepted.
+   * The spike itself has not yet been executed.
 
-3. **Separately execute and verify the accepted 18-table `schema.sql` against the actual target XAMPP/MariaDB environment.**
+3. **Executed and verified the canonical 18-table `schema.sql` in the actual XAMPP/MariaDB environment.**
 
-   * This is a verification step only.
-   * Do not redesign the schema during this step.
-   * Record:
+   * Actual server/client version: MariaDB 10.4.32.
+   * Fresh import result: successful.
+   * Table count: 18.
+   * Remaining `CHECK`-constraint count: 13.
+   * Enforcement was confirmed by rejecting an invalid `system_settings.ai_enabled` value.
+   * The incompatible `chk_resources_no_self_replace` constraint was removed because MariaDB 10.4.32 rejects its comparison against the `AUTO_INCREMENT` `resources.id` column.
+   * PHP must enforce direct self-replacement and longer replacement-cycle prevention under D037.
 
-     * database version;
-     * schema execution result;
-     * CHECK-constraint behavior;
-     * any actual SQL compatibility issue.
+Current next checkpoint:
 
-4. **Perform the clean-hardware checkpoint.**
+4. **Perform the clean-hardware and runtime baseline.**
 
    * Restart Windows.
    * Close unnecessary heavy applications.
@@ -874,33 +882,32 @@ llmfit system
 nvidia-smi
 ```
 
-* Record the clean baseline.
+* Record the clean baseline exactly.
 * Do not treat the previous high-load scan as the final benchmark.
+* Do not begin model/provider selection during this checkpoint.
 
-5. **Execute the feasibility spike.**
+Remaining order:
 
-   * Use representative readable files.
-   * Use the bounded sample corpus.
+5. **Execute the accepted feasibility spike.**
+
+   * Use the accepted representative corpus and evaluation set.
+   * Follow the pre-run criteria and evidence-recording rules in `AI_FEASIBILITY_SPIKE.md`.
    * Record actual results rather than relying on model/tool marketing claims.
 
-6. **Evaluate the measured results.**
+6. **Evaluate and accept the measured findings.**
 
-   * extraction success;
-   * extraction failure;
+   * extraction success and failure;
    * source-location preservation;
    * embedding performance;
-   * retrieval quality;
-   * citation behavior;
+   * retrieval relevance and latency;
+   * grounded inquiry and attribution;
    * insufficient-evidence behavior;
    * prohibited-request behavior;
-   * session follow-up;
-   * stale-source exclusion;
-   * status/lifecycle exclusion;
-   * latency;
-   * memory;
-   * CPU/GPU use;
-   * external-provider dependence;
-   * outage/fallback behavior.
+   * session-scoped follow-up;
+   * stale-source and lifecycle exclusion;
+   * CPU/RAM/GPU/VRAM use;
+   * external-provider dependence, quota, cost, and fallback;
+   * maintainability.
 
 7. **Select the simplest workable architecture based on the measured results.**
 
@@ -1000,7 +1007,7 @@ Any older D016-based optional inquiry wording is superseded by D041 and must be 
 
 ## 15. Guidance for the Next Claude Conversation
 
-Use this to open the next Claude conversation:
+Use this only when a fresh Claude conversation is needed during the clean-baseline or spike-execution phase:
 
 ```text
 I am continuing the BPC LearnShare capstone project in a fresh Claude conversation.
@@ -1011,129 +1018,97 @@ Read the latest project files first and treat them as source of truth:
 2. PROJECT_BRIEF.md (accepted and aligned through D042)
 3. USER_ROLES.md (accepted and aligned through D042)
 4. WORKFLOWS.md (accepted and aligned through D042)
-5. DATABASE_DESIGN.md (accepted pre-D041/D042 baseline; retrieval architecture not yet propagated)
+5. DATABASE_DESIGN.md (accepted pre-D041/D042 conceptual baseline; retrieval architecture not yet propagated)
 6. DECISIONS.md (through D042)
-7. schema.sql (accepted 18-table baseline; D039/D040 applied; no retrieval/schema expansion yet)
+7. schema.sql (verified 18-table MariaDB 10.4.32 baseline; 13 enforced CHECK constraints; no retrieval/schema expansion)
 8. SECURITY_NOTES.md (accepted Sections 1–15 pre-D041/D042 baseline)
 9. DATA_PRIVACY.md (accepted Sections 1–15 pre-D041/D042 baseline)
+10. AI_FEASIBILITY_SPIKE.md (accepted complete pre-run specification, Sections 1–26)
+
+Current verified state:
+
+- AI_FEASIBILITY_SPIKE.md is complete and accepted, but the spike has not yet been executed.
+- The canonical schema was verified on MariaDB 10.4.32.
+- All 18 tables import successfully.
+- The remaining 13 CHECK constraints are recognized and enforced.
+- chk_resources_no_self_replace was removed because MariaDB 10.4.32 rejects a CHECK that compares against the AUTO_INCREMENT resources.id column.
+- PHP must enforce direct self-replacement and longer replacement-cycle prevention under D037.
+- No final provider, model, retrieval layer, database upgrade, second database, or retrieval-related schema expansion has been selected.
 
 Current task:
 
-Prepare the focused AI feasibility-spike specification for BPC LearnShare v1.0.
+Help review the clean hardware/runtime baseline and then support execution of the accepted feasibility spike exactly as specified.
 
-This is not AI_FEATURES.md, BUILD_PLAN.md, TESTING_CHECKLIST.md, a final architecture decision, or a schema revision.
+Do not rewrite AI_FEASIBILITY_SPIKE.md.
+Do not select an architecture before measurements are complete.
+Do not add a table or column.
+Do not modify DATABASE_DESIGN.md or schema.sql during the spike.
+Do not turn the spike into the full AI implementation.
+Do not treat optional local generation as a required pass condition.
+Do not reopen D001–D042 unless the source files directly conflict.
 
-Its purpose is to measure whether the candidate direction in PROJECT_HANDOFF.md Section 7A is feasible for the required minimum AI package defined by DECISIONS.md D041–D042.
+For the immediate turn, return only:
 
-Do not select a final provider, model, database upgrade, vector database, or retrieval architecture.
+1. Source-and-version check.
+2. Clean-baseline evidence check for llmfit system and nvidia-smi outputs supplied by the user.
+3. Any actual blocker before execution.
+4. The smallest next execution step from the accepted AI_FEASIBILITY_SPIKE.md.
 
-Do not add a database table or column.
-
-Do not modify DATABASE_DESIGN.md or schema.sql.
-
-Do not draft implementation code.
-
-Before drafting the full specification, return only:
-
-1. A source-and-conflict check.
-2. A proposed document filename.
-3. A complete section outline with one-line purposes.
-4. A recommended split plan if the document is long.
-5. A concise traceability map showing how the outline covers every Required capability in D042 Part A.
-6. A proposed measurement and decision matrix at heading/summary level only.
-7. A list of genuinely unresolved details that the specification must test rather than assume.
-8. Any blocking conflict.
-
-The eventual specification must cover:
-
-- representative PDF, DOCX, PPTX, and TXT files;
-- extraction success and failure cases;
-- image-only/scanned limitations;
-- source-location preservation;
-- a bounded corpus initially around 25–50 Approved resources or an equivalent realistic chunk count;
-- local embedding benchmarks;
-- retrieval quality;
-- status and lifecycle exclusion;
-- stale-source handling;
-- replacement non-inheritance;
-- grounded answer behavior;
-- source attribution;
-- reliable source locators;
-- insufficient-evidence behavior;
-- prohibited-request handling;
-- session-scoped follow-up;
-- latency;
-- memory;
-- CPU/GPU use;
-- external-provider dependence;
-- outage/fallback behavior;
-- explicit criteria for keeping MariaDB 10.4 with bounded application-side retrieval versus selecting a more complex retrieval layer.
-
-Confirm the current hardware note from PROJECT_HANDOFF.md Section 12A but do not assume that the hardware is sufficient.
-
-Stop and flag any direct conflict with D041–D042 before drafting around it.
+Do not invent measurements and do not claim that the spike has passed before evidence exists.
 ```
 
 ---
 
 ## 16. Guidance for the Next GPT Review Conversation
 
-Use this to open a separate GPT review conversation:
+Use this to open a separate GPT review conversation during the clean-baseline or spike-execution phase:
 
 ```text
-You are acting as a critical planning, architecture, security, AI-feasibility, and documentation reviewer for the BPC LearnShare capstone project.
+You are acting as a critical planning, architecture, security, AI-feasibility, measurement, and documentation reviewer for the BPC LearnShare capstone project.
 
-BPC LearnShare is a BS Information Systems capstone for Bulacan Polytechnic College: an AI-assisted collaborative academic resource-sharing and management system.
+Read the latest source files first:
 
-I will paste Claude-drafted feasibility-spike sections and later planning documents for review.
+- PROJECT_HANDOFF.md
+- PROJECT_BRIEF.md
+- DECISIONS.md through D042
+- USER_ROLES.md
+- WORKFLOWS.md
+- DATABASE_DESIGN.md
+- schema.sql
+- SECURITY_NOTES.md
+- DATA_PRIVACY.md
+- AI_FEASIBILITY_SPIKE.md
+
+Current verified state:
+
+- AI_FEASIBILITY_SPIKE.md Sections 1–26 are complete and accepted.
+- The spike has not yet been executed.
+- MariaDB 10.4.32 successfully imports the verified 18-table schema.
+- The remaining 13 CHECK constraints are recognized and enforced.
+- The incompatible direct self-replacement CHECK was removed; PHP must prevent direct self-replacement and longer cycles under D037.
+- No AI architecture, provider, model, retrieval layer, database upgrade, second database, or retrieval-related schema expansion is selected.
 
 Your job:
 
-1. Verify every claim against the current source documents:
-   - PROJECT_HANDOFF.md
-   - PROJECT_BRIEF.md
-   - USER_ROLES.md
-   - WORKFLOWS.md
-   - DATABASE_DESIGN.md
-   - DECISIONS.md through D042
-   - schema.sql
-   - SECURITY_NOTES.md
-   - DATA_PRIVACY.md
-
-2. Give a clear verdict:
-   - Accept
-   - Accept with fixes
-   - Reject and rework
-
-3. Group issues by severity:
-   - Blockers: direct contradictions with an accepted decision, role, permission, status, lifecycle rule, schema baseline, security/privacy rule, or D041–D042 AI tier
-   - Important: feasibility, architecture, testing, maintainability, or ambiguity risks
-   - Minor: wording, duplication, or presentation issues that do not change meaning
-
-4. Apply exact targeted patches for real issues.
-
-5. Provide clean, copy-ready corrected text.
-
-6. Preserve useful technical depth while removing:
-   - enterprise-scale overengineering;
-   - premature provider or architecture lock-in;
-   - vague claims;
-   - unsupported certainty;
-   - unnecessary full-document rewrites.
-
-7. End with one targeted next prompt for Claude.
+1. Review clean-baseline and spike evidence against the accepted specification.
+2. Distinguish measured fact, interpretation, limitation, and recommendation.
+3. Flag missing, invalid, incomparable, or post-hoc measurements.
+4. Enforce the accepted pre-run criteria and mandatory guardrails.
+5. Preserve Required, Planned, and Deferred AI tiers.
+6. Prevent architecture lock-in before the complete evidence package is reviewed.
+7. Give a clear verdict for each checkpoint: Accept / Accept with fixes / Reject and rerun.
+8. Apply only targeted documentation corrections when a real inconsistency exists.
+9. Keep the work bounded to a local/LAN BSIS capstone MVP.
 
 Constraints:
 
-- Do not introduce new roles.
-- Do not introduce new account statuses.
-- Do not introduce new resource statuses.
-- Do not introduce new report statuses.
-- Do not add a table or schema column before the feasibility spike and explicit architecture/schema decision.
-- Do not treat a specific provider, model, vector database, or hosted service as selected.
-- Do not reopen D001–D042 unless source documents directly conflict.
-- Do not turn BPC LearnShare into an LMS, unrestricted AI tutor, chatbot-first product, production campus platform, enterprise AI platform, or security whitepaper.
-- Keep the project realistic for a small BSIS capstone team, native PHP, XAMPP, MariaDB, and local/LAN demonstration.
+- Do not invent measurements.
+- Do not treat one successful sample as proof of feasibility.
+- Do not add a table or schema column during the spike.
+- Do not modify DATABASE_DESIGN.md or schema.sql before the later explicit architecture/schema decision.
+- Do not select Groq, Ollama, Hugging Face, Supabase, pgvector, MariaDB 11.7+, or any model/provider merely because it is mentioned as a candidate.
+- Do not turn the project into an LMS, unrestricted AI tutor, chatbot-first product, production campus platform, or enterprise AI platform.
+- Do not reopen D001–D042 unless current source files directly conflict.
 ```
 
 ---
@@ -1222,13 +1197,13 @@ AI capabilities explicitly deferred beyond v1.0 — including OCR, AI vision, pe
 
 ## 19. Project Risks to Avoid
 
-### 19.1 Delaying database verification too long
+### 19.1 Losing the verified database baseline
 
-The accepted schema still needs execution against the actual XAMPP/MariaDB environment.
+The accepted schema has now been executed and verified against MariaDB 10.4.32.
 
-Do not rely on assumed CHECK-constraint behavior.
+Do not reintroduce the incompatible direct self-replacement `CHECK`, silently change the verified 18-table baseline, or treat database enforcement as a replacement for PHP validation.
 
-The schema-verification step must remain separate from retrieval-schema redesign.
+Future retrieval-related schema work must remain separate and must wait for measured spike findings plus an explicit architecture/schema decision.
 
 ### 19.2 Decision-propagation gaps
 
@@ -1325,9 +1300,10 @@ BPC LearnShare v1.0 currently has:
 * `WORKFLOWS.md` — accepted and aligned through D042;
 * `DATABASE_DESIGN.md` — accepted pre-D041/D042 conceptual baseline, with retrieval architecture and any resulting schema expansion intentionally not yet propagated;
 * `DECISIONS.md` — accepted through D042;
-* `schema.sql` — accepted 18-table baseline, including the D039 audit-log patch and D040 removal-lifecycle documentation, not yet expanded for retrieval structures;
+* `schema.sql` — accepted and verified 18-table MariaDB 10.4.32 baseline, including the D039 audit-log patch, D040 removal-lifecycle documentation, and the targeted removal of the incompatible direct self-replacement `CHECK`; the remaining 13 `CHECK` constraints are recognized and enforced;
 * `SECURITY_NOTES.md` — complete and accepted through its pre-D041/D042 baseline;
 * `DATA_PRIVACY.md` — complete and accepted through its pre-D041/D042 baseline;
+* `AI_FEASIBILITY_SPIKE.md` — complete and accepted pre-run specification, Sections 1–26;
 * this updated `PROJECT_HANDOFF.md`.
 
 D041–D042 have been propagated into:
@@ -1335,55 +1311,53 @@ D041–D042 have been propagated into:
 * `PROJECT_BRIEF.md`;
 * `USER_ROLES.md`;
 * `WORKFLOWS.md`;
+* `AI_FEASIBILITY_SPIKE.md`;
 * this handoff.
 
-No unresolved source conflict blocks the next planning step.
+No unresolved source conflict blocks the clean-hardware baseline or the accepted spike-execution sequence.
+
+Completed verification:
+
+* actual server/client version recorded as MariaDB 10.4.32;
+* canonical schema imported successfully into a fresh verification database;
+* all 18 accepted tables created;
+* 13 remaining `CHECK` constraints recognized;
+* actual `CHECK` enforcement confirmed through rejection of an invalid `ai_enabled` value;
+* incompatible `chk_resources_no_self_replace` removed without changing the 18-table design;
+* direct self-replacement and longer-cycle prevention explicitly retained as mandatory PHP application rules under D037.
 
 Known scheduled propagation remains:
 
-* `DATABASE_DESIGN.md` and `schema.sql` after feasibility testing and an explicit architecture/schema decision;
+* `DATABASE_DESIGN.md` and `schema.sql` after feasibility testing and an explicit architecture/schema decision, only where measured results justify changes;
 * `SECURITY_NOTES.md` after architecture selection;
 * `DATA_PRIVACY.md` after architecture selection.
 
 Any older pre-D041/D042 wording that describes repository-grounded inquiry as optional or stretch scope is superseded by D041 and must be corrected during the scheduled targeted propagation pass.
 
-Important verification items remain open:
+Important remaining items:
 
-* execute `schema.sql` against the actual XAMPP/MariaDB environment;
-* record the actual MariaDB version;
-* confirm local CHECK-constraint behavior;
 * test the 20 MB upload limit against representative files;
-* complete the clean hardware baseline;
-* execute the AI feasibility spike;
-* measure extraction quality;
+* restart Windows and record the clean `llmfit system` and `nvidia-smi` baseline;
+* execute the accepted AI feasibility spike;
+* measure extraction quality and failure behavior;
+* measure source-location preservation;
 * measure local embedding feasibility;
-* measure retrieval quality;
-* evaluate source-location preservation;
-* evaluate grounded-answer behavior;
-* evaluate source attribution;
-* evaluate insufficient-evidence handling;
-* evaluate latency and resource use;
-* evaluate provider dependence and fallback behavior;
-* select the simplest workable AI architecture.
+* measure bounded retrieval quality and latency;
+* evaluate grounded-answer behavior and source attribution;
+* evaluate insufficient-evidence and prohibited-request handling;
+* evaluate session-scoped follow-up and lifecycle revalidation;
+* evaluate CPU, RAM, GPU, and VRAM use;
+* evaluate external-provider dependence, quota, cost, privacy limitations, and fallback behavior;
+* select the simplest workable AI architecture only after the complete evidence package is reviewed.
 
-The immediate next planning phase is the **focused AI feasibility-spike specification**.
+The immediate next checkpoint is the **clean hardware and runtime baseline**:
 
-The remaining order is:
-
-1. Accept this `PROJECT_HANDOFF.md`.
-2. Draft and review the feasibility-spike specification.
-3. Verify the current 18-table schema in the target XAMPP/MariaDB environment without redesigning it.
-4. Restart Windows and record the clean `llmfit system` and `nvidia-smi` baseline.
-5. Execute the feasibility spike.
-6. Evaluate the measured results.
-7. Select the simplest workable architecture.
-8. Record the architecture/schema decision explicitly.
-9. Apply targeted database-design and schema changes.
-10. Propagate targeted AI/retrieval changes into security and privacy documentation.
-11. Draft `AI_FEATURES.md`.
-12. Draft `BUILD_PLAN.md`.
-13. Draft `TESTING_CHECKLIST.md`.
-14. Perform final cross-document consistency review before implementation.
+1. Restart Windows.
+2. Close unnecessary heavy applications.
+3. Run `llmfit system`.
+4. Run `nvidia-smi`.
+5. Record the clean baseline.
+6. Begin the accepted feasibility spike only after the baseline is captured.
 
 The project remains a local/LAN BS Information Systems academic MVP: a moderated academic resource-sharing and management system that is required to implement and demonstrate a bounded repository-grounded AI capability package while preserving an independently functional non-AI resource-sharing core.
 

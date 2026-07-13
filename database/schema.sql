@@ -247,10 +247,7 @@ CREATE TABLE resources (
             (ai_notice_acknowledged = 0 AND ai_notice_acknowledged_at IS NULL)
             OR
             (ai_notice_acknowledged = 1 AND ai_notice_acknowledged_at IS NOT NULL)
-        ),
-
-    CONSTRAINT chk_resources_no_self_replace
-        CHECK (replaces_resource_id IS NULL OR replaces_resource_id <> id)
+        )
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -274,19 +271,22 @@ CREATE TABLE resources (
 --   specific combination; adding it now would be speculative tuning.
 --   Cheap to add later via ALTER TABLE if real testing shows a need.
 --
---   chk_resources_no_self_replace only blocks a resource from directly
---   pointing at itself. It does NOT detect longer replacement cycles
---   (A replaces B, B replaces C, C replaces A) — MySQL/MariaDB CHECK
---   constraints are row-level only and cannot reason across multiple
---   rows. That cycle-prevention check remains an unresolved
---   application-layer requirement, same as flagged in the previous
---   Part 2 draft. Do not treat this CHECK as having closed that gap.
+--   MariaDB 10.4.32 rejects a CHECK on resources that compares
+--   replaces_resource_id with the AUTO_INCREMENT id column. Therefore,
+--   direct self-replacement is not enforced through a CHECK constraint.
 --
---   CHECK constraints require MariaDB 10.2+ or MySQL 8.0.16+. Confirm
---   your XAMPP MariaDB version supports them (phpMyAdmin > Server >
---   Variables > version) — on older versions these are silently
---   parsed but not enforced, which is worse than not having them at
---   all if you're relying on them for correctness.
+--   PHP application logic must reject both:
+--     1. direct self-replacement; and
+--     2. longer replacement cycles such as A -> B -> C -> A.
+--
+--   This remains consistent with D037: database CHECK constraints are
+--   defense-in-depth only, and PHP must independently enforce every
+--   applicable business rule.
+--
+--   Live verification on MariaDB 10.4.32 confirmed that the remaining
+--   CHECK constraints are recognized and enforced. The accepted schema
+--   therefore contains 13 CHECK constraints after removal of the
+--   incompatible direct self-replacement CHECK.
 
 -- D040 — Removed-resource minimization is an application-level lifecycle
 -- rule using the existing 18-table schema.
