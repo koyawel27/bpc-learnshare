@@ -62,10 +62,10 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `DATABASE_DESIGN.md` | Accepted **pre-D041/D042** conceptual baseline. Retrieval architecture, extraction/chunk/embedding storage, and any resulting schema expansion are intentionally not yet propagated. Its current silence on retrieval structures must not be treated as a decision that no additional structure will be needed.                                                                                                                          |
 | `DECISIONS.md`       | Complete through **D042**. D041–D042 establish the required completed-capstone AI package, the Required/Planned/Deferred AI tiers, and the feasibility-gated architecture direction.                                                                                                                                                                                                                                                     |
 | `schema.sql`         | Accepted and live-verified 18-table SQL baseline corresponding to the current pre-D041/D042 database design. MariaDB 10.4.32 successfully creates all 18 tables and enforces the remaining 13 `CHECK` constraints. The incompatible direct self-replacement `CHECK` was removed because MariaDB rejects a comparison against the `AUTO_INCREMENT` `resources.id`; PHP must enforce direct self-replacement and longer-cycle prevention under D037. No retrieval-related schema expansion has been authorized. |
-| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the pre-run feasibility-spike specification, Sections 1–26. The specification defines the corpus, measurements, guardrails, pre-run criteria, evidence package, recommendation format, and architecture/schema handoff. The spike itself has not yet been executed, and no provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
+| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, and versioned ground-truth evaluation are recorded. Generation, grounded inquiry, lifecycle, follow-up, related-resource, fallback, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
 | `SECURITY_NOTES.md`  | Complete and accepted, Sections 1–15, through Draft 1.2 and aligned through D040. It predates D041–D042. Its existing security baseline remains accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older wording that treats the newly required inquiry capability as optional is superseded by D041. |
 | `DATA_PRIVACY.md`    | Complete and accepted, Sections 1–15, through the pre-D041/D042 baseline. Its existing privacy principles remain accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older optional/stretch framing for inquiry is superseded by D041. |
-| `PROJECT_HANDOFF.md` | This updated version. It records the accepted feasibility-spike specification, the verified MariaDB 10.4.32 schema baseline, the targeted compatibility patch, and the clean-hardware baseline as the next execution checkpoint. |
+| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval-related checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
 
 **Not yet substantively completed:**
 
@@ -732,33 +732,36 @@ The following remain open and must not be treated as already resolved:
   * Database writes should be atomic where required.
   * Filesystem deletion cannot be assumed to roll back with a database transaction.
 
-* **AI/retrieval architecture remains unresolved pending the feasibility spike.**
+* **AI/retrieval architecture remains unresolved while the feasibility spike is partially executed.**
 
-  * No provider, model, embedding approach, vector-storage method, retrieval infrastructure, or schema expansion may be treated as decided before measured results are reviewed.
+  * No provider, model, embedding approach, vector-storage method, retrieval infrastructure, or schema expansion may be treated as decided before the complete Required-package evidence is reviewed.
+  * Measured checkpoints now support readable extraction, corrected 102-chunk segmentation, complete local embedding, native PHP cosine correctness, and promising bounded standalone retrieval.
+  * Generation, grounded inquiry, lifecycle, follow-up, related-resource, insufficient-evidence response, and fallback behavior remain incomplete.
 
-* **Hardware suitability for local AI processing remains unconfirmed.**
+* **Current hardware supports the measured local embedding and bounded retrieval checkpoints, but broader AI suitability remains unresolved.**
 
   * See Section 12A.
-  * Local embeddings appear plausible but remain unverified.
-  * Local generation remains uncertain.
+  * Ollama 0.32.1 with `all-minilm:latest` completed 102/102 corpus embeddings on the current baseline laptop.
+  * Native PHP cosine retrieval was practical for the tested 102-vector corpus.
+  * Local or external generation suitability remains uncertain and untested.
 
 ---
 
-## 12A. AI Feasibility Spike — Accepted Pre-Run Specification
+## 12A. AI Feasibility Spike — Accepted Specification and Partial Execution Status
 
-`AI_FEASIBILITY_SPIKE.md` is complete and accepted as the project's pre-run measurement specification.
+`AI_FEASIBILITY_SPIKE.md` remains complete and accepted as the project's controlling measurement specification.
 
 It is:
 
 * a bounded decision-support and measurement plan;
-* the controlling specification for the next clean-baseline and spike-execution phase;
+* the controlling specification for completed and remaining spike checkpoints;
 * not `AI_FEATURES.md`;
 * not `BUILD_PLAN.md`;
 * not `TESTING_CHECKLIST.md`;
 * not a final architecture decision;
 * not a schema revision.
 
-Specification completion does not mean that the spike has been executed or that a provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected.
+Partial execution has produced accepted extraction, corrected segmentation, complete embedding, PHP cosine, standalone retrieval, manual review, and versioned ground-truth evidence. This does not mean that the Required package is complete or that a provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected.
 
 ### 12A.1 Purpose
 
@@ -852,7 +855,7 @@ Completed checkpoints:
 
    * Sections 1–26 are complete.
    * Required capability coverage, measurements, mandatory guardrails, pre-run criteria, evidence rules, and architecture/schema handoff are accepted.
-   * The spike itself has not yet been executed.
+   * The spike is partially executed; completed and remaining checkpoints are recorded below.
 
 3. **Executed and verified the canonical 18-table `schema.sql` in the actual XAMPP/MariaDB environment.**
 
@@ -888,26 +891,17 @@ nvidia-smi
 
 Remaining order:
 
-5. **Execute the accepted feasibility spike.**
+5. **Continue the accepted feasibility spike.**
 
-   * Use the accepted representative corpus and evaluation set.
-   * Follow the pre-run criteria and evidence-recording rules in `AI_FEASIBILITY_SPIKE.md`.
-   * Record actual results rather than relying on model/tool marketing claims.
+   * Completed checkpoints cover extraction success/failure, source-location fidelity, corrected segmentation, complete local embedding, PHP cosine correctness/timing, standalone retrieval relevance/latency, and targeted manual relevance review.
+   * Continue using the accepted representative corpus, query set, versioned evaluator ground truth, and evidence-recording rules.
+   * Remaining checkpoints include grounded inquiry and attribution, insufficient-evidence and prohibited-request behavior, session follow-up, related-resource suggestions, stale-source/lifecycle exclusion, fallback, generation dependencies, maintainability, and any missing resource observations.
 
-6. **Evaluate and accept the measured findings.**
+6. **Evaluate and accept the complete measured findings.**
 
-   * extraction success and failure;
-   * source-location preservation;
-   * embedding performance;
-   * retrieval relevance and latency;
-   * grounded inquiry and attribution;
-   * insufficient-evidence behavior;
-   * prohibited-request behavior;
-   * session-scoped follow-up;
-   * stale-source and lifecycle exclusion;
-   * CPU/RAM/GPU/VRAM use;
-   * external-provider dependence, quota, cost, and fallback;
-   * maintainability.
+   * Preserve both successful and failed runs.
+   * Distinguish original measurements from later versioned corrections and reviewer interpretation.
+   * Do not write the final recommendation until required missing evidence is clearly identified and reflected in confidence and risk.
 
 7. **Select the simplest workable architecture based on the measured results.**
 
@@ -1082,11 +1076,14 @@ Read the latest source files first:
 Current verified state:
 
 - AI_FEASIBILITY_SPIKE.md Sections 1–26 are complete and accepted.
-- The spike has not yet been executed.
+- The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, and audited versioned ground-truth evaluation.
+- The bounded retrieval candidate achieved 100% resource top-five, 96% corrected passage top-five, practical isolated latency, 100% metadata fallback, and 100% explicit-filter correctness under the tested corpus.
+- The automatic predeclared-misleading criterion remains not met at 25%; manual review provides separate interpretation and does not erase that historical result.
+- Generation, grounded inquiry, lifecycle, follow-up, related-resource, fallback, and final recommendation evidence remain pending.
 - MariaDB 10.4.32 successfully imports the verified 18-table schema.
 - The remaining 13 CHECK constraints are recognized and enforced.
 - The incompatible direct self-replacement CHECK was removed; PHP must prevent direct self-replacement and longer cycles under D037.
-- No AI architecture, provider, model, retrieval layer, database upgrade, second database, or retrieval-related schema expansion is selected.
+- No final AI architecture, provider, model, retrieval layer, database upgrade, second database, or retrieval-related schema expansion is selected.
 
 Your job:
 

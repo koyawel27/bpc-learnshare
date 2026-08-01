@@ -1,7 +1,7 @@
 # AI Feasibility Spike — Evidence Package
 
 **Project:** BPC LearnShare  
-**Status:** Pre-execution evidence setup  
+**Status:** Partially executed — extraction, corrected segmentation, local embedding, PHP cosine, and standalone retrieval checkpoints recorded; later AI stages pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 ## Purpose
@@ -12,15 +12,21 @@ It does not contain production application data, final AI architecture, schema c
 
 ## Current Execution Stage
 
-The clean hardware/runtime baseline has been recorded.
+The representative corpus, evaluation-query set, and versioned expected-evidence set have been prepared and reviewed.
 
-The next activity is to prepare and review:
+Completed and registered checkpoints now cover:
 
-1. the authorized representative corpus;
-2. the evaluation-query set;
-3. the expected-evidence set.
+1. readable-text extraction and locator/fidelity review;
+2. deterministic corrected segmentation into 102 chunks;
+3. complete local embedding of all 102 chunks;
+4. native PHP cosine correctness and bounded vector-only timing;
+5. standalone semantic retrieval over 55 executed queries;
+6. targeted manual relevance review; and
+7. an independently audited versioned ground-truth evaluation.
 
-Do not begin scored extraction, embedding, retrieval, or generation tests until these three inputs are prepared and reviewed.
+Generation, repository-grounded answer construction, source-attribution display, insufficient-evidence response behavior, prohibited-request behavior, session follow-up, related-resource evaluation, lifecycle/staleness behavior, graceful fallback, and the final recommendation remain incomplete.
+
+The completed retrieval checkpoints do not select a final model, retrieval method, permanent storage design, database change, or application integration.
 
 ## File Map
 
