@@ -39,11 +39,13 @@ use function BpcLearnShare\Support\e;
         </dl>
 
         <p class="prototype-note">
-            Authentication is active. Resource submissions are stored securely
-            and enter moderation before they can appear in the repository.
+            Authentication, protected uploads, moderation, and Approved-only
+            repository access are active. These core workflows do not require
+            AI.
         </p>
 
         <div class="dashboard-actions">
+            <a class="button-link" href="/resources">Browse approved resources</a>
             <?php if ($canUpload): ?>
                 <a class="button-link" href="/resources/upload">
                     Upload a resource

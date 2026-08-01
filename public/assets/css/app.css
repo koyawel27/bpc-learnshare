@@ -594,6 +594,259 @@ button:disabled {
     max-width: none;
 }
 
+.repository-shell {
+    width: min(76rem, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 2.5rem 0 4rem;
+}
+
+.repository-heading,
+.resource-results-heading {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.repository-heading {
+    margin-bottom: 1.5rem;
+}
+
+.repository-heading .lead {
+    margin-bottom: 0;
+}
+
+.repository-heading > .button-link {
+    flex: 0 0 auto;
+}
+
+.resource-filter-card {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.resource-filter-card h2 {
+    margin-bottom: 1rem;
+}
+
+.resource-filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.filter-actions .button-link {
+    margin-top: 0.5rem;
+}
+
+.resource-results-heading {
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
+.resource-results-heading h2 {
+    margin-bottom: 0;
+}
+
+.resource-results-heading > p {
+    max-width: 25rem;
+    margin-bottom: 0;
+    color: #66728a;
+    font-size: 0.88rem;
+    text-align: right;
+}
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.resource-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 1.35rem;
+    border: 1px solid #d8e0ec;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 0.45rem 1.4rem rgb(30 55 90 / 7%);
+}
+
+.resource-card-topline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: space-between;
+    align-items: center;
+    color: #66728a;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.status-approved {
+    background: #e8f7ee;
+    color: #17673a;
+}
+
+.resource-card h3 {
+    margin: 0.8rem 0 0.25rem;
+    font-size: 1.25rem;
+    overflow-wrap: anywhere;
+}
+
+.resource-topic {
+    margin-bottom: 0.8rem;
+    color: #285ea8;
+    font-weight: 700;
+}
+
+.resource-card-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    color: #4b5872;
+    line-height: 1.6;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.resource-card-meta,
+.resource-detail-meta,
+.resource-access-counts {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.resource-card-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1rem;
+}
+
+.resource-card-meta div,
+.resource-detail-meta div,
+.resource-access-counts div {
+    min-width: 0;
+    padding: 0.8rem;
+    border-radius: 0.7rem;
+    background: #f5f7fb;
+}
+
+.resource-card-meta dt,
+.resource-detail-meta dt,
+.resource-access-counts dt {
+    color: #66728a;
+    font-size: 0.76rem;
+}
+
+.resource-card-meta dd,
+.resource-detail-meta dd,
+.resource-access-counts dd {
+    margin: 0.2rem 0 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.resource-card .review-tags {
+    margin-bottom: 1rem;
+}
+
+.resource-card-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    color: #66728a;
+    font-size: 0.84rem;
+}
+
+.resource-card-footer .button-link {
+    flex: 0 0 auto;
+    margin-top: 0;
+}
+
+.resource-empty-state {
+    max-width: none;
+}
+
+.resource-empty-state h3 {
+    margin-top: 0;
+}
+
+.resource-detail-heading h1 {
+    max-width: 22ch;
+}
+
+.resource-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.resource-detail-card,
+.resource-download-card {
+    width: 100%;
+}
+
+.resource-detail-card h2 {
+    margin: 1.4rem 0 0.6rem;
+}
+
+.resource-description {
+    color: #36445f;
+    line-height: 1.75;
+    white-space: pre-wrap;
+}
+
+.resource-detail-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 1.5rem 0;
+}
+
+.resource-detail-card h3 {
+    margin-bottom: 0.7rem;
+}
+
+.resource-download-card {
+    position: sticky;
+    top: 1rem;
+}
+
+.resource-download-card h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.3rem;
+    overflow-wrap: anywhere;
+}
+
+.resource-download-card > p {
+    color: #4b5872;
+    line-height: 1.6;
+}
+
+.resource-access-counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 1rem 0;
+}
+
+.resource-download-card .button-link {
+    width: 100%;
+}
+
+.resource-download-card .field-help,
+.muted-copy {
+    margin-top: 0.8rem;
+    color: #66728a;
+}
+
 @media (max-width: 48rem) {
     .auth-shell,
     .upload-shell {
@@ -607,18 +860,31 @@ button:disabled {
 
     .moderation-heading,
     .moderation-item,
-    .file-review-card {
+    .file-review-card,
+    .repository-heading,
+    .resource-results-heading,
+    .resource-card-footer {
         align-items: stretch;
         flex-direction: column;
     }
 
     .moderation-review-grid,
-    .compact-meta {
+    .compact-meta,
+    .resource-detail-grid,
+    .resource-filter-grid {
         grid-template-columns: 1fr;
     }
 
     .moderation-decision-card {
         position: static;
+    }
+
+    .resource-results-heading > p {
+        text-align: left;
+    }
+
+    .resource-grid {
+        grid-template-columns: 1fr;
     }
 
     .account-summary,
@@ -632,8 +898,14 @@ button:disabled {
     .dashboard-shell,
     .single-card-shell,
     .upload-shell,
-    .moderation-shell {
+    .moderation-shell,
+    .repository-shell {
         padding-top: 1.25rem;
+    }
+
+    .resource-card-meta,
+    .resource-detail-meta {
+        grid-template-columns: 1fr;
     }
 
     .form-card,

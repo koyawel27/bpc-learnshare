@@ -302,6 +302,65 @@ Pass when:
 - direct URLs to ineligible resources fail closed;
 - the complete core path still works while AI is disabled.
 
+#### Gate 4 implementation checkpoint
+
+**Status:** Implemented and locally verified in the current working tree;
+awaiting user review and commit.
+
+Implemented behavior:
+
+- every active authenticated role can open the Approved-resource repository;
+- ordinary browse results are hard-limited to resources whose current status
+  is `Approved` and whose `file_availability` is `available`;
+- metadata search checks title, topic, and description without depending on
+  AI;
+- course/program, subject, year level, resource type, and tag filters accept
+  only active controlled taxonomy values;
+- resource cards and details escape uploader-controlled text;
+- opening a detail page rechecks live eligibility and records a view only when
+  the resource remains eligible;
+- downloads are served only through PHP after rechecking the active account,
+  current approval status, file availability, randomized stored filename,
+  expected extension, protected storage path, and exact file size;
+- the client cannot choose a storage path or override the served filename with
+  a query parameter;
+- Pending, Needs Correction, Rejected, Withdrawn, Hidden, Restricted, Removed,
+  Replaced, and Approved-but-unavailable resources fail closed through direct
+  detail and download URLs;
+- an old link stops working immediately after the resource becomes ineligible;
+- the upload form now distinguishes the resource's human-readable title from
+  its original filename and gives plain guidance for topic, description, and
+  optional controlled tags.
+
+Verified locally:
+
+- anonymous repository access redirects to sign-in;
+- Approved-and-available inclusion and every ineligible-status exclusion;
+- metadata search and all five controlled filters;
+- invalid filter rejection;
+- output escaping and protected stored-filename non-disclosure;
+- view/download activity counts;
+- exact protected-file serving and attachment headers;
+- unsafe filename/path query isolation;
+- live status and disabled-account rechecks;
+- PHP syntax, Git whitespace checks, and browser rendering of the repository
+  and detail pages;
+- temporary test accounts, resources, tag links, files, and cookies were
+  removed after verification.
+
+**AI boundary:** This checkpoint does not run or change Ollama, embeddings,
+query vectors, retrieval rankings, thresholds, AI candidates, test runs,
+measurements, accepted local AI evidence, or AI feasibility registers. It
+provides the non-AI eligibility and access boundary that any later AI feature
+must obey.
+
+Deferred boundaries:
+
+- bookmarks, Helpful marks, reports, recommendation UI, semantic search, and
+  grounded inquiry remain later checkpoints;
+- no schema, free-text tag, permanent AI-storage, or final AI-candidate
+  decision is introduced here.
+
 ### Gate 5 — AI feasibility decision
 
 Pass when:

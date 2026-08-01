@@ -57,7 +57,7 @@ $selectedTags = array_map('intval', $old['tag_ids'] ?? []);
             <input type="hidden" name="_token" value="<?= e($csrfToken) ?>">
             <input type="hidden" name="MAX_FILE_SIZE" value="20971520">
 
-            <label for="title">Title</label>
+            <label for="title">Resource title</label>
             <input
                 id="title"
                 name="title"
@@ -67,6 +67,10 @@ $selectedTags = array_map('intval', $old['tag_ids'] ?? []);
                 required
                 autofocus
             >
+            <p class="field-help">
+                Enter the title shown inside the document. If it has no clear
+                title, use a readable version of the filename.
+            </p>
             <?php if (isset($errors['title'])): ?>
                 <p class="field-error"><?= e($errors['title']) ?></p>
             <?php endif; ?>
@@ -82,7 +86,7 @@ $selectedTags = array_map('intval', $old['tag_ids'] ?? []);
                 <p class="field-error"><?= e($errors['description']) ?></p>
             <?php endif; ?>
 
-            <label for="topic">Topic</label>
+            <label for="topic">Topic or lesson covered</label>
             <input
                 id="topic"
                 name="topic"
@@ -92,7 +96,7 @@ $selectedTags = array_map('intval', $old['tag_ids'] ?? []);
                 required
             >
             <p class="field-help">
-                Example: Database normalization or PHP sessions.
+                Use a short phrase, such as Database normalization or PHP sessions.
             </p>
             <?php if (isset($errors['topic'])): ?>
                 <p class="field-error"><?= e($errors['topic']) ?></p>
@@ -189,6 +193,10 @@ $selectedTags = array_map('intval', $old['tag_ids'] ?? []);
                         </label>
                     <?php endforeach; ?>
                 </div>
+                <p class="field-help">
+                    Optional. Choose only tags that clearly match this
+                    resource. Leave this blank if none apply.
+                </p>
                 <?php if (isset($errors['tag_ids'])): ?>
                     <p class="field-error"><?= e($errors['tag_ids']) ?></p>
                 <?php endif; ?>

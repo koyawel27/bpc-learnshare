@@ -17,17 +17,25 @@ final class ResourceInput
         $description = trim((string) ($input['description'] ?? ''));
         $topic = trim((string) ($input['topic'] ?? ''));
 
-        if ($title === '' || mb_strlen($title) > 200) {
-            $errors['title'] = 'Title is required and must not exceed 200 characters.';
+        if ($title === '') {
+            $errors['title'] = 'Please enter a resource title.';
+        } elseif (mb_strlen($title) > 200) {
+            $errors['title'] =
+                'Resource title must not exceed 200 characters.';
         }
 
-        if ($description === '' || strlen($description) > 65535) {
+        if ($description === '') {
             $errors['description'] =
-                'Description is required and must fit within 65,535 bytes.';
+                'Please add a short description of what the file contains.';
+        } elseif (strlen($description) > 65535) {
+            $errors['description'] =
+                'The description is too long. Please shorten it.';
         }
 
-        if ($topic === '' || mb_strlen($topic) > 150) {
-            $errors['topic'] = 'Topic is required and must not exceed 150 characters.';
+        if ($topic === '') {
+            $errors['topic'] = 'Please enter the topic or lesson covered.';
+        } elseif (mb_strlen($topic) > 150) {
+            $errors['topic'] = 'Topic must not exceed 150 characters.';
         }
 
         foreach (

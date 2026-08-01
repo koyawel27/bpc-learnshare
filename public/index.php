@@ -11,6 +11,8 @@ use BpcLearnShare\Core\Session;
 use BpcLearnShare\Moderation\ModerationDecisionException;
 use BpcLearnShare\Moderation\ModerationInput;
 use BpcLearnShare\Moderation\ModerationRepository;
+use BpcLearnShare\Resource\ResourceDiscoveryInput;
+use BpcLearnShare\Resource\ResourceDiscoveryRepository;
 use BpcLearnShare\Resource\ResourceInput;
 use BpcLearnShare\Resource\ResourceRepository;
 use BpcLearnShare\Resource\ResourceUploadService;
@@ -48,6 +50,7 @@ $resourceUploads = new ResourceUploadService(
     dirname(__DIR__) . '/storage/uploads/resources'
 );
 $moderation = new ModerationRepository($database);
+$resourceDiscovery = new ResourceDiscoveryRepository($database);
 $resourceStorageDirectory =
     dirname(__DIR__) . '/storage/uploads/resources';
 $requestMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
@@ -96,6 +99,16 @@ $rejectMethod = static function (
         'message' => 'Please return to the application and try again.',
     ]);
     exit;
+};
+
+$requireAccount = static function () use ($auth): array {
+    $account = $auth->currentAccount();
+
+    if ($account === null) {
+        redirect('/login');
+    }
+
+    return $account;
 };
 
 $requireStaff = static function () use (
@@ -377,6 +390,213 @@ if ($path === '/resources/upload'
         'taxonomyReady' => $taxonomyReady,
         'csrfToken' => Csrf::token(),
     ]);
+    exit;
+}
+
+if ($path === '/resources') {
+    if ($requestMethod !== 'GET') {
+        $rejectMethod(['GET']);
+    }
+
+    $account = $requireAccount();
+    $taxonomyOptions = $taxonomy->activeOptions();
+    $filters = ResourceDiscoveryInput::normalize($_GET);
+    $errors = ResourceDiscoveryInput::validate($_GET);
+
+    if ($errors === []) {
+        $errors = ResourceDiscoveryInput::activeFilterErrors(
+            $filters,
+            $taxonomyOptions
+        );
+    }
+
+    if ($errors !== []) {
+        http_response_code(422);
+    }
+
+    $renderPage('resource/index', [
+        'title' => 'Approved resources',
+        'account' => $account,
+        'resources' => $errors === []
+            ? $resourceDiscovery->search($filters)
+            : [],
+        'filters' => $filters,
+        'errors' => $errors,
+        'taxonomy' => $taxonomyOptions,
+    ]);
+    exit;
+}
+
+$resourceDetailMatch = [];
+$isResourceDetail = preg_match(
+    '#\A/resources/([1-9][0-9]*)\z#',
+    $path,
+    $resourceDetailMatch
+) === 1;
+
+if ($isResourceDetail) {
+    if ($requestMethod !== 'GET') {
+        $rejectMethod(['GET']);
+    }
+
+    $requireAccount();
+    $resourceId = (int) $resourceDetailMatch[1];
+    $resource = $resourceDiscovery->openAvailableApproved($resourceId);
+
+    if ($resource === null) {
+        http_response_code(404);
+        $renderPage('error', [
+            'title' => 'Resource unavailable',
+            'heading' => 'This resource is unavailable',
+            'message' =>
+                'It may not be Approved, or its protected file may no longer be available.',
+        ]);
+        exit;
+    }
+
+    $renderPage('resource/show', [
+        'title' => (string) $resource['title'],
+        'resource' => $resource,
+    ]);
+    exit;
+}
+
+$resourceDownloadMatch = [];
+$isResourceDownload = preg_match(
+    '#\A/resources/([1-9][0-9]*)/download\z#',
+    $path,
+    $resourceDownloadMatch
+) === 1;
+
+if ($isResourceDownload) {
+    if ($requestMethod !== 'GET') {
+        $rejectMethod(['GET']);
+    }
+
+    $account = $requireAccount();
+    $resourceId = (int) $resourceDownloadMatch[1];
+    $file = $resourceDiscovery->availableDownload($resourceId);
+
+    if ($file === null) {
+        http_response_code(404);
+        $renderPage('error', [
+            'title' => 'File unavailable',
+            'heading' => 'The protected file is unavailable',
+            'message' =>
+                'The resource may no longer be Approved or its file is unavailable.',
+        ]);
+        exit;
+    }
+
+    $storedFilename = (string) $file['stored_filename'];
+    $expectedExtension = (string) $file['file_type'];
+
+    if (
+        preg_match(
+            '/\A[a-f0-9]{64}\.(pdf|docx|pptx|txt|jpg|png)\z/',
+            $storedFilename
+        ) !== 1
+        || !str_ends_with($storedFilename, '.' . $expectedExtension)
+    ) {
+        error_log(sprintf(
+            '[BPC LearnShare] Invalid approved filename resource=%d actor=%d',
+            $resourceId,
+            (int) $account['id']
+        ));
+        http_response_code(500);
+        $renderPage('error', [
+            'title' => 'File unavailable',
+            'heading' => 'The protected file could not be verified',
+            'message' => 'No file was served. Ask an Admin to inspect storage.',
+        ]);
+        exit;
+    }
+
+    $storageRoot = realpath($resourceStorageDirectory);
+    $filePath = realpath(
+        $resourceStorageDirectory
+        . DIRECTORY_SEPARATOR
+        . $storedFilename
+    );
+
+    if (
+        $storageRoot === false
+        || $filePath === false
+        || dirname($filePath) !== $storageRoot
+        || !is_file($filePath)
+        || filesize($filePath) !== (int) $file['file_size']
+    ) {
+        error_log(sprintf(
+            '[BPC LearnShare] Approved file mismatch resource=%d actor=%d',
+            $resourceId,
+            (int) $account['id']
+        ));
+        http_response_code(404);
+        $renderPage('error', [
+            'title' => 'File unavailable',
+            'heading' => 'The protected file is unavailable',
+            'message' => 'No file was served because its stored evidence did not match.',
+        ]);
+        exit;
+    }
+
+    if (!$resourceDiscovery->recordDownload($resourceId)) {
+        http_response_code(404);
+        $renderPage('error', [
+            'title' => 'File unavailable',
+            'heading' => 'The resource is no longer available',
+            'message' => 'Its eligibility changed before the file could be served.',
+        ]);
+        exit;
+    }
+
+    $mimeTypes = [
+        'pdf' => 'application/pdf',
+        'docx' =>
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'pptx' =>
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'txt' => 'text/plain; charset=UTF-8',
+        'jpg' => 'image/jpeg',
+        'png' => 'image/png',
+    ];
+    $originalFilename = str_replace(
+        ["\r", "\n"],
+        '',
+        (string) $file['original_filename']
+    );
+    $fallbackFilename = preg_replace(
+        '/[^A-Za-z0-9._-]+/',
+        '_',
+        $originalFilename
+    );
+
+    if (!is_string($fallbackFilename) || $fallbackFilename === '') {
+        $fallbackFilename =
+            'resource-' . $resourceId . '.' . $expectedExtension;
+    }
+
+    header_remove('Content-Type');
+    header(
+        'Content-Type: '
+        . ($mimeTypes[$expectedExtension] ?? 'application/octet-stream')
+    );
+    header(
+        'Content-Disposition: attachment; filename="'
+        . addcslashes($fallbackFilename, "\\\"")
+        . '"; filename*=UTF-8\'\''
+        . rawurlencode($originalFilename)
+    );
+    header('Content-Length: ' . (string) filesize($filePath));
+    header('Cache-Control: private, no-store');
+
+    if (readfile($filePath) === false) {
+        error_log(sprintf(
+            '[BPC LearnShare] Approved read failed resource=%d actor=%d',
+            $resourceId,
+            (int) $account['id']
+        ));
+    }
     exit;
 }
 
@@ -713,6 +933,7 @@ $allowedMethodsByPath = [
     '/register' => ['GET', 'POST'],
     '/logout' => ['POST'],
     '/dashboard' => ['GET'],
+    '/resources' => ['GET'],
     '/resources/upload' => ['GET', 'POST'],
 ];
 
