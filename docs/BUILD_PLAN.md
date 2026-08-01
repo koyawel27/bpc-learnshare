@@ -131,6 +131,26 @@ tests/
 
 Local secrets belong in an ignored local configuration file. They must not be committed or exposed through `public/`.
 
+### 5.1 First Admin bootstrap
+
+The first Admin is created once through the non-public command-line helper:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+    -File database\seeds\create_first_admin.ps1
+```
+
+The helper:
+
+* runs only from the local command line and has no browser route;
+* asks for the username, display name, password, and confirmation;
+* keeps the password out of command-line arguments and application logs;
+* uses the same account validation and `password_hash()` path as runtime account creation;
+* refuses to run after any Admin account exists; and
+* creates no default or placeholder credential.
+
+The first setup action cannot write a normal `audit_log` row because that table requires an existing actor account. The setup command itself is the local bootstrap record. Every later elevated account must be created by an authenticated Admin and audited through the normal account-management workflow.
+
 The frontend should initially use server-rendered PHP, reusable HTML partials, CSS, and small vanilla-JavaScript enhancements. A single-page application or frontend framework is not required.
 
 ---

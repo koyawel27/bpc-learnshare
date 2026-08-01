@@ -13,13 +13,24 @@ spl_autoload_register(static function (string $class): void {
     }
 
     $relative = substr($class, strlen($prefix));
-    $path = __DIR__
-        . DIRECTORY_SEPARATOR
-        . str_replace('\\', DIRECTORY_SEPARATOR, $relative)
-        . '.php';
+    $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relative);
+    $path = __DIR__ . DIRECTORY_SEPARATOR . $relativePath . '.php';
 
     if (is_file($path)) {
         require $path;
+
+        return;
+    }
+
+    $segments = explode(DIRECTORY_SEPARATOR, $relativePath);
+    $segments[0] = lcfirst($segments[0]);
+    $fallbackPath = __DIR__
+        . DIRECTORY_SEPARATOR
+        . implode(DIRECTORY_SEPARATOR, $segments)
+        . '.php';
+
+    if (is_file($fallbackPath)) {
+        require $fallbackPath;
     }
 });
 
@@ -39,6 +50,13 @@ ini_set('session.use_strict_mode', '1');
 ini_set('session.use_only_cookies', '1');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_samesite', 'Lax');
+ini_set(
+    'session.cookie_secure',
+    (
+        isset($_SERVER['HTTPS'])
+        && strtolower((string) $_SERVER['HTTPS']) !== 'off'
+    ) ? '1' : '0'
+);
 
 session_name('bpc_learnshare_session');
 

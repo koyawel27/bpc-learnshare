@@ -19,10 +19,54 @@ body {
         #f4f7fb;
 }
 
-main {
-    width: min(58rem, calc(100% - 2rem));
+a {
+    color: #245ca8;
+}
+
+.site-header {
+    width: min(72rem, calc(100% - 2rem));
     margin: 0 auto;
-    padding: 4rem 0;
+    padding: 1.25rem 0;
+}
+
+.brand {
+    display: inline-flex;
+    gap: 0.75rem;
+    align-items: center;
+    color: #172033;
+    font-weight: 750;
+    text-decoration: none;
+}
+
+.brand-mark {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border-radius: 0.7rem;
+    background: #245ca8;
+    color: #fff;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+}
+
+.auth-shell,
+.dashboard-shell,
+.single-card-shell {
+    width: min(72rem, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 2.5rem 0 4rem;
+}
+
+.auth-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(20rem, 0.75fr);
+    gap: clamp(2rem, 7vw, 6rem);
+    align-items: center;
+}
+
+.intro-panel {
+    padding: 2rem 0;
 }
 
 .eyebrow {
@@ -41,38 +85,195 @@ p {
 }
 
 h1 {
-    max-width: 16ch;
+    max-width: 17ch;
     margin-bottom: 1rem;
-    font-size: clamp(2.1rem, 6vw, 4.5rem);
+    font-size: clamp(2.2rem, 6vw, 4.6rem);
     line-height: 0.98;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.045em;
+}
+
+h2 {
+    margin-bottom: 1.5rem;
+    font-size: clamp(1.65rem, 3vw, 2.2rem);
+    letter-spacing: -0.025em;
 }
 
 .lead {
     max-width: 44rem;
     margin-bottom: 2rem;
     color: #4b5872;
-    font-size: 1.06rem;
+    font-size: 1.04rem;
     line-height: 1.7;
 }
 
-.status-card {
-    padding: 1.5rem;
+.form-card,
+.status-card,
+.dashboard-card {
+    padding: clamp(1.5rem, 4vw, 2.25rem);
     border: 1px solid #d8e0ec;
-    border-radius: 1rem;
-    background: rgb(255 255 255 / 88%);
+    border-radius: 1.15rem;
+    background: rgb(255 255 255 / 92%);
     box-shadow: 0 1.25rem 3rem rgb(31 55 90 / 9%);
 }
 
-.status-card h2 {
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
+.single-card-shell .form-card,
+.single-card-shell .status-card {
+    max-width: 46rem;
+    margin: 2rem auto 0;
 }
 
+form {
+    display: grid;
+    gap: 0.75rem;
+}
+
+label {
+    margin-top: 0.25rem;
+    color: #2e3c55;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid #bfc9d8;
+    border-radius: 0.7rem;
+    background: #fff;
+    color: #172033;
+    font: inherit;
+}
+
+input:focus {
+    border-color: #3470c3;
+    outline: 3px solid rgb(52 112 195 / 18%);
+}
+
+button,
+.button-link {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #245ca8;
+    border-radius: 0.7rem;
+    background: #245ca8;
+    color: #fff;
+    font: inherit;
+    font-weight: 750;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover,
+.button-link:hover {
+    background: #194b8e;
+}
+
+.button-secondary {
+    width: auto;
+    border-color: #c4cedd;
+    background: #fff;
+    color: #25344d;
+}
+
+.button-secondary:hover {
+    background: #f0f4f9;
+}
+
+.form-link {
+    margin: 1.5rem 0 0;
+    color: #5d6980;
+    text-align: center;
+}
+
+.field-help,
+.field-error {
+    margin: -0.35rem 0 0.15rem;
+    font-size: 0.83rem;
+    line-height: 1.45;
+}
+
+.field-help {
+    color: #66728a;
+}
+
+.field-error {
+    color: #a43d31;
+    font-weight: 650;
+}
+
+.alert {
+    padding: 0.85rem 1rem;
+    border: 1px solid;
+    border-radius: 0.7rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.alert-error {
+    border-color: #efc5bf;
+    background: #fff4f2;
+    color: #873229;
+}
+
+.alert-success {
+    border-color: #b9dfc7;
+    background: #f0fbf4;
+    color: #17673a;
+}
+
+.alert-info {
+    border-color: #c8d9ee;
+    background: #f1f7ff;
+    color: #28527f;
+}
+
+.dashboard-card {
+    display: grid;
+    gap: 2rem;
+    max-width: 58rem;
+    margin: 2rem auto 0;
+}
+
+.account-summary,
 .checks {
     display: grid;
     gap: 0.75rem;
     margin: 0;
+}
+
+.account-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.account-summary div,
+.check {
+    padding: 0.9rem 1rem;
+    border-radius: 0.75rem;
+    background: #f7f9fc;
+}
+
+.account-summary dt,
+.account-summary dd,
+.check dt,
+.check dd {
+    margin: 0;
+}
+
+.account-summary dt,
+.check dt {
+    margin-bottom: 0.25rem;
+    color: #66728a;
+    font-size: 0.8rem;
+}
+
+.account-summary dd,
+.check dd {
+    font-weight: 750;
 }
 
 .check {
@@ -80,22 +281,14 @@ h1 {
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 1rem;
     align-items: center;
-    padding: 0.9rem 1rem;
-    border-radius: 0.75rem;
-    background: #f7f9fc;
 }
 
-.check dt,
-.check dd {
+.prototype-note,
+.note {
     margin: 0;
-}
-
-.check dt {
-    color: #526078;
-}
-
-.check dd {
-    font-weight: 700;
+    color: #66728a;
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
 
 .ready {
@@ -106,16 +299,33 @@ h1 {
     color: #a43d31;
 }
 
-.note {
-    margin: 1.5rem 0 0;
-    color: #66728a;
-    font-size: 0.9rem;
-    line-height: 1.6;
+@media (max-width: 48rem) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .intro-panel {
+        padding-bottom: 1rem;
+    }
+
+    .account-summary {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 36rem) {
-    main {
-        padding: 2.5rem 0;
+    .auth-shell,
+    .dashboard-shell,
+    .single-card-shell {
+        padding-top: 1.25rem;
+    }
+
+    .form-card,
+    .status-card,
+    .dashboard-card {
+        padding: 1.25rem;
+        border-radius: 0.9rem;
     }
 
     .check {
