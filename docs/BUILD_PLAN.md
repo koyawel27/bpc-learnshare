@@ -161,6 +161,52 @@ Only an active Student or Teacher/Instructor may create an ordinary upload. Role
 
 The frontend should initially use server-rendered PHP, reusable HTML partials, CSS, and small vanilla-JavaScript enhancements. A single-page application or frontend framework is not required.
 
+### 5.3 Upload-form usability review (proposed; not implemented)
+
+**Status:** Recorded usability refinement. No metadata rule, schema, taxonomy authority, or application behavior is changed by this note. Changes that conflict with accepted source documents require an explicit decision before implementation.
+
+**Reason for the proposal:** A walkthrough of the working upload form showed that Students and Teacher/Instructors may receive files with weak filenames such as `INFO-SHEET-1.pdf` and may not know enough about the contents to write a detailed title, description, or topic. Technical validation wording and incomplete subject/tag choices may add avoidable friction. The form should help honest uploaders provide useful metadata without implying that they must already be cataloging experts.
+
+#### Recommended near-term refinements that preserve the accepted data model
+
+| Area | Recommendation | Why this is better |
+|---|---|---|
+| Title | Relabel the field as “Resource title.” Keep it required and editable, but suggest a human-readable value from the selected filename, such as `INFO-SHEET-1.pdf` to `Info Sheet 1`. Clearly label it as a suggestion. | This distinguishes the human-readable title of the contents from the original filename, while still helping uploaders when the document has no clear internal title. |
+| Description guidance | Replace database-oriented messages such as “65,535 bytes” with plain instructions. Explain that a short description helps moderation, ordinary search, and later AI-assisted discovery, but does not guarantee AI correctness. | Users receive an understandable reason for the field instead of an internal storage limit. |
+| Topic guidance | Keep topic required for now, but relabel it as “Topic or lesson covered” and state that a short phrase is sufficient. | This preserves the confirmed metadata-search requirement while making the expected answer clearer. |
+| Subject display | Use controlled subject labels that include the official code and full name where known, for example `ISP-323 — Information Systems Project`. The prototype may keep this combined value in `subjects.name`. | Students commonly recognize subject codes, while the full name avoids ambiguous initials. This needs no immediate schema change. |
+| Tags | Keep tag selection optional and Admin-controlled. Tell uploaders to choose only clearly related tags and leave the field blank when none fit. Expand the prototype list only with a small reviewed set of general tags. | Relevant tags can improve browsing and later AI-assisted discovery, but an unrelated tag produces misleading search results and is worse than no tag. Title, topic, subject, and description remain the primary metadata when tags are blank. |
+
+Suggested user-facing title helper text:
+
+> Enter the title shown inside the document. If it has no clear title, use a readable version of the filename.
+
+Suggested user-facing tag helper text:
+
+> Optional. Choose only tags that clearly match this resource. Leave this blank if none apply.
+
+Suggested user-facing description text **if optional Description is later approved**:
+
+> Optional details can help moderators and other users understand and find this resource. They may also help future AI-assisted search use the file more effectively. A short sentence is enough.
+
+Suggested validation wording when a description remains required:
+
+> Please add a short description of what the file contains.
+
+#### Changes that require an explicit decision
+
+1. **Making Description optional at initial submission.** Current source documents treat Description as required and `resources.description` is `NOT NULL`. The recommended direction is to consider allowing an empty initial description while keeping it reviewable during moderation. Before implementation, the project must decide whether an Approved resource may remain without a description or whether a Moderator should request correction when the missing description materially harms discovery.
+2. **Making Topic optional.** This is not recommended for the current prototype because Topic is explicitly required for non-AI metadata search. The lower-friction alternative is clearer wording and accepting a short phrase.
+3. **Allowing uploaders to create custom tags.** This is not recommended as direct creation because the accepted design makes tags a controlled Admin-managed vocabulary. A later “suggest a tag” workflow could send a proposed value for Admin review without immediately creating it.
+4. **Adding a separate subject-code column.** This is unnecessary for the current vertical slice. A combined controlled label is sufficient until an official institutional subject list or a confirmed code-specific search requirement justifies a schema decision.
+
+#### Safety and scope boundaries
+
+- Filename-based title suggestions remain editable and must not silently overwrite uploader text.
+- AI may later suggest metadata only when the accepted eligibility, notice, acknowledgment, lifecycle, and review rules allow it. AI must not make these fields authoritative automatically.
+- General tags added for the prototype remain demonstration values, not an official BPC taxonomy.
+- This note does not authorize schema changes, free-text tags, or optional metadata by itself.
+
 ---
 
 ## 6. Build Gates
@@ -211,6 +257,39 @@ Pass when:
 - the current status is rechecked inside the write transaction;
 - action history/audit evidence is written with the decision;
 - an ordinary user cannot call moderation endpoints directly.
+
+#### Gate 3 implementation checkpoint
+
+**Status:** Implemented and locally verified in the current working tree; awaiting user review and commit.
+
+Implemented behavior:
+
+- active Moderator and Admin accounts can open a Pending-resource queue and inspect the submitted metadata, uploader, and protected file;
+- the file is streamed through a staff-only endpoint and the randomized storage filename is not exposed;
+- Approve changes `Pending` to `Approved`;
+- Reject changes `Pending` to `Rejected` and requires an explanatory note;
+- Request Correction changes `Pending` to `Needs Correction` and requires an explanatory note;
+- the actor's current role/status and the resource's current `Pending` status are locked and rechecked inside the same database transaction;
+- each successful decision writes one append-only `resource_action_history` row in the same transaction;
+- anonymous, Student, and Teacher/Instructor users cannot use the moderation queue, file, or decision endpoints directly;
+- invalid CSRF, repeated/stale decisions, unavailable files, and disabled staff sessions fail without changing the resource.
+
+**Why this design is safer:** The decision and its history record either succeed together or are both rolled back. This prevents a resource status from changing without evidence of who changed it and why. Moderation history is stored in the purpose-built resource-action table rather than forcing moderation values into the separate general audit-log action list.
+
+Verified locally:
+
+- all three Pending transitions and their history rows;
+- required-note behavior for Reject and Request Correction;
+- direct ordinary-user denial and protected file access;
+- stale-decision, CSRF, stored-file, and live staff-status guards;
+- responsive queue and review-page rendering;
+- temporary test accounts, resources, history, files, and sessions were removed after testing.
+
+Deferred boundaries:
+
+- uploader correction and resubmission remain a later workflow;
+- linked replacement approval remains a later P2 workflow and currently fails closed instead of partially updating the original resource;
+- this checkpoint does not publish repository browse/search or ordinary-user download behavior, which belongs to Gate 4.
 
 ### Gate 4 — Approved-resource discovery and access
 

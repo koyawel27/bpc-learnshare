@@ -9,6 +9,7 @@ use function BpcLearnShare\Support\e;
  * @var string $roleLabel
  * @var string $csrfToken
  * @var bool $canUpload
+ * @var bool $canModerate
  */
 ?>
 <main class="dashboard-shell">
@@ -46,6 +47,12 @@ use function BpcLearnShare\Support\e;
             <?php if ($canUpload): ?>
                 <a class="button-link" href="/resources/upload">
                     Upload a resource
+                </a>
+            <?php endif; ?>
+
+            <?php if ($canModerate): ?>
+                <a class="button-link" href="/moderation">
+                    Open moderation queue
                 </a>
             <?php endif; ?>
 
