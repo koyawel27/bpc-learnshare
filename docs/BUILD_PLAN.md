@@ -38,9 +38,9 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 ### 2.2 Current implementation reality
 
-- The repository is still an application skeleton.
-- `public/index.php` currently contains only the skeleton readiness message.
-- `BUILD_PLAN.md`, `TESTING_CHECKLIST.md`, and `AI_FEATURES.md` were placeholders before this planning pass.
+- Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
+- Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
+- Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
 - Generation, grounded inquiry, lifecycle, follow-up, related-resource, fallback, and final AI recommendation evidence remain pending.
 
 ---
@@ -150,6 +150,14 @@ The helper:
 * creates no default or placeholder credential.
 
 The first setup action cannot write a normal `audit_log` row because that table requires an existing actor account. The setup command itself is the local bootstrap record. Every later elevated account must be created by an authenticated Admin and audited through the normal account-management workflow.
+
+### 5.2 Current protected-upload implementation
+
+The local prototype uses an idempotent command-line seed for demonstration taxonomy values. Those values support the presentation workflow and are not presented as the final official BPC course, subject, year-level, resource-type, or tag list.
+
+The upload path enforces the accepted 20 MB limit, extension and detected-MIME agreement, non-empty input, and format-specific structure checks. PDF files require a PDF header and completion marker; DOCX/PPTX files require a consistent ZIP package and their expected internal document entry; TXT files require UTF-8 text without NUL bytes; JPG/JPEG and PNG files require matching image signatures.
+
+Only an active Student or Teacher/Instructor may create an ordinary upload. Role, status, taxonomy availability, and selected controlled values are rechecked server-side, including a transaction-time uploader check. Accepted files receive a cryptographically random storage filename outside `public/`, and the database row is created as `Pending`. If the database write fails, the moved file is removed.
 
 The frontend should initially use server-rendered PHP, reusable HTML partials, CSS, and small vanilla-JavaScript enhancements. A single-page application or frontend framework is not required.
 

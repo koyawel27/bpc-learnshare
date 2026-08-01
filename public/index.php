@@ -8,6 +8,12 @@ use BpcLearnShare\Auth\AuthService;
 use BpcLearnShare\Core\Database;
 use BpcLearnShare\Core\Environment;
 use BpcLearnShare\Core\Session;
+use BpcLearnShare\Resource\ResourceInput;
+use BpcLearnShare\Resource\ResourceRepository;
+use BpcLearnShare\Resource\ResourceUploadService;
+use BpcLearnShare\Resource\TaxonomyRepository;
+use BpcLearnShare\Resource\UploadValidationException;
+use BpcLearnShare\Resource\UploadValidator;
 use BpcLearnShare\Security\Csrf;
 use function BpcLearnShare\Support\redirect;
 use function BpcLearnShare\Support\render;
@@ -29,8 +35,15 @@ header(
 Session::start();
 
 $appName = Environment::get('APP_NAME', 'BPC LearnShare');
-$accounts = new AccountRepository(Database::connection());
+$database = Database::connection();
+$accounts = new AccountRepository($database);
 $auth = new AuthService($accounts);
+$taxonomy = new TaxonomyRepository($database);
+$uploadValidator = new UploadValidator();
+$resourceUploads = new ResourceUploadService(
+    new ResourceRepository($database),
+    dirname(__DIR__) . '/storage/uploads/resources'
+);
 $requestMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $requestPath = parse_url(
     $_SERVER['REQUEST_URI'] ?? '/',
@@ -206,6 +219,119 @@ if ($path === '/register' && $requestMethod === 'POST') {
     redirect('/login');
 }
 
+if ($path === '/resources/upload'
+    && in_array($requestMethod, ['GET', 'POST'], true)
+) {
+    $account = $auth->currentAccount();
+
+    if ($account === null) {
+        redirect('/login');
+    }
+
+    if (!in_array(
+        (string) $account['role'],
+        ['student', 'teacher_instructor'],
+        true
+    )) {
+        http_response_code(403);
+        $renderPage('error', [
+            'title' => 'Upload not permitted',
+            'heading' => 'This account cannot submit ordinary uploads',
+            'message' =>
+                'Only Student and Teacher/Instructor accounts may upload resources.',
+        ]);
+        exit;
+    }
+
+    $taxonomyOptions = $taxonomy->activeOptions();
+    $taxonomyReady = $taxonomyOptions['courses'] !== []
+        && $taxonomyOptions['subjects'] !== []
+        && $taxonomyOptions['year_levels'] !== []
+        && $taxonomyOptions['resource_types'] !== [];
+    $old = [
+        'title' => '',
+        'description' => '',
+        'topic' => '',
+        'course_id' => 0,
+        'subject_id' => 0,
+        'year_level_id' => 0,
+        'resource_type_id' => 0,
+        'tag_ids' => [],
+    ];
+    $errors = [];
+
+    if ($requestMethod === 'POST') {
+        if (!Csrf::validate($_POST['_token'] ?? null)) {
+            $rejectInvalidCsrf();
+        }
+
+        $old = ResourceInput::normalize($_POST);
+        $errors = ResourceInput::validate($_POST);
+
+        if (!$taxonomyReady) {
+            $errors['upload'] =
+                'Upload choices are not configured. Contact an Admin.';
+        }
+
+        if ($errors === []) {
+            $errors = $taxonomy->selectionErrors($old);
+        }
+
+        $validatedFile = null;
+
+        if ($errors === []) {
+            try {
+                $submittedFile = $_FILES['resource_file'] ?? null;
+                $validatedFile = $uploadValidator->validate(
+                    is_array($submittedFile) ? $submittedFile : null
+                );
+            } catch (UploadValidationException $exception) {
+                $errors['resource_file'] = $exception->getMessage();
+                error_log(sprintf(
+                    '[BPC LearnShare] Rejected upload actor=%d category=%s extension=%s',
+                    (int) $account['id'],
+                    $exception->category(),
+                    $exception->attemptedExtension() === ''
+                        ? '[none]'
+                        : $exception->attemptedExtension()
+                ));
+            }
+        }
+
+        if ($errors === [] && is_array($validatedFile)) {
+            try {
+                $resourceId = $resourceUploads->createPending(
+                    $account,
+                    $old,
+                    $validatedFile
+                );
+                Session::flash(
+                    'success',
+                    'Resource #' . $resourceId
+                    . ' was stored securely and submitted for moderation.'
+                );
+                redirect('/resources/upload');
+            } catch (Throwable $exception) {
+                error_log(sprintf(
+                    '[BPC LearnShare] Resource upload failed after validation: %s',
+                    $exception->getMessage()
+                ));
+                $errors['upload'] =
+                    'The upload could not be completed. No resource was accepted.';
+            }
+        }
+    }
+
+    $renderPage('resource/upload', [
+        'title' => 'Upload resource',
+        'errors' => $errors,
+        'old' => $old,
+        'taxonomy' => $taxonomyOptions,
+        'taxonomyReady' => $taxonomyReady,
+        'csrfToken' => Csrf::token(),
+    ]);
+    exit;
+}
 if ($path === '/dashboard' && $requestMethod === 'GET') {
     $account = $auth->currentAccount();
 
@@ -226,6 +352,11 @@ if ($path === '/dashboard' && $requestMethod === 'GET') {
         'roleLabel' =>
             $roleLabels[(string) $account['role']] ?? 'Account',
         'csrfToken' => Csrf::token(),
+        'canUpload' => in_array(
+            (string) $account['role'],
+            ['student', 'teacher_instructor'],
+            true
+        ),
     ]);
     exit;
 }
@@ -245,6 +376,7 @@ $allowedMethodsByPath = [
     '/register' => ['GET', 'POST'],
     '/logout' => ['POST'],
     '/dashboard' => ['GET'],
+    '/resources/upload' => ['GET', 'POST'],
 ];
 
 if (
