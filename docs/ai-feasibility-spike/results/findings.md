@@ -67,7 +67,7 @@ Extraction locator preservation passed the completed fidelity review. End-user a
 
 ### 2.8 Insufficient-Evidence Behavior
 
-Five unsupported-query score distributions were recorded, but their scores overlapped positive-query scores. No safe no-result threshold was selected. Answer-level insufficient-evidence behavior remains pending.
+Five unsupported-query score distributions were recorded, but their scores overlapped positive-query scores. No safe no-result threshold was selected. Llama 3.2 3B passed one synthetic insufficient-evidence case, but repository-grounded answer-level behavior remains pending.
 
 ### 2.9 Session-Scoped Follow-Up
 
@@ -83,7 +83,11 @@ Not yet executed.
 
 ### 2.12 Optional Experimental Local Generation
 
-Not yet executed.
+Two bounded synthetic preflights used Ollama 0.32.1, the same five non-project cases, `num_ctx=4096`, temperature 0, seed 42, `think=false`, a 256-token output limit, and zero automatic retries.
+
+Qwen3 4B completed 5/5 requests but met 0/5 automated checks. Its median case latency was 72.391 seconds, 0/5 cases completed within 60 seconds, all five outputs hit the token limit, and visible internal reasoning displaced the requested user-facing answers. This tested configuration is not justified for grounded progression.
+
+Llama 3.2 3B completed 5/5 requests and met 5/5 automated and manual quality checks. Median case latency was 14.738 seconds, p90 was 26.597 seconds, and 5/5 cases completed within 60 seconds without output-limit hits or visible reasoning exposure. It may proceed only to bounded grounded-inquiry evaluation. No final model, integration, or architecture decision is selected.
 
 ### 2.13 Non-AI Fallback
 
@@ -104,6 +108,8 @@ Completed checkpoint guardrails passed for:
 - exact query-scope execution and explicit filter enforcement;
 - preservation of quality misses and failed runs;
 - versioned ground-truth correction without changing saved rankings;
+- preservation of both failed Qwen and passed Llama synthetic-generation evidence;
+- zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
 ## 4. Measurement Limitations
@@ -113,7 +119,7 @@ Completed checkpoint guardrails passed for:
 - Application concurrency, persistent loading strategy, and complete request lifecycle were not tested.
 - Unsupported-query scores overlap supported-query scores; cosine similarity alone cannot safely decide whether the repository contains enough evidence.
 - Manual review changed interpretation of the automatic misleading flags but did not redefine that historical criterion.
-- Generation and most lifecycle/fallback capabilities remain untested.
+- Synthetic local-generation preflights cover only five small non-project cases per candidate; grounded corpus-based generation, sustained hardware use, concurrency, and most lifecycle/fallback capabilities remain untested.
 
 ## 5. Open Questions
 

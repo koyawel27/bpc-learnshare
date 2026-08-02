@@ -62,10 +62,10 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `DATABASE_DESIGN.md` | Accepted **pre-D041/D042** conceptual baseline. Retrieval architecture, extraction/chunk/embedding storage, and any resulting schema expansion are intentionally not yet propagated. Its current silence on retrieval structures must not be treated as a decision that no additional structure will be needed.                                                                                                                          |
 | `DECISIONS.md`       | Complete through **D042**. D041–D042 establish the required completed-capstone AI package, the Required/Planned/Deferred AI tiers, and the feasibility-gated architecture direction.                                                                                                                                                                                                                                                     |
 | `schema.sql`         | Accepted and live-verified 18-table SQL baseline corresponding to the current pre-D041/D042 database design. MariaDB 10.4.32 successfully creates all 18 tables and enforces the remaining 13 `CHECK` constraints. The incompatible direct self-replacement `CHECK` was removed because MariaDB rejects a comparison against the `AUTO_INCREMENT` `resources.id`; PHP must enforce direct self-replacement and longer-cycle prevention under D037. No retrieval-related schema expansion has been authorized. |
-| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, and versioned ground-truth evaluation are recorded. Generation, grounded inquiry, lifecycle, follow-up, related-resource, fallback, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
+| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, versioned ground-truth evaluation, and two synthetic local-generation preflights are recorded. Grounded inquiry, lifecycle, follow-up, related-resource, fallback, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
 | `SECURITY_NOTES.md`  | Complete and accepted, Sections 1–15, through Draft 1.2 and aligned through D040. It predates D041–D042. Its existing security baseline remains accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older wording that treats the newly required inquiry capability as optional is superseded by D041. |
 | `DATA_PRIVACY.md`    | Complete and accepted, Sections 1–15, through the pre-D041/D042 baseline. Its existing privacy principles remain accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older optional/stretch framing for inquiry is superseded by D041. |
-| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval-related checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
+| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval and synthetic local-generation checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
 
 **Not yet substantively completed:**
 
@@ -736,14 +736,14 @@ The following remain open and must not be treated as already resolved:
 
   * No provider, model, embedding approach, vector-storage method, retrieval infrastructure, or schema expansion may be treated as decided before the complete Required-package evidence is reviewed.
   * Measured checkpoints now support readable extraction, corrected 102-chunk segmentation, complete local embedding, native PHP cosine correctness, and promising bounded standalone retrieval.
-  * Generation, grounded inquiry, lifecycle, follow-up, related-resource, insufficient-evidence response, and fallback behavior remain incomplete.
+  * Synthetic local-generation preflight is complete for Qwen3 4B and Llama 3.2 3B. Grounded inquiry, lifecycle, follow-up, related-resource, corpus-based insufficient-evidence response, and fallback behavior remain incomplete.
 
 * **Current hardware supports the measured local embedding and bounded retrieval checkpoints, but broader AI suitability remains unresolved.**
 
   * See Section 12A.
   * Ollama 0.32.1 with `all-minilm:latest` completed 102/102 corpus embeddings on the current baseline laptop.
   * Native PHP cosine retrieval was practical for the tested 102-vector corpus.
-  * Local or external generation suitability remains uncertain and untested.
+  * Under the fixed synthetic preflight, Qwen3 4B failed the tested quality/latency criteria while Llama 3.2 3B passed. Grounded and external generation, sustained hardware use, and concurrency remain untested.
 
 ---
 
@@ -1079,7 +1079,7 @@ Current verified state:
 - The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, and audited versioned ground-truth evaluation.
 - The bounded retrieval candidate achieved 100% resource top-five, 96% corrected passage top-five, practical isolated latency, 100% metadata fallback, and 100% explicit-filter correctness under the tested corpus.
 - The automatic predeclared-misleading criterion remains not met at 25%; manual review provides separate interpretation and does not erase that historical result.
-- Generation, grounded inquiry, lifecycle, follow-up, related-resource, fallback, and final recommendation evidence remain pending.
+- Two synthetic local-generation preflights are recorded: Qwen3 4B failed the tested quality/latency criteria, while Llama 3.2 3B passed and may proceed to bounded grounded evaluation. Grounded inquiry, lifecycle, follow-up, related-resource, fallback, and final recommendation evidence remain pending.
 - MariaDB 10.4.32 successfully imports the verified 18-table schema.
 - The remaining 13 CHECK constraints are recognized and enforced.
 - The incompatible direct self-replacement CHECK was removed; PHP must prevent direct self-replacement and longer cycles under D037.

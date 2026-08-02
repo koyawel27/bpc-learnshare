@@ -1,7 +1,7 @@
 # AI Feasibility Spike — Evidence Package
 
 **Project:** BPC LearnShare  
-**Status:** Partially executed — extraction, corrected segmentation, local embedding, PHP cosine, and standalone retrieval checkpoints recorded; later AI stages pending
+**Status:** Partially executed — extraction, corrected segmentation, local embedding, PHP cosine, standalone retrieval, and two synthetic local-generation preflights recorded; later AI stages pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 ## Purpose
@@ -22,11 +22,12 @@ Completed and registered checkpoints now cover:
 4. native PHP cosine correctness and bounded vector-only timing;
 5. standalone semantic retrieval over 55 executed queries;
 6. targeted manual relevance review; and
-7. an independently audited versioned ground-truth evaluation.
+7. an independently audited versioned ground-truth evaluation; and
+8. two bounded synthetic local-generation preflights comparing Qwen3 4B and Llama 3.2 3B.
 
-Generation, repository-grounded answer construction, source-attribution display, insufficient-evidence response behavior, prohibited-request behavior, session follow-up, related-resource evaluation, lifecycle/staleness behavior, graceful fallback, and the final recommendation remain incomplete.
+Repository-grounded answer construction, end-user source-attribution display, corpus-based insufficiency and prohibited-request behavior, session follow-up, related-resource evaluation, lifecycle/staleness behavior, graceful fallback, and the final recommendation remain incomplete. The synthetic local-generation preflights do not establish grounded inquiry.
 
-The completed retrieval checkpoints do not select a final model, retrieval method, permanent storage design, database change, or application integration.
+The completed retrieval and synthetic-generation checkpoints do not select a final model, retrieval method, permanent storage design, database change, or application integration.
 
 ## File Map
 

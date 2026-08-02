@@ -3185,7 +3185,7 @@ In every failure case:
 
 # 19. Optional Experimental Local Generation
 
-Local generation remains optional, experimental, and unverified.
+Local generation remains optional and experimental. Two bounded synthetic local-generation preflights are now registered, but grounded corpus-based generation and final model selection remain pending.
 
 The spike does not require a positive local-generation result.
 

@@ -41,7 +41,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
 - Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
 - Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
-- Generation, grounded inquiry, lifecycle, follow-up, related-resource, fallback, and final AI recommendation evidence remain pending.
+- Two synthetic local-generation preflights are complete: Qwen3 4B failed the tested quality/latency criteria, while Llama 3.2 3B passed and may proceed to bounded grounded evaluation. Grounded inquiry, lifecycle, follow-up, related-resource, fallback, and the final AI recommendation remain pending.
 
 ---
 
@@ -362,6 +362,8 @@ Deferred boundaries:
   decision is introduced here.
 
 ### Gate 5 — AI feasibility decision
+
+Current evidence: the bounded synthetic Qwen3 4B preflight failed, while the comparable Llama 3.2 3B preflight passed. This permits grounded evaluation only and does not select a final candidate.
 
 Pass when:
 
