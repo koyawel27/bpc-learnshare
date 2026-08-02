@@ -1,6 +1,6 @@
 # AI Feasibility Spike — Findings
 
-**Status:** Partially executed; retrieval checkpoint registered and reviewed, later required capabilities pending
+**Status:** Partially executed; retrieval and bounded local grounded-generation checkpoints registered and reviewed, later required capabilities pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 These findings distinguish original measurements, later reviewed interpretation, and versioned ground-truth correction. They do not constitute the final spike recommendation or an architecture decision.
@@ -14,7 +14,7 @@ These findings distinguish original measurements, later reviewed interpretation,
 - Embedding candidate: `EMB-OLLAMA-ALL-MINILM-001`, Ollama 0.32.1, `all-minilm:latest`, 384 dimensions.
 - Similarity method: `SIM-PHP-COSINE-001`.
 - Retrieval configuration: `RET-SEMANTIC-STANDALONE-001`.
-- Test period covered by the registered checkpoints: 2026-07-27 through 2026-07-30.
+- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-02.
 
 ## 2. Observed Results by Capability
 
@@ -59,15 +59,21 @@ The automatic predeclared-misleading top-three rate remains 25% against the 20% 
 
 ### 2.6 Repository-Grounded Inquiry
 
-Not yet executed. Retrieval feasibility does not prove grounded answer generation, citation presentation, or answer-level faithfulness.
+A bounded six-case local comparison was completed for Llama 3.2 3B and Qwen3.5 4B using the same saved retrieval evidence, response contract, settings, and zero-retry policy.
+
+- Llama completed 6/6 requests, passed 1/6 automated checks, and reached 3/6 (50%) useful as-is or after a light edit.
+- Qwen3.5 completed 6/6 requests, passed 3/6 automated checks, and reached 3/6 (50%) useful as-is.
+- Both missed the accepted 80% grounded-answer usefulness criterion.
+
+The four grounded evaluation stages are registered as failed quality verdicts even though request execution and evidence capture completed successfully. Neither candidate is selected or accepted as a reliable fallback.
 
 ### 2.7 Source Attribution and Locator Reliability
 
-Extraction locator preservation passed the completed fidelity review. End-user attribution display and answer-level locator behavior remain untested because grounded generation has not started.
+Extraction locator preservation passed the completed fidelity review. The fixed JSON claim-source contract was technically achievable but not consistently reliable: Llama omitted supported content and invented one source label, while Qwen3.5 omitted or incompletely attributed some supplied evidence. End-user source-attribution and locator presentation in the application remain untested.
 
 ### 2.8 Insufficient-Evidence Behavior
 
-Five unsupported-query score distributions were recorded, but their scores overlapped positive-query scores. No safe no-result threshold was selected. Llama 3.2 3B passed one synthetic insufficient-evidence case, but repository-grounded answer-level behavior remains pending.
+Five unsupported-query score distributions were recorded, but their scores overlapped positive-query scores, so no safe no-result threshold was selected. In the grounded comparison, both models avoided fabricating an answer for the fixed no-evidence case. Qwen3.5's automated miss was a checker false negative confirmed by manual review. The response contract already supported a visible `refused` outcome; Qwen3.5's empty prohibited response remains a model-behavior failure, not a missing contract field.
 
 ### 2.9 Session-Scoped Follow-Up
 
@@ -85,9 +91,11 @@ Not yet executed.
 
 Two bounded synthetic preflights used Ollama 0.32.1, the same five non-project cases, `num_ctx=4096`, temperature 0, seed 42, `think=false`, a 256-token output limit, and zero automatic retries.
 
-Qwen3 4B completed 5/5 requests but met 0/5 automated checks. Its median case latency was 72.391 seconds, 0/5 cases completed within 60 seconds, all five outputs hit the token limit, and visible internal reasoning displaced the requested user-facing answers. This tested configuration is not justified for grounded progression.
+Qwen3 4B completed 5/5 requests but met 0/5 automated checks. Its median case latency was 72.391 seconds, 0/5 cases completed within 60 seconds, all five outputs hit the token limit, and visible internal reasoning displaced the requested user-facing answers. This tested configuration was not justified for grounded progression.
 
-Llama 3.2 3B completed 5/5 requests and met 5/5 automated and manual quality checks. Median case latency was 14.738 seconds, p90 was 26.597 seconds, and 5/5 cases completed within 60 seconds without output-limit hits or visible reasoning exposure. It may proceed only to bounded grounded-inquiry evaluation. No final model, integration, or architecture decision is selected.
+Llama 3.2 3B completed 5/5 requests and met 5/5 automated and manual quality checks. Median case latency was 14.738 seconds, p90 was 26.597 seconds, and 5/5 cases completed within 60 seconds without output-limit hits or visible reasoning exposure. It progressed to the bounded grounded comparison.
+
+In the six-case grounded comparison, Llama's pooled conventional median was 41.6 seconds with 6/6 within 60 seconds. Qwen3.5 4B's pooled conventional median was 66.0 seconds with 2/6 within 60 seconds. Both medians fall in the documented limited-fallback timing band, but neither candidate is accepted as a reliable fallback because each achieved only 50% usefulness against the accepted 80% requirement. The samples are directional (n=6 per model), and no final model, integration, mixed architecture, or provider decision is selected.
 
 ### 2.13 Non-AI Fallback
 
@@ -108,7 +116,7 @@ Completed checkpoint guardrails passed for:
 - exact query-scope execution and explicit filter enforcement;
 - preservation of quality misses and failed runs;
 - versioned ground-truth correction without changing saved rankings;
-- preservation of both failed Qwen and passed Llama synthetic-generation evidence;
+- preservation of failed and passed synthetic-preflight evidence and all four quality-failed grounded-generation stages;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
@@ -119,11 +127,11 @@ Completed checkpoint guardrails passed for:
 - Application concurrency, persistent loading strategy, and complete request lifecycle were not tested.
 - Unsupported-query scores overlap supported-query scores; cosine similarity alone cannot safely decide whether the repository contains enough evidence.
 - Manual review changed interpretation of the automatic misleading flags but did not redefine that historical criterion.
-- Synthetic local-generation preflights cover only five small non-project cases per candidate; grounded corpus-based generation, sustained hardware use, concurrency, and most lifecycle/fallback capabilities remain untested.
+- The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, control-layer enforcement, end-user citation display, and most lifecycle/fallback capabilities remain untested.
 
 ## 5. Open Questions
 
-- Whether grounded answer generation can remain faithful, properly attributed, and safe for unsupported or prohibited questions.
+- Whether a model-independent policy, claim-source validation, fallback, and lifecycle control layer can prevent the observed unsafe or unsupported output from reaching users.
 - Whether lifecycle, freshness, and live eligibility revalidation remain simple enough for the bounded PHP/MariaDB MVP.
 - Whether a hybrid metadata-semantic presentation should be tested for exact-title searches.
 - What temporary or persistent retrieval-data behavior is actually necessary.

@@ -62,10 +62,10 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `DATABASE_DESIGN.md` | Accepted **pre-D041/D042** conceptual baseline. Retrieval architecture, extraction/chunk/embedding storage, and any resulting schema expansion are intentionally not yet propagated. Its current silence on retrieval structures must not be treated as a decision that no additional structure will be needed.                                                                                                                          |
 | `DECISIONS.md`       | Complete through **D042**. D041–D042 establish the required completed-capstone AI package, the Required/Planned/Deferred AI tiers, and the feasibility-gated architecture direction.                                                                                                                                                                                                                                                     |
 | `schema.sql`         | Accepted and live-verified 18-table SQL baseline corresponding to the current pre-D041/D042 database design. MariaDB 10.4.32 successfully creates all 18 tables and enforces the remaining 13 `CHECK` constraints. The incompatible direct self-replacement `CHECK` was removed because MariaDB rejects a comparison against the `AUTO_INCREMENT` `resources.id`; PHP must enforce direct self-replacement and longer-cycle prevention under D037. No retrieval-related schema expansion has been authorized. |
-| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, versioned ground-truth evaluation, and two synthetic local-generation preflights are recorded. Grounded inquiry, lifecycle, follow-up, related-resource, fallback, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
+| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, versioned ground-truth evaluation, two synthetic local-generation preflights, and two fixed six-case local grounded-generation comparisons are recorded. Neither local generation candidate met the accepted usefulness criteria or is selected. Model-independent controls, lifecycle, follow-up, related-resource, fallback, any justified external comparison, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
 | `SECURITY_NOTES.md`  | Complete and accepted, Sections 1–15, through Draft 1.2 and aligned through D040. It predates D041–D042. Its existing security baseline remains accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older wording that treats the newly required inquiry capability as optional is superseded by D041. |
 | `DATA_PRIVACY.md`    | Complete and accepted, Sections 1–15, through the pre-D041/D042 baseline. Its existing privacy principles remain accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older optional/stretch framing for inquiry is superseded by D041. |
-| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval and synthetic local-generation checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
+| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval, synthetic preflight, and bounded local grounded-generation checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
 
 **Not yet substantively completed:**
 
@@ -74,7 +74,7 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 * `TESTING_CHECKLIST.md`
 * `CHANGELOG.md`
 
-`AI_FEASIBILITY_SPIKE.md` is now complete and accepted. The immediate next execution checkpoint is the clean hardware and runtime baseline defined in Sections 12A and 13, followed by measured spike execution.
+`AI_FEASIBILITY_SPIKE.md` is complete and accepted. The next AI checkpoint is a narrow model-independent control layer covering deterministic policy refusal, claim-to-source validation, visible fallback, and lifecycle invalidation before another model/provider comparison or application integration decision.
 
 ---
 
@@ -1334,27 +1334,21 @@ Any older pre-D041/D042 wording that describes repository-grounded inquiry as op
 Important remaining items:
 
 * test the 20 MB upload limit against representative files;
-* restart Windows and record the clean `llmfit system` and `nvidia-smi` baseline;
-* execute the accepted AI feasibility spike;
-* measure extraction quality and failure behavior;
-* measure source-location preservation;
-* measure local embedding feasibility;
-* measure bounded retrieval quality and latency;
-* evaluate grounded-answer behavior and source attribution;
-* evaluate insufficient-evidence and prohibited-request handling;
-* evaluate session-scoped follow-up and lifecycle revalidation;
-* evaluate CPU, RAM, GPU, and VRAM use;
-* evaluate external-provider dependence, quota, cost, privacy limitations, and fallback behavior;
+* design and test the model-independent policy, claim-source validation, visible-fallback, and lifecycle-invalidation control layer;
+* evaluate end-user source-attribution and locator presentation;
+* evaluate session-scoped follow-up, related-resource behavior, lifecycle revalidation, and stale-output exclusion;
+* evaluate external-provider dependence, quota, cost, privacy limitations, and fallback behavior only if an external candidate is justified;
 * select the simplest workable AI architecture only after the complete evidence package is reviewed.
 
-The immediate next checkpoint is the **clean hardware and runtime baseline**:
+The immediate next AI checkpoint is the **model-independent grounded-response control layer**:
 
-1. Restart Windows.
-2. Close unnecessary heavy applications.
-3. Run `llmfit system`.
-4. Run `nvidia-smi`.
-5. Record the clean baseline.
-6. Begin the accepted feasibility spike only after the baseline is captured.
+1. block prohibited requests before model generation;
+2. require each substantive generated claim to use an allowed source label;
+3. reject or replace responses that fail claim-source validation;
+4. show a clear insufficient-supported-evidence fallback; and
+5. invalidate cached AI output when its source becomes stale or ineligible.
+
+This checkpoint should use a stubbed model first so the safety behavior can be demonstrated independently of the final provider or model.
 
 The project remains a local/LAN BS Information Systems academic MVP: a moderated academic resource-sharing and management system that is required to implement and demonstrate a bounded repository-grounded AI capability package while preserving an independently functional non-AI resource-sharing core.
 
