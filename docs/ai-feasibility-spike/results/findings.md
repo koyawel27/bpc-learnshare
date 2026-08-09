@@ -1,6 +1,6 @@
 # AI Feasibility Spike — Findings
 
-**Status:** Partially executed; retrieval and bounded local grounded-generation checkpoints registered and reviewed, later required capabilities pending
+**Status:** Partially executed; retrieval, bounded local grounded-generation, and model-independent control-layer checkpoints registered and reviewed, later required capabilities pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 These findings distinguish original measurements, later reviewed interpretation, and versioned ground-truth correction. They do not constitute the final spike recommendation or an architecture decision.
@@ -103,7 +103,13 @@ Not yet executed.
 
 ### 2.14 Security, Privacy, Eligibility, and Lifecycle
 
-Local-only fixture processing, explicit file-type filters, ignored raw-vector storage, and boundary-fixture exclusion were verified in the completed checkpoints. Live eligibility revalidation, stale-source exclusion, replacement handling, cleanup, and graceful application fallback remain pending.
+Local-only fixture processing, explicit file-type filters, ignored raw-vector storage, and boundary-fixture exclusion were verified in the completed checkpoints. The deterministic control-layer checkpoint also rejected stale or ineligible synthetic evidence and prevented answers after second revalidation failed. Live database-backed eligibility revalidation, replacement handling, cleanup, and graceful application fallback remain pending.
+
+### 2.15 Model-Independent Grounded-Response Control Layer
+
+`TR-CTRL-GROUNDED-MODEL-INDEPENDENT-001` passed all 21 fixed synthetic cases with zero mandatory guardrail occurrences. The checkpoint blocked prohibited-answer leakage after classification, stale or ineligible evidence use, unsupported substantive answers, fabricated source or locator behavior, post-generation staleness, invalid authority side effects, false completion, and unsafe logging while preserving metadata search and safe user-facing fallback behavior.
+
+The run made zero real-model or provider requests, used zero registered evaluation queries, and used zero BPC resource records. It proves the tested deterministic enforcement logic only. It does not prove prohibited-request detection quality, session follow-up, end-user source presentation, complete application fallback, live PHP/database integration, or final architecture suitability.
 
 ## 3. Mandatory Guardrail Results
 
@@ -117,6 +123,7 @@ Completed checkpoint guardrails passed for:
 - preservation of quality misses and failed runs;
 - versioned ground-truth correction without changing saved rankings;
 - preservation of failed and passed synthetic-preflight evidence and all four quality-failed grounded-generation stages;
+- 21/21 deterministic control-layer cases with zero prohibited-answer leakage, stale or ineligible evidence use, unsupported answers, invalid authority side effects, false completion, or unsafe log exposure;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
@@ -127,11 +134,11 @@ Completed checkpoint guardrails passed for:
 - Application concurrency, persistent loading strategy, and complete request lifecycle were not tested.
 - Unsupported-query scores overlap supported-query scores; cosine similarity alone cannot safely decide whether the repository contains enough evidence.
 - Manual review changed interpretation of the automatic misleading flags but did not redefine that historical criterion.
-- The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, control-layer enforcement, end-user citation display, and most lifecycle/fallback capabilities remain untested.
+- The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, live control-layer integration, end-user citation display, and most application-level lifecycle/fallback capabilities remain untested.
 
 ## 5. Open Questions
 
-- Whether a model-independent policy, claim-source validation, fallback, and lifecycle control layer can prevent the observed unsafe or unsupported output from reaching users.
+- Whether the registered deterministic control rules remain effective after live PHP/database integration and real request classification.
 - Whether lifecycle, freshness, and live eligibility revalidation remain simple enough for the bounded PHP/MariaDB MVP.
 - Whether a hybrid metadata-semantic presentation should be tested for exact-title searches.
 - What temporary or persistent retrieval-data behavior is actually necessary.

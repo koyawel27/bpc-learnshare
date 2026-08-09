@@ -62,10 +62,10 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `DATABASE_DESIGN.md` | Accepted **pre-D041/D042** conceptual baseline. Retrieval architecture, extraction/chunk/embedding storage, and any resulting schema expansion are intentionally not yet propagated. Its current silence on retrieval structures must not be treated as a decision that no additional structure will be needed.                                                                                                                          |
 | `DECISIONS.md`       | Complete through **D042**. D041–D042 establish the required completed-capstone AI package, the Required/Planned/Deferred AI tiers, and the feasibility-gated architecture direction.                                                                                                                                                                                                                                                     |
 | `schema.sql`         | Accepted and live-verified 18-table SQL baseline corresponding to the current pre-D041/D042 database design. MariaDB 10.4.32 successfully creates all 18 tables and enforces the remaining 13 `CHECK` constraints. The incompatible direct self-replacement `CHECK` was removed because MariaDB rejects a comparison against the `AUTO_INCREMENT` `resources.id`; PHP must enforce direct self-replacement and longer-cycle prevention under D037. No retrieval-related schema expansion has been authorized. |
-| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, versioned ground-truth evaluation, two synthetic local-generation preflights, and two fixed six-case local grounded-generation comparisons are recorded. Neither local generation candidate met the accepted usefulness criteria or is selected. Model-independent controls, lifecycle, follow-up, related-resource, fallback, any justified external comparison, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
+| `AI_FEASIBILITY_SPIKE.md` | Complete and accepted as the controlling feasibility-spike specification, Sections 1–26. The spike is partially executed: extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, versioned ground-truth evaluation, two synthetic local-generation preflights, two fixed six-case local grounded-generation comparisons, and the 21-case model-independent control-layer checkpoint are recorded. Neither local generation candidate met the accepted usefulness criteria or is selected. Integration-level lifecycle, follow-up, related-resource, fallback, any justified external comparison, and the final recommendation remain pending. No final provider, model, retrieval layer, database upgrade, second database, or schema expansion has been selected. |
 | `SECURITY_NOTES.md`  | Complete and accepted, Sections 1–15, through Draft 1.2 and aligned through D040. It predates D041–D042. Its existing security baseline remains accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older wording that treats the newly required inquiry capability as optional is superseded by D041. |
 | `DATA_PRIVACY.md`    | Complete and accepted, Sections 1–15, through the pre-D041/D042 baseline. Its existing privacy principles remain accepted, but targeted AI/retrieval propagation is scheduled after architecture selection. Any older optional/stretch framing for inquiry is superseded by D041. |
-| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval, synthetic preflight, and bounded local grounded-generation checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
+| `PROJECT_HANDOFF.md` | This updated version. It records the accepted specification, verified MariaDB 10.4.32 schema baseline, completed retrieval, synthetic preflight, bounded local grounded-generation, and deterministic model-independent control-layer checkpoints, and the remaining feasibility work without selecting a final AI/retrieval architecture. |
 
 **Not yet substantively completed:**
 
@@ -74,7 +74,7 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 * `TESTING_CHECKLIST.md`
 * `CHANGELOG.md`
 
-`AI_FEASIBILITY_SPIKE.md` is complete and accepted. The next AI checkpoint is a narrow model-independent control layer covering deterministic policy refusal, claim-to-source validation, visible fallback, and lifecycle invalidation before another model/provider comparison or application integration decision.
+`AI_FEASIBILITY_SPIKE.md` is complete and accepted. The deterministic model-independent control layer passed 21/21 fixed synthetic cases and is registered. The next AI checkpoint is session-scoped follow-up plus integration-level lifecycle, staleness, and fallback validation before another model/provider comparison or application integration decision.
 
 ---
 
@@ -736,14 +736,15 @@ The following remain open and must not be treated as already resolved:
 
   * No provider, model, embedding approach, vector-storage method, retrieval infrastructure, or schema expansion may be treated as decided before the complete Required-package evidence is reviewed.
   * Measured checkpoints now support readable extraction, corrected 102-chunk segmentation, complete local embedding, native PHP cosine correctness, and promising bounded standalone retrieval.
-  * Synthetic local-generation preflight is complete for Qwen3 4B and Llama 3.2 3B. Grounded inquiry, lifecycle, follow-up, related-resource, corpus-based insufficient-evidence response, and fallback behavior remain incomplete.
+  * Synthetic local-generation preflight and bounded grounded comparison are complete for the tested Qwen and Llama candidates; neither candidate met the accepted grounded-answer usefulness criteria or is selected.
+  * The 21-case deterministic model-independent control layer is complete and registered. Session follow-up, end-user source presentation, related-resource behavior, live lifecycle revalidation, and complete application fallback remain incomplete.
 
 * **Current hardware supports the measured local embedding and bounded retrieval checkpoints, but broader AI suitability remains unresolved.**
 
   * See Section 12A.
   * Ollama 0.32.1 with `all-minilm:latest` completed 102/102 corpus embeddings on the current baseline laptop.
   * Native PHP cosine retrieval was practical for the tested 102-vector corpus.
-  * Under the fixed synthetic preflight, Qwen3 4B failed the tested quality/latency criteria while Llama 3.2 3B passed. Grounded and external generation, sustained hardware use, and concurrency remain untested.
+  * Under the fixed synthetic preflight, Qwen3 4B failed the tested quality/latency criteria while Llama 3.2 3B passed. Both Llama 3.2 3B and Qwen3.5 4B later completed bounded grounded comparison, but each reached only 50% usefulness against the accepted 80% requirement and neither was selected. External generation, sustained hardware use, and concurrency remain untested.
 
 ---
 
@@ -893,9 +894,9 @@ Remaining order:
 
 5. **Continue the accepted feasibility spike.**
 
-   * Completed checkpoints cover extraction success/failure, source-location fidelity, corrected segmentation, complete local embedding, PHP cosine correctness/timing, standalone retrieval relevance/latency, and targeted manual relevance review.
+   * Completed checkpoints cover extraction success/failure, source-location fidelity, corrected segmentation, complete local embedding, PHP cosine correctness/timing, standalone retrieval relevance/latency, targeted manual relevance review, bounded local grounded-generation comparison, and deterministic model-independent control-layer enforcement.
    * Continue using the accepted representative corpus, query set, versioned evaluator ground truth, and evidence-recording rules.
-   * Remaining checkpoints include grounded inquiry and attribution, insufficient-evidence and prohibited-request behavior, session follow-up, related-resource suggestions, stale-source/lifecycle exclusion, fallback, generation dependencies, maintainability, and any missing resource observations.
+   * Remaining checkpoints include end-user attribution presentation, real request classification, session follow-up, related-resource suggestions, integration-level stale-source/lifecycle exclusion, complete application fallback, any justified external-generation comparison, generation dependencies, maintainability, and any missing resource observations.
 
 6. **Evaluate and accept the complete measured findings.**
 
@@ -1076,10 +1077,10 @@ Read the latest source files first:
 Current verified state:
 
 - AI_FEASIBILITY_SPIKE.md Sections 1–26 are complete and accepted.
-- The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, and audited versioned ground-truth evaluation.
+- The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, audited versioned ground-truth evaluation, two bounded local grounded-generation comparisons, and the registered 21-case model-independent control layer.
 - The bounded retrieval candidate achieved 100% resource top-five, 96% corrected passage top-five, practical isolated latency, 100% metadata fallback, and 100% explicit-filter correctness under the tested corpus.
 - The automatic predeclared-misleading criterion remains not met at 25%; manual review provides separate interpretation and does not erase that historical result.
-- Two synthetic local-generation preflights are recorded: Qwen3 4B failed the tested quality/latency criteria, while Llama 3.2 3B passed and may proceed to bounded grounded evaluation. Grounded inquiry, lifecycle, follow-up, related-resource, fallback, and final recommendation evidence remain pending.
+- Two synthetic local-generation preflights and two fixed six-case grounded comparisons are recorded. Llama 3.2 3B and Qwen3.5 4B each reached only 50% usefulness against the accepted 80% requirement; neither is selected as the interactive local solution or a reliable fallback. The model-independent control layer passed 21/21 fixed synthetic cases. Integration-level lifecycle, follow-up, related-resource, fallback, and final recommendation evidence remain pending.
 - MariaDB 10.4.32 successfully imports the verified 18-table schema.
 - The remaining 13 CHECK constraints are recognized and enforced.
 - The incompatible direct self-replacement CHECK was removed; PHP must prevent direct self-replacement and longer cycles under D037.
@@ -1334,21 +1335,21 @@ Any older pre-D041/D042 wording that describes repository-grounded inquiry as op
 Important remaining items:
 
 * test the 20 MB upload limit against representative files;
-* design and test the model-independent policy, claim-source validation, visible-fallback, and lifecycle-invalidation control layer;
 * evaluate end-user source-attribution and locator presentation;
 * evaluate session-scoped follow-up, related-resource behavior, lifecycle revalidation, and stale-output exclusion;
+* verify the registered deterministic control rules against live PHP/database state and complete application fallback behavior;
 * evaluate external-provider dependence, quota, cost, privacy limitations, and fallback behavior only if an external candidate is justified;
 * select the simplest workable AI architecture only after the complete evidence package is reviewed.
 
-The immediate next AI checkpoint is the **model-independent grounded-response control layer**:
+The immediate next AI checkpoint is **session-scoped follow-up plus integration-level lifecycle and staleness validation**:
 
-1. block prohibited requests before model generation;
-2. require each substantive generated claim to use an allowed source label;
-3. reject or replace responses that fail claim-source validation;
-4. show a clear insufficient-supported-evidence fallback; and
-5. invalidate cached AI output when its source becomes stale or ineligible.
+1. resolve follow-up references only within the active session and clear them when the session ends;
+2. revalidate every supporting source against current database status, access, file availability, readiness, and freshness before returning an answer;
+3. prevent cached or late AI output from being shown after a source becomes stale, replaced, restricted, removed, or otherwise ineligible;
+4. preserve a clear insufficient-supported-evidence or unavailable-AI fallback without blocking metadata search; and
+5. demonstrate that these rules remain model-independent and do not grant AI authority over resource status or moderation.
 
-This checkpoint should use a stubbed model first so the safety behavior can be demonstrated independently of the final provider or model.
+This checkpoint should remain isolated from production integration and should reuse deterministic stubs where necessary so lifecycle and session behavior can be measured independently of the final provider or model.
 
 The project remains a local/LAN BS Information Systems academic MVP: a moderated academic resource-sharing and management system that is required to implement and demonstrate a bounded repository-grounded AI capability package while preserving an independently functional non-AI resource-sharing core.
 
