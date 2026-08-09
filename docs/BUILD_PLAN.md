@@ -405,7 +405,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource evaluation is complete and registered. The next isolated AI-quality work is end-user source-attribution presentation and natural-language follow-up quality, followed by live integration-level lifecycle and fallback checks; this does not authorize AI application integration yet.
+The related-resource and isolated end-user source-attribution presentation evaluations are complete and registered. The next isolated AI-quality work is natural-language follow-up quality and the no-useful-related-resource boundary, followed by live integration-level lifecycle and fallback checks; this does not authorize AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 
@@ -428,13 +428,23 @@ The related-resource evaluation is complete and registered. The next isolated AI
 - One suggestion was weakly related and three were unrelated. The accepted query set contains no intentionally empty useful-related-resource case, so the no-forced-weak-suggestion criterion remains unscored rather than passed.
 - The checkpoint does not introduce learner profiles, behavioral personalization, engagement transfer, automatic duplicate decisions, a schema change, or application integration.
 
-### 7.4 Later integration-level lifecycle and fallback
+### 7.4 Completed isolated source-attribution presentation
+
+- `ATTR-END-USER-PRESENTATION-001` passed 10/10 fixed presentation-contract cases.
+- Six displayed source references reconciled to accepted identities, versions, titles, chunks, and locator evidence.
+- Unknown, stale or mismatched, and final-revalidation-failed sources disclosed no answer or source details.
+- Correct locator omission, insufficiency, refusal, and HTML escaping passed.
+- Desktop and mobile isolated visual review passed with no horizontal overflow.
+- Zero model/provider calls and zero retrieval reruns occurred.
+- The live application and final citation UI remain unselected and untested.
+
+### 7.5 Later integration-level lifecycle and fallback
 
 - Confirm against live PHP/database state that Hidden, Restricted, Removed, Replaced, stale-source, missing-file, and unavailable-AI states cannot leak or block core workflows.
 - Test natural-language follow-up interpretation with the eventual bounded generation direction.
 - Confirm metadata search and controlled resource access still work with AI disabled.
 
-### 7.5 Final recommendation
+### 7.6 Final recommendation
 
 - Compare all accepted measurements with `ACCEPTED_CRITERIA.md`.
 - State which candidate/configuration is accepted, rejected, or requires further evidence.

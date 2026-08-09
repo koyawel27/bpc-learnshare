@@ -69,7 +69,9 @@ The four grounded evaluation stages are registered as failed quality verdicts ev
 
 ### 2.7 Source Attribution and Locator Reliability
 
-Extraction locator preservation passed the completed fidelity review. The fixed JSON claim-source contract was technically achievable but not consistently reliable: Llama omitted supported content and invented one source label, while Qwen3.5 omitted or incompletely attributed some supplied evidence. End-user source-attribution and locator presentation in the application remain untested.
+Extraction locator preservation passed the completed fidelity review. The fixed JSON claim-source contract was technically achievable but not consistently reliable in the saved local-generation comparisons: Llama omitted supported content and invented one source label, while Qwen3.5 omitted or incompletely attributed some supplied evidence. Those model-quality failures remain preserved.
+
+A later model-independent presentation checkpoint, `TR-ATTR-END-USER-PRESENTATION-001`, passed 10/10 fixed cases using frozen saved evidence and deterministic controls. Six displayed source records reconciled to accepted fixture identity, source version, title, file type, chunk, and locator evidence. Unknown labels, source-version mismatch, and failed second-point revalidation produced safe unavailable states with zero answer or source disclosure. Correct locator omission, insufficiency, refusal, and output escaping passed. Desktop and mobile visual review passed without horizontal overflow. This proves the isolated presentation contract only; the live application route, resource links, database revalidation, and final citation UI remain untested and unselected.
 
 ### 2.8 Insufficient-Evidence Behavior
 
@@ -146,6 +148,7 @@ Completed checkpoint guardrails passed for:
 - 200/200 deterministic session/lifecycle cases with 100% same-session continuity, context clearing, cross-session isolation, lifecycle exclusion, final revalidation, and metadata fallback under the supplied state transitions;
 - five accepted related-resource cases with 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness;
 - 30/30 deterministic related-resource eligibility revalidations, five distinct non-self suggestions per case, and preservation of the unscored no-useful-relation limitation;
+- 10/10 model-independent source-attribution presentation cases, six verified displayed source records, five fail-closed safe states, and desktop/mobile visual review without horizontal overflow;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
@@ -156,7 +159,7 @@ Completed checkpoint guardrails passed for:
 - Application concurrency, persistent loading strategy, and complete request lifecycle were not tested.
 - Unsupported-query scores overlap supported-query scores; cosine similarity alone cannot safely decide whether the repository contains enough evidence.
 - Manual review changed interpretation of the automatic misleading flags but did not redefine that historical criterion.
-- The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, live control-layer integration, end-user citation display, and most application-level lifecycle/fallback capabilities remain untested.
+- The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, live control-layer integration, live application citation/link behavior, and most application-level lifecycle/fallback capabilities remain untested. The later isolated presentation checkpoint does not repair those model-quality limitations.
 - The session/lifecycle checkpoint supplied deterministic state changes and did not test language-model reference interpretation, the production PHP session, live database transitions, cleanup synchronization, or provider-side retention.
 
 ## 5. Open Questions
