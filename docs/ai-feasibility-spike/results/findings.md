@@ -1,6 +1,6 @@
 # AI Feasibility Spike — Findings
 
-**Status:** Partially executed; retrieval, bounded local grounded-generation, and model-independent control-layer checkpoints registered and reviewed, later required capabilities pending
+**Status:** Partially executed; retrieval, bounded local grounded-generation, model-independent grounded-response controls, and deterministic session/lifecycle controls registered and reviewed, later required capabilities pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 These findings distinguish original measurements, later reviewed interpretation, and versioned ground-truth correction. They do not constitute the final spike recommendation or an architecture decision.
@@ -14,7 +14,7 @@ These findings distinguish original measurements, later reviewed interpretation,
 - Embedding candidate: `EMB-OLLAMA-ALL-MINILM-001`, Ollama 0.32.1, `all-minilm:latest`, 384 dimensions.
 - Similarity method: `SIM-PHP-COSINE-001`.
 - Retrieval configuration: `RET-SEMANTIC-STANDALONE-001`.
-- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-02.
+- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-09.
 
 ## 2. Observed Results by Capability
 
@@ -77,7 +77,9 @@ Five unsupported-query score distributions were recorded, but their scores overl
 
 ### 2.9 Session-Scoped Follow-Up
 
-Not yet executed.
+The deterministic model-independent checkpoint `TR-CTRL-SESSION-LIFECYCLE-001` tested all ten accepted follow-up mappings. Same-session parent continuity passed 10/10, missing-parent rejection passed 10/10, cross-session isolation passed 10/10, and all 50 logout, expiration, explicit-reset, session-end, and new-session clearing cases passed.
+
+This establishes the tested supplied-state control behavior only. No language model interpreted the follow-up text, and the production PHP session and live database were not used. Natural-language reference resolution and integrated session behavior therefore remain pending.
 
 ### 2.10 Related-Resource Suggestions
 
@@ -103,13 +105,19 @@ Not yet executed.
 
 ### 2.14 Security, Privacy, Eligibility, and Lifecycle
 
-Local-only fixture processing, explicit file-type filters, ignored raw-vector storage, and boundary-fixture exclusion were verified in the completed checkpoints. The deterministic control-layer checkpoint also rejected stale or ineligible synthetic evidence and prevented answers after second revalidation failed. Live database-backed eligibility revalidation, replacement handling, cleanup, and graceful application fallback remain pending.
+Local-only fixture processing, explicit file-type filters, ignored raw-vector storage, and boundary-fixture exclusion were verified in the completed checkpoints. The deterministic grounded-response control layer rejected stale or ineligible synthetic evidence and prevented answers after second revalidation failed. The later session/lifecycle checkpoint passed all 110 mid-session ineligibility cases and all 10 final-revalidation cases with zero unsupported or ineligible carryover. It used deterministic supplied state rather than live database transitions, so live database-backed eligibility revalidation, replacement cleanup, and graceful application fallback remain pending.
 
 ### 2.15 Model-Independent Grounded-Response Control Layer
 
 `TR-CTRL-GROUNDED-MODEL-INDEPENDENT-001` passed all 21 fixed synthetic cases with zero mandatory guardrail occurrences. The checkpoint blocked prohibited-answer leakage after classification, stale or ineligible evidence use, unsupported substantive answers, fabricated source or locator behavior, post-generation staleness, invalid authority side effects, false completion, and unsafe logging while preserving metadata search and safe user-facing fallback behavior.
 
-The run made zero real-model or provider requests, used zero registered evaluation queries, and used zero BPC resource records. It proves the tested deterministic enforcement logic only. It does not prove prohibited-request detection quality, session follow-up, end-user source presentation, complete application fallback, live PHP/database integration, or final architecture suitability.
+That run made zero real-model or provider requests, used zero registered evaluation queries, and used zero BPC resource records. It proves its tested deterministic enforcement logic only. It does not prove prohibited-request detection quality, end-user source presentation, complete application fallback, live PHP/database integration, or final architecture suitability; the separate later session/lifecycle checkpoint is recorded in Section 2.16.
+
+### 2.16 Model-Independent Session and Lifecycle Control
+
+`TR-CTRL-SESSION-LIFECYCLE-001` passed all 200 fixed cases: 10 ordinary same-session continuity cases, 10 missing-parent cases, 10 cross-session isolation cases, 50 context-clearing cases, 110 mid-session eligibility changes, and 10 final-revalidation changes. Ordinary continuity was 100% against the accepted 90% minimum. Mid-session evidence removal, context clearing, cross-session isolation, and metadata fallback were each 100%, with zero unsupported or ineligible carryover.
+
+The saved evidence used aliases rather than raw registered session IDs and called no model/provider. The checkpoint did not test natural-language understanding, generated-answer quality, provider retention, the production PHP session, or live database integration. It does not authorize permanent chat history, schema changes, application integration, or a final candidate/architecture decision.
 
 ## 3. Mandatory Guardrail Results
 
@@ -124,6 +132,7 @@ Completed checkpoint guardrails passed for:
 - versioned ground-truth correction without changing saved rankings;
 - preservation of failed and passed synthetic-preflight evidence and all four quality-failed grounded-generation stages;
 - 21/21 deterministic control-layer cases with zero prohibited-answer leakage, stale or ineligible evidence use, unsupported answers, invalid authority side effects, false completion, or unsafe log exposure;
+- 200/200 deterministic session/lifecycle cases with 100% same-session continuity, context clearing, cross-session isolation, lifecycle exclusion, final revalidation, and metadata fallback under the supplied state transitions;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
@@ -135,10 +144,11 @@ Completed checkpoint guardrails passed for:
 - Unsupported-query scores overlap supported-query scores; cosine similarity alone cannot safely decide whether the repository contains enough evidence.
 - Manual review changed interpretation of the automatic misleading flags but did not redefine that historical criterion.
 - The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, live control-layer integration, end-user citation display, and most application-level lifecycle/fallback capabilities remain untested.
+- The session/lifecycle checkpoint supplied deterministic state changes and did not test language-model reference interpretation, the production PHP session, live database transitions, cleanup synchronization, or provider-side retention.
 
 ## 5. Open Questions
 
-- Whether the registered deterministic control rules remain effective after live PHP/database integration and real request classification.
+- Whether the registered deterministic grounded-response and session/lifecycle rules remain effective after live PHP/database integration, natural-language follow-up interpretation, and real request classification.
 - Whether lifecycle, freshness, and live eligibility revalidation remain simple enough for the bounded PHP/MariaDB MVP.
 - Whether a hybrid metadata-semantic presentation should be tested for exact-title searches.
 - What temporary or persistent retrieval-data behavior is actually necessary.

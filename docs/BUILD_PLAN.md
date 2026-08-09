@@ -41,7 +41,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
 - Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
 - Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
-- Two synthetic local-generation preflights are complete: Qwen3 4B failed the tested quality/latency criteria, while Llama 3.2 3B passed and may proceed to bounded grounded evaluation. Grounded inquiry, lifecycle, follow-up, related-resource, fallback, and the final AI recommendation remain pending.
+- Two synthetic local-generation preflights and two bounded six-case grounded comparisons are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met the accepted grounded-answer usefulness criterion. The 21-case grounded-response control layer and 200-case deterministic session/lifecycle control checkpoint are registered; related-resource evaluation, natural-language follow-up quality, live integration/fallback, and the final AI recommendation remain pending.
 
 ---
 
@@ -363,7 +363,7 @@ Deferred boundaries:
 
 ### Gate 5 — AI feasibility decision
 
-Current evidence: the bounded synthetic Qwen3 4B preflight failed, while the comparable Llama 3.2 3B preflight passed. This permits grounded evaluation only and does not select a final candidate.
+Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. No final candidate or architecture is selected.
 
 Pass when:
 
@@ -405,35 +405,32 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The immediate next AI checkpoint is a **generation-candidate preflight**, not application integration.
+The immediate next isolated AI-quality checkpoint is **related-resource evaluation**, not application integration.
 
-### 7.1 Generation preflight
+### 7.1 Completed bounded generation evidence
 
-- Select one small local candidate through an explicit test-run registration.
-- Verify exact runtime, model tag, digest, size, license/terms reference, and local-only API route.
-- Begin with a 4,096-token context.
-- Record model load time, first-response time, warm-response time, generated token count/rate where available, CPU/GPU split, RAM observations, failures, and output size.
-- Use synthetic non-corpus inputs first.
-- Check strict instruction following, evidence-only behavior, citation-format compliance, insufficiency behavior, and prohibited-request refusal.
-- Do not silently download a second model or promote a smoke pass to final suitability.
+- Synthetic preflights and fixed six-case grounded comparisons are registered for the tested local candidates.
+- Neither grounded candidate met the accepted usefulness criterion; neither is selected as an interactive solution or reliable fallback.
+- No rerun should be used to hide or repair the recorded quality findings.
 
-### 7.2 Grounded inquiry evaluation
+### 7.2 Completed deterministic controls
 
-- Use a predeclared subset of accepted supported, partially supported, unsupported, and prohibited questions.
-- Retrieve evidence using the preserved retrieval candidate.
-- Send only the bounded evidence package and necessary instruction prompt.
-- Record every generated claim, supporting source, citation, locator, unsupported claim, omission, refusal, latency component, and failure.
-- Require manual usefulness and grounding review.
+- The 21-case grounded-response control layer passed its fixed policy, evidence, revalidation, fallback, non-authority, and logging cases.
+- The 200-case session/lifecycle checkpoint passed same-session continuity, missing/cross-session isolation, five clearing triggers, eleven supplied lifecycle/access change classes, final revalidation, and metadata fallback.
+- These tests did not prove natural-language follow-up quality or live PHP/database integration.
 
-### 7.3 Lifecycle and fallback evaluation
+### 7.3 Related-resource evaluation — next
 
-- Confirm that Hidden, Restricted, Removed, Replaced, stale-source, missing-file, and unavailable-AI states cannot leak or block core workflows.
-- Confirm that metadata search and controlled resource access still work with AI disabled.
+- Use a predeclared set of accepted starting resources and expected related resources.
+- Reuse the accepted corpus, metadata, corrected chunks, and saved vectors without changing retrieval evidence.
+- Measure useful related-resource coverage, misleading/unrelated suggestions, resource diversity, metadata fallback, eligibility exclusion, and latency.
+- Do not introduce learner profiles, behavioral personalization, engagement transfer, automatic duplicate decisions, or a schema change.
 
-### 7.4 Follow-up and related-resource evaluation
+### 7.4 Later integration-level lifecycle and fallback
 
-- Test session-scoped follow-up without permanent cross-session memory.
-- Test a small related-resource result set using current eligibility checks.
+- Confirm against live PHP/database state that Hidden, Restricted, Removed, Replaced, stale-source, missing-file, and unavailable-AI states cannot leak or block core workflows.
+- Test natural-language follow-up interpretation with the eventual bounded generation direction.
+- Confirm metadata search and controlled resource access still work with AI disabled.
 
 ### 7.5 Final recommendation
 
