@@ -83,7 +83,18 @@ This establishes the tested supplied-state control behavior only. No language mo
 
 ### 2.10 Related-Resource Suggestions
 
-Not yet executed.
+`TR-REL-CENTROID-COSINE-001` completed five accepted positive related-resource cases using normalized whole-resource centroids derived from the existing 102 saved `all-minilm` chunk vectors. It made zero new embedding, model, or provider requests.
+
+- Expected related resource in the top five: 4/5 (80%), meeting the accepted 80% minimum exactly.
+- Human-reviewed top-three usefulness: 11/15 (73.33%), meeting the accepted 70% minimum by one suggestion.
+- Top-three judgments: 6 clearly related, 5 meaningfully related, 1 weakly related, and 3 unrelated.
+- Predeclared misleading fixtures in the top three: 0.
+- Distinct saved suggestions: 16 resources across 25 ranking rows; every case returned five distinct resources and excluded the starting resource.
+- Deterministic ineligibility revalidation: 30/30 passed.
+- Test-only metadata-cluster fallback: 5/5 diagnostics preserved eligibility.
+- Ranking-only latency across the five cases: 1.0921 ms minimum, 1.5985 ms median, and 4.7467 ms maximum. These timings exclude vector loading and live application/database work.
+
+The scored positive-case scope passed, but the result is not a final acceptance of the configuration. Four top-three suggestions were not useful enough, the usefulness pass has little margin, and the accepted register contains no intentionally empty useful-related-resource case. The no-forced-weak-suggestion criterion therefore remains unscored, not passed. Live database eligibility checks, lifecycle cleanup, UI behavior, and application integration remain pending.
 
 ### 2.11 External Generation
 
@@ -133,6 +144,8 @@ Completed checkpoint guardrails passed for:
 - preservation of failed and passed synthetic-preflight evidence and all four quality-failed grounded-generation stages;
 - 21/21 deterministic control-layer cases with zero prohibited-answer leakage, stale or ineligible evidence use, unsupported answers, invalid authority side effects, false completion, or unsafe log exposure;
 - 200/200 deterministic session/lifecycle cases with 100% same-session continuity, context clearing, cross-session isolation, lifecycle exclusion, final revalidation, and metadata fallback under the supplied state transitions;
+- five accepted related-resource cases with 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness;
+- 30/30 deterministic related-resource eligibility revalidations, five distinct non-self suggestions per case, and preservation of the unscored no-useful-relation limitation;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
