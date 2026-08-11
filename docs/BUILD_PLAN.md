@@ -41,7 +41,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
 - Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
 - Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
-- Two synthetic local-generation preflights and two bounded six-case grounded comparisons are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met the accepted grounded-answer usefulness criterion. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, and five-case related-resource evaluation are registered; natural-language follow-up quality, live integration/fallback, and the final AI recommendation remain pending.
+- Two synthetic local-generation preflights and two bounded six-case grounded comparisons are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met the accepted grounded-answer usefulness criterion. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, five-case related-resource evaluation, and one-case safe no-result related-resource boundary control are registered; natural-language follow-up quality, live integration/fallback, and the final AI recommendation remain pending.
 
 ---
 
@@ -363,7 +363,7 @@ Deferred boundaries:
 
 ### Gate 5 — AI feasibility decision
 
-Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. The bounded related-resource configuration met its two scored positive-case thresholds but retained an unscored no-useful-relation boundary. No final candidate or architecture is selected.
+Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. The bounded positive-case related-resource configuration met its two scored thresholds. A separate metadata-guarded configuration passed one predeclared synthetic safe no-result boundary case without selecting a cosine threshold. No final candidate or architecture is selected.
 
 Pass when:
 
@@ -405,7 +405,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource and isolated end-user source-attribution presentation evaluations are complete and registered. The next isolated AI-quality work is natural-language follow-up quality and the no-useful-related-resource boundary, followed by live integration-level lifecycle and fallback checks; this does not authorize AI application integration yet.
+The related-resource positive-case evaluation, one-case safe no-result boundary control, and isolated end-user source-attribution presentation evaluation are complete and registered. The next isolated AI-quality work is natural-language follow-up quality, followed by live integration-level lifecycle and fallback checks; this does not authorize AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 
@@ -425,10 +425,18 @@ The related-resource and isolated end-user source-attribution presentation evalu
 - Expected related-resource top-five coverage was 4/5 (80%), meeting the accepted 80% minimum exactly.
 - Manual review found 11/15 (73.33%) top-three suggestions clearly or meaningfully related, meeting the accepted 70% minimum by one suggestion.
 - Deterministic eligibility revalidation passed 30/30 cases, test-only metadata fallback passed 5/5 diagnostics, and every case returned five distinct non-self resources.
-- One suggestion was weakly related and three were unrelated. The accepted query set contains no intentionally empty useful-related-resource case, so the no-forced-weak-suggestion criterion remains unscored rather than passed.
+- One suggestion was weakly related and three were unrelated. Within this positive-case run, the no-forced-weak-suggestion criterion remains unscored because the accepted query set contains no intentionally empty useful-related-resource case. A separate synthetic control is recorded below and does not erase these quality findings.
 - The checkpoint does not introduce learner profiles, behavioral personalization, engagement transfer, automatic duplicate decisions, a schema change, or application integration.
 
-### 7.4 Completed isolated source-attribution presentation
+### 7.4 Completed safe no-result related-resource boundary control
+
+- `REL-CENTROID-COSINE-METADATA-GUARDED-BOUNDARY-001` used one frozen synthetic Philippine Literature resource outside the accepted corpus and made three local embedding requests.
+- Raw centroid cosine ranking retained five cross-group neighbors for diagnosis. The predeclared eligibility-plus-academic-relation-group guard displayed zero suggestions and returned `No useful related resource is currently available.`
+- No cosine threshold was selected, and the accepted 30-fixture and 75-query registers were not changed.
+- This single control case does not validate live subject/topic/tag mappings, repair the four weak or unrelated positive-case findings, select a final configuration, or authorize application integration.
+- Positive-case regression is required before this guard can be combined with application behavior.
+
+### 7.5 Completed isolated source-attribution presentation
 
 - `ATTR-END-USER-PRESENTATION-001` passed 10/10 fixed presentation-contract cases.
 - Six displayed source references reconciled to accepted identities, versions, titles, chunks, and locator evidence.
@@ -438,7 +446,7 @@ The related-resource and isolated end-user source-attribution presentation evalu
 - Zero model/provider calls and zero retrieval reruns occurred.
 - The live application and final citation UI remain unselected and untested.
 
-### 7.5 Later integration-level lifecycle and fallback
+### 7.6 Later integration-level lifecycle and fallback
 
 - Confirm against live PHP/database state that Hidden, Restricted, Removed, Replaced, stale-source, missing-file, and unavailable-AI states cannot leak or block core workflows.
 - Test natural-language follow-up interpretation with the eventual bounded generation direction.

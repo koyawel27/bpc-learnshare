@@ -96,7 +96,20 @@ This establishes the tested supplied-state control behavior only. No language mo
 - Test-only metadata-cluster fallback: 5/5 diagnostics preserved eligibility.
 - Ranking-only latency across the five cases: 1.0921 ms minimum, 1.5985 ms median, and 4.7467 ms maximum. These timings exclude vector loading and live application/database work.
 
-The scored positive-case scope passed, but the result is not a final acceptance of the configuration. Four top-three suggestions were not useful enough, the usefulness pass has little margin, and the accepted register contains no intentionally empty useful-related-resource case. The no-forced-weak-suggestion criterion therefore remains unscored, not passed. Live database eligibility checks, lifecycle cleanup, UI behavior, and application integration remain pending.
+The scored positive-case scope passed, but the result is not a final acceptance of the configuration. Four top-three suggestions were not useful enough, the usefulness pass has little margin, and the accepted register contains no intentionally empty useful-related-resource case. The no-forced-weak-suggestion criterion therefore remains unscored within this positive-case run. The separate synthetic safe no-result control below does not alter these saved rankings or judgments. Live database eligibility checks, lifecycle cleanup, UI behavior, and application integration remain pending.
+
+### 2.10A Related-Resource Safe No-Result Boundary
+
+`TR-REL-NO-USEFUL-BOUNDARY-001` tested one frozen synthetic Philippine Literature resource outside the accepted 30-fixture corpus. It created three valid 384-dimensional local embeddings and reused the 102 accepted saved corpus vectors without re-embedding the corpus.
+
+- Raw semantic top-five neighbors retained for diagnosis: 5.
+- Candidates remaining after the predeclared eligibility-plus-academic-relation-group guard: 0.
+- Suggestions displayed: 0.
+- Safe message returned: `No useful related resource is currently available.`
+- Cosine threshold selected: none.
+- Ranking-only latency: 2.423 ms.
+
+The single boundary-control case passed, but it does not erase the four weak or unrelated findings from `REL-CENTROID-COSINE-001`, validate live subject/topic/tag mappings, select a final configuration, or authorize application integration. The synthetic fixture remains local payload evidence identified by `PLAN-REL-NO-USEFUL-001-v1`; it was not silently added to the accepted fixture or query registers. Positive-case regression is required before this guard can be considered for application behavior.
 
 ### 2.11 External Generation
 
@@ -147,7 +160,8 @@ Completed checkpoint guardrails passed for:
 - 21/21 deterministic control-layer cases with zero prohibited-answer leakage, stale or ineligible evidence use, unsupported answers, invalid authority side effects, false completion, or unsafe log exposure;
 - 200/200 deterministic session/lifecycle cases with 100% same-session continuity, context clearing, cross-session isolation, lifecycle exclusion, final revalidation, and metadata fallback under the supplied state transitions;
 - five accepted related-resource cases with 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness;
-- 30/30 deterministic related-resource eligibility revalidations, five distinct non-self suggestions per case, and preservation of the unscored no-useful-relation limitation;
+- 30/30 deterministic related-resource eligibility revalidations and five distinct non-self suggestions per positive case;
+- one separately versioned safe no-result boundary-control case with three valid local embeddings, five retained raw cross-group neighbors, zero displayed suggestions, a safe no-result message, and no selected cosine threshold;
 - 10/10 model-independent source-attribution presentation cases, six verified displayed source records, five fail-closed safe states, and desktop/mobile visual review without horizontal overflow;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
