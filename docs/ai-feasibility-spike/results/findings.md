@@ -81,7 +81,12 @@ Five unsupported-query score distributions were recorded, but their scores overl
 
 The deterministic model-independent checkpoint `TR-CTRL-SESSION-LIFECYCLE-001` tested all ten accepted follow-up mappings. Same-session parent continuity passed 10/10, missing-parent rejection passed 10/10, cross-session isolation passed 10/10, and all 50 logout, expiration, explicit-reset, session-end, and new-session clearing cases passed.
 
-This establishes the tested supplied-state control behavior only. No language model interpreted the follow-up text, and the production PHP session and live database were not used. Natural-language reference resolution and integrated session behavior therefore remain pending.
+The later registered natural-language comparison executed the same ten accepted follow-up mappings for each of two local models with the parent available only as active-session context, one eligible source chunk, zero retries, and zero retrieval reruns. All 20 requests returned HTTP 200 and valid structured responses.
+
+- `TR-FOLLOWUP-NL-LLAMA32-001`: 10/10 correct context interpretations, 8/10 grounded correct answers, and 8/10 responses useful as-is or after a light edit. It contradicted the supplied evidence once and produced one critical RBAC error that wrongly allowed a Student approval request. Median generation latency was 26.786 seconds.
+- `TR-FOLLOWUP-NL-QWEN35-001`: 8/10 correct context interpretations, 8/10 grounded correct answers, and 8/10 responses useful as-is or after a light edit. It produced zero unsupported substantive answers, but unnecessarily requested clarification for two clear supported turns. Median generation latency was 37.243 seconds, and one response took 117.683 seconds.
+
+Neither model met every-turn grounded correctness, the accepted context requirement, and the 15-second median interactive target together. Both runs are therefore registered as failed, and neither candidate is selected. This comparison tested model interpretation against supplied context only; the production PHP session and live database were not used, so integrated session behavior remains pending.
 
 ### 2.10 Related-Resource Suggestions
 
@@ -174,11 +179,12 @@ Completed checkpoint guardrails passed for:
 - Unsupported-query scores overlap supported-query scores; cosine similarity alone cannot safely decide whether the repository contains enough evidence.
 - Manual review changed interpretation of the automatic misleading flags but did not redefine that historical criterion.
 - The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, live control-layer integration, live application citation/link behavior, and most application-level lifecycle/fallback capabilities remain untested. The later isolated presentation checkpoint does not repair those model-quality limitations.
-- The session/lifecycle checkpoint supplied deterministic state changes and did not test language-model reference interpretation, the production PHP session, live database transitions, cleanup synchronization, or provider-side retention.
+- The session/lifecycle checkpoint supplied deterministic state changes and did not call a model. The later natural-language comparison tested model reference interpretation but still did not use the production PHP session, live database transitions, cleanup synchronization, or provider-side retention.
+- The natural-language comparison used ten fixed turns per model on one laptop with sequential requests. It does not establish concurrency, sustained-load behavior, live eligibility revalidation, or final local/external generation suitability.
 
 ## 5. Open Questions
 
-- Whether the registered deterministic grounded-response and session/lifecycle rules remain effective after live PHP/database integration, natural-language follow-up interpretation, and real request classification.
+- Whether the registered deterministic grounded-response, session/lifecycle, and natural-language follow-up rules remain effective after live PHP/database integration and real request classification.
 - Whether lifecycle, freshness, and live eligibility revalidation remain simple enough for the bounded PHP/MariaDB MVP.
 - Whether a hybrid metadata-semantic presentation should be tested for exact-title searches.
 - What temporary or persistent retrieval-data behavior is actually necessary.

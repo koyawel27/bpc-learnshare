@@ -41,7 +41,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
 - Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
 - Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
-- Two synthetic local-generation preflights and two bounded six-case grounded comparisons are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met the accepted grounded-answer usefulness criterion. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, five-case related-resource evaluation, and one-case safe no-result related-resource boundary control are registered; natural-language follow-up quality, live integration/fallback, and the final AI recommendation remain pending.
+- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, five-case related-resource evaluation, one-case safe no-result related-resource boundary control, and natural-language follow-up comparison are registered; live integration/fallback and the final AI recommendation remain pending.
 
 ---
 
@@ -405,7 +405,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource positive-case evaluation, one-case safe no-result boundary control, and isolated end-user source-attribution presentation evaluation are complete and registered. The next isolated AI-quality work is natural-language follow-up quality, followed by live integration-level lifecycle and fallback checks; this does not authorize AI application integration yet.
+The related-resource positive-case evaluation, one-case safe no-result boundary control, isolated end-user source-attribution presentation evaluation, and ten-case natural-language follow-up comparison are complete and registered. The next required work is positive-case regression for the metadata-guarded related-resource boundary and live integration-level lifecycle, attribution-link, and fallback checks; this does not authorize AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 
@@ -417,7 +417,7 @@ The related-resource positive-case evaluation, one-case safe no-result boundary 
 
 - The 21-case grounded-response control layer passed its fixed policy, evidence, revalidation, fallback, non-authority, and logging cases.
 - The 200-case session/lifecycle checkpoint passed same-session continuity, missing/cross-session isolation, five clearing triggers, eleven supplied lifecycle/access change classes, final revalidation, and metadata fallback.
-- These tests did not prove natural-language follow-up quality or live PHP/database integration.
+- These deterministic tests did not prove natural-language follow-up quality or live PHP/database integration. The separate natural-language comparison below tested model interpretation but did not use the production PHP session or live database.
 
 ### 7.3 Completed related-resource evaluation
 
@@ -446,13 +446,20 @@ The related-resource positive-case evaluation, one-case safe no-result boundary 
 - Zero model/provider calls and zero retrieval reruns occurred.
 - The live application and final citation UI remain unselected and untested.
 
-### 7.6 Later integration-level lifecycle and fallback
+### 7.6 Completed natural-language follow-up comparison
+
+- `TR-FOLLOWUP-NL-LLAMA32-001` and `TR-FOLLOWUP-NL-QWEN35-001` each executed the ten accepted follow-up mappings with one eligible source chunk, active-session parent context, zero retries, and zero retrieval reruns.
+- Llama interpreted 10/10 references but produced only 8/10 grounded correct answers, including one critical RBAC error that wrongly allowed a Student approval request.
+- Qwen produced 8/10 grounded correct answers with zero unsupported substantive answers, but reached only 8/10 context continuity because two clear supported turns were unnecessarily left unanswered.
+- Both candidates missed the 15-second median interactive target. Neither candidate passed the complete checkpoint or was selected for application integration.
+
+### 7.7 Later integration-level lifecycle and fallback
 
 - Confirm against live PHP/database state that Hidden, Restricted, Removed, Replaced, stale-source, missing-file, and unavailable-AI states cannot leak or block core workflows.
-- Test natural-language follow-up interpretation with the eventual bounded generation direction.
+- Verify the registered natural-language follow-up controls against the production PHP session and live database without weakening the preserved model-quality findings.
 - Confirm metadata search and controlled resource access still work with AI disabled.
 
-### 7.6 Final recommendation
+### 7.8 Final recommendation
 
 - Compare all accepted measurements with `ACCEPTED_CRITERIA.md`.
 - State which candidate/configuration is accepted, rejected, or requires further evidence.
