@@ -114,7 +114,21 @@ The scored positive-case scope passed, but the result is not a final acceptance 
 - Cosine threshold selected: none.
 - Ranking-only latency: 2.423 ms.
 
-The single boundary-control case passed, but it does not erase the four weak or unrelated findings from `REL-CENTROID-COSINE-001`, validate live subject/topic/tag mappings, select a final configuration, or authorize application integration. The synthetic fixture remains local payload evidence identified by `PLAN-REL-NO-USEFUL-001-v1`; it was not silently added to the accepted fixture or query registers. Positive-case regression is required before this guard can be considered for application behavior.
+The single boundary-control case passed, but it does not erase the four weak or unrelated findings from `REL-CENTROID-COSINE-001`, validate live subject/topic/tag mappings, select a final configuration, or authorize application integration. The synthetic fixture remains local payload evidence identified by `PLAN-REL-NO-USEFUL-001-v1`; it was not silently added to the accepted fixture or query registers.
+
+`TR-REL-METADATA-GUARDED-POSITIVE-REGRESSION-001` then applied the same guard to all five accepted positive cases using the existing 102 saved vectors and frozen A-E relation groups. It made zero new embedding, model, or provider requests.
+
+- Accepted raw expected-resource baseline reproduced: 4/5 (80%).
+- Guarded expected-resource display: 5/5 (100%).
+- Same-group eligible suggestions displayed: 20/20; cross-group displayed suggestions: 0.
+- False safe-no-result outcomes across positive cases: 0/5.
+- Human review completed: 15/15 gated top-three suggestions.
+- Reviewed usefulness: 8 clearly related, 7 meaningfully related, 0 weakly related, 0 unrelated, and 0 redundant.
+- Reviewed top-three usefulness: 15/15 (100%), exceeding the accepted 70% minimum.
+- Predeclared misleading fixtures in the guarded top three: 0.
+- Cosine threshold selected or changed: none.
+
+The positive regression passed its bounded criteria without rewriting the accepted unguarded rankings, expected evidence, or prior manual judgments. It shows that the frozen metadata guard can preserve useful same-group suggestions in the five tested positive cases while still supporting the isolated safe no-result outcome. It does not yet prove how live subject, topic, and tag values should be mapped, how current eligibility will be revalidated inside PHP/database requests, or which final related-resource design should be integrated.
 
 ### 2.11 External Generation
 
@@ -164,9 +178,10 @@ Completed checkpoint guardrails passed for:
 - preservation of failed and passed synthetic-preflight evidence and all four quality-failed grounded-generation stages;
 - 21/21 deterministic control-layer cases with zero prohibited-answer leakage, stale or ineligible evidence use, unsupported answers, invalid authority side effects, false completion, or unsafe log exposure;
 - 200/200 deterministic session/lifecycle cases with 100% same-session continuity, context clearing, cross-session isolation, lifecycle exclusion, final revalidation, and metadata fallback under the supplied state transitions;
-- five accepted related-resource cases with 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness;
+- five accepted unguarded related-resource cases with 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness;
 - 30/30 deterministic related-resource eligibility revalidations and five distinct non-self suggestions per positive case;
 - one separately versioned safe no-result boundary-control case with three valid local embeddings, five retained raw cross-group neighbors, zero displayed suggestions, a safe no-result message, and no selected cosine threshold;
+- one five-case metadata-guarded positive regression with 100% expected-resource display, 15/15 clearly or meaningfully related reviewed top-three suggestions, zero false no-result outcomes, and zero new model/provider requests;
 - 10/10 model-independent source-attribution presentation cases, six verified displayed source records, five fail-closed safe states, and desktop/mobile visual review without horizontal overflow;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.

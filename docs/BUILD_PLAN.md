@@ -41,7 +41,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
 - Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
 - Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
-- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, five-case related-resource evaluation, one-case safe no-result related-resource boundary control, and natural-language follow-up comparison are registered; live integration/fallback and the final AI recommendation remain pending.
+- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, five-case related-resource evaluation, one-case safe no-result related-resource boundary control, five-case metadata-guarded positive regression, and natural-language follow-up comparison are registered; live integration/fallback and the final AI recommendation remain pending.
 
 ---
 
@@ -363,7 +363,7 @@ Deferred boundaries:
 
 ### Gate 5 — AI feasibility decision
 
-Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. The bounded positive-case related-resource configuration met its two scored thresholds. A separate metadata-guarded configuration passed one predeclared synthetic safe no-result boundary case without selecting a cosine threshold. No final candidate or architecture is selected.
+Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. The bounded unguarded positive-case related-resource configuration met its two scored thresholds with limited usefulness margin. The metadata-guarded configuration then passed one predeclared synthetic safe no-result boundary case and a separate five-case positive regression at 100% expected-resource display and 100% reviewed top-three usefulness without selecting a cosine threshold. Live metadata mapping remains unvalidated, and no final candidate or architecture is selected.
 
 Pass when:
 
@@ -405,7 +405,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource positive-case evaluation, one-case safe no-result boundary control, isolated end-user source-attribution presentation evaluation, and ten-case natural-language follow-up comparison are complete and registered. The next required work is positive-case regression for the metadata-guarded related-resource boundary and live integration-level lifecycle, attribution-link, and fallback checks; this does not authorize AI application integration yet.
+The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, and ten-case natural-language follow-up comparison are complete and registered. The next required work is live integration-level relation-metadata mapping, lifecycle, attribution-link, and fallback checks; this does not authorize AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 
@@ -428,13 +428,14 @@ The related-resource positive-case evaluation, one-case safe no-result boundary 
 - One suggestion was weakly related and three were unrelated. Within this positive-case run, the no-forced-weak-suggestion criterion remains unscored because the accepted query set contains no intentionally empty useful-related-resource case. A separate synthetic control is recorded below and does not erase these quality findings.
 - The checkpoint does not introduce learner profiles, behavioral personalization, engagement transfer, automatic duplicate decisions, a schema change, or application integration.
 
-### 7.4 Completed safe no-result related-resource boundary control
+### 7.4 Completed metadata-guarded related-resource boundary and positive regression
 
 - `REL-CENTROID-COSINE-METADATA-GUARDED-BOUNDARY-001` used one frozen synthetic Philippine Literature resource outside the accepted corpus and made three local embedding requests.
 - Raw centroid cosine ranking retained five cross-group neighbors for diagnosis. The predeclared eligibility-plus-academic-relation-group guard displayed zero suggestions and returned `No useful related resource is currently available.`
 - No cosine threshold was selected, and the accepted 30-fixture and 75-query registers were not changed.
-- This single control case does not validate live subject/topic/tag mappings, repair the four weak or unrelated positive-case findings, select a final configuration, or authorize application integration.
-- Positive-case regression is required before this guard can be combined with application behavior.
+- `TR-REL-METADATA-GUARDED-POSITIVE-REGRESSION-001` then reused the frozen A-E relation groups, accepted 102 vectors, and zero new model/provider requests across all five positive cases.
+- The guard retained an expected resource in 5/5 cases, displayed 20/20 same-group eligible suggestions, returned no false safe-no-result outcome, and achieved 15/15 clearly or meaningfully related human-reviewed top-three suggestions.
+- The regression does not rewrite the earlier unguarded rankings or judgments. It remains bounded to frozen spike groups and does not validate live subject/topic/tag mapping, select a final configuration, or authorize application integration.
 
 ### 7.5 Completed isolated source-attribution presentation
 
