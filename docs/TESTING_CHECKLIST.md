@@ -223,12 +223,12 @@ These checks extend the accepted feasibility package. Raw detailed evidence rema
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| AI-LIFE-001 | P0 | Change Approved source to Hidden | Excluded from new public retrieval/inquiry | Not run |
-| AI-LIFE-002 | P0 | Change source to Restricted/Removed/Replaced | Derived data follows exact lifecycle and access rules | Not run |
-| AI-LIFE-003 | P0 | Change source version/file hash | Old derived data is stale and cannot be used as current | Not run |
-| AI-LIFE-004 | P0 | Make file unavailable while resource row remains | File and dependent AI behavior fail closed | Not run |
-| AI-FALL-001 | P0 | Stop/unreach Ollama during an AI action | AI feature reports unavailability; core workflow continues | Not run |
-| AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Not run |
+| AI-LIFE-001 | P0 | Change Approved source to Hidden | Excluded from new public retrieval/inquiry | Passed at live Gate 5B control seam — 2026-08-13; HTTP inquiry route remains unbuilt |
+| AI-LIFE-002 | P0 | Change source to Restricted/Removed/Replaced | Derived data follows exact lifecycle and access rules | Partial — live Gate 5B evidence eligibility passed; persistent derived-data cleanup remains unimplemented |
+| AI-LIFE-003 | P0 | Change source version/file hash | Old derived data is stale and cannot be used as current | Passed at live Gate 5B control seam — 2026-08-13 |
+| AI-LIFE-004 | P0 | Make file unavailable while resource row remains | File and dependent AI behavior fail closed | Passed at live Gate 5B control seam — 2026-08-13 |
+| AI-FALL-001 | P0 | Stop/unreach Ollama during an AI action | AI feature reports unavailability; core workflow continues | Partial — unavailable-provider contract passed; real Ollama interruption not run |
+| AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Partial — live metadata search and protected-download lookup passed; upload/moderation HTTP regression remains |
 | AI-FOLL-001 | P1 | Ask context-dependent follow-up in active session | Uses bounded session context and repository evidence | Not run |
 | AI-FOLL-002 | P1 | Start new session and refer to old conversation | No unauthorized permanent memory | Not run |
 | AI-REL-001 | P1 | Request related resources | Small relevant Approved-only set with live filters | Not run |
@@ -246,6 +246,12 @@ These checks exercise the reusable PHP control seam with a deterministic fake pr
 | AI-CTRL-004 | P0 | Present a verified source and optional trusted locator | Link uses `/resources/{id}`; protected filename is omitted; unreliable locator is omitted | Passed — 2026-08-13 |
 | AI-CTRL-005 | P0 | Begin, clear, authenticate, log out, and expire a CLI inquiry session | Context remains session-only, contains no question text, and clears at every tested boundary | Passed — 2026-08-13 |
 | AI-CTRL-006 | P0 | Read current live account/resource/file/fingerprint and run metadata discovery | Current eligible source passes, wrong fingerprint fails, metadata discovery still works, AI tables/settings remain unchanged | Passed — 2026-08-13 |
+
+#### Gate 5B live lifecycle and fallback verification
+
+`tests/ai/run_gate5b_live_lifecycle.php` passed 19/19 checks against live MariaDB state on 2026-08-13. All temporary mutations used one transaction that was rolled back. The selected resource, account, AI setting state, AI-output count, audit-log count, and protected-file SHA-256 were unchanged afterward. No real model/provider request, retrieval rerun, embedding rerun, schema change, route, or UI was introduced.
+
+The checks covered baseline eligibility; Hidden, Restricted, Removed, and Replaced status exclusion; deleted and invalidated file states; changed source reference; missing protected file; file-size drift; disabled requester; missing/enabled/disabled `ai_enabled`; disabled and unavailable AI fallback; a source becoming Hidden between initial and final revalidation; Hidden-resource exclusion from metadata search/download lookup; and continued metadata search/download lookup while AI was disabled.
 
 ### 11.4 Final AI recommendation
 
