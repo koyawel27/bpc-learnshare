@@ -396,6 +396,6 @@ echo 'External evidence transmission authorized: No' . PHP_EOL;
 echo 'Payload-manifest rows created: 0' . PHP_EOL;
 echo 'Register/schema/database changes: 0' . PHP_EOL;
 echo 'Model/provider selected for final architecture: No' . PHP_EOL;
-echo 'Next permitted action: review this offline result, configure a '
-    . 'project-specific key and ZDR, then separately approve one synthetic '
-    . 'connectivity probe.' . PHP_EOL;
+echo 'This offline result never authorizes a provider request or rerun. '
+    . 'Every live payload requires separate review and explicit approval.'
+    . PHP_EOL;

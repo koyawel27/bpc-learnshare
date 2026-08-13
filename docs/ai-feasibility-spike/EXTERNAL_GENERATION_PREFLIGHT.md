@@ -1,12 +1,13 @@
 # External Generation Candidate Preflight
 
-**Status:** Candidate research and offline validation only
+**Status:** Synthetic connectivity validated; grounded evaluation not authorized
 **Reviewed:** 2026-08-13
 **Candidate ID reserved only for later review:** `GEN-GROQ-GPT-OSS-120B-001`
 
 This checkpoint does not register, select, or integrate an external provider or
-model. It identifies one bounded candidate for a later synthetic connectivity
-probe and, only after separate approval, a small grounded evaluation.
+model. It identifies one bounded candidate, records one approved synthetic
+connectivity probe, and leaves any small grounded evaluation subject to a
+separate reviewed payload and approval.
 
 ## Candidate
 
@@ -95,9 +96,36 @@ register, ignored credential location, and absence of a plaintext key in the
 tracked preflight files. It makes no network request and reads no fixture,
 query, expected-evidence, chunk, vector, or generated-answer content.
 
-The later connectivity probe is not included in this checkpoint. It requires a
-Groq account, a project-specific API key, verified ZDR, another current policy
-and model-availability check, and explicit user approval.
+## Synthetic connectivity result
+
+On 2026-08-13, the user manually confirmed project-level Inference API Zero
+Data Retention, restricted the project to `openai/gpt-oss-120b`, and configured
+conservative limits of 5 requests per minute, 25 requests per day, 8,000 tokens
+per minute, and 50,000 tokens per day. A project-specific key was stored only
+in the ignored local `.env` file.
+
+After explicit approval, `tests/ai/run_gate5d_external_connectivity.php` made
+exactly one request containing only the accepted project-independent probe:
+
+> Return the status value runtime_ready. Do not include any repository or
+> project content.
+
+The provider returned HTTP 200 in 1,668.951 ms. The strict JSON response
+matched the required `runtime_ready` / `EXTERNAL_RUNTIME_READY` contract. The
+request used 158 prompt tokens, 59 completion tokens, and 217 total tokens.
+There were zero retries. No fixture, query, expected-evidence, chunk, vector,
+account, filename, or database content was read or transmitted. The checker
+persisted neither the provider response nor the key.
+
+This proves only credential, endpoint, model-family, latency, and structured-
+response connectivity for one harmless probe. It does not prove grounded
+academic quality, refusal behavior, citation correctness, reliability under
+quota or interruption, final cost, provider suitability, or application
+integration readiness. The candidate remains unregistered and unselected.
+
+Any grounded external comparison still requires a reviewed payload-manifest
+row, exact selected synthetic evidence, a declared request/token/cost ceiling,
+and separate explicit approval before transmission.
 
 ## Official sources reviewed
 

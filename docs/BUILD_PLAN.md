@@ -419,13 +419,15 @@ This checkpoint selects no cosine threshold, semantic model, final relation rule
 
 #### Gate 5D — External-generation candidate research and offline validation
 
-Status: **GroqCloud `openai/gpt-oss-120b` candidate reviewed; offline validation passed; no provider request or evidence transmission performed.**
+Status: **GroqCloud `openai/gpt-oss-120b` candidate reviewed; offline validation and one synthetic connectivity probe passed; no BPC evidence was transmitted and no candidate was selected.**
 
 `docs/ai-feasibility-spike/EXTERNAL_GENERATION_PREFLIGHT.md` records the 2026-08-13 provider, model, price, quota, data-retention, Zero Data Retention, deprecation, credential, and payload-boundary review. The candidate was chosen for a future probe because it is currently production-listed, available under the reviewed Free-plan limits, supports strict Structured Outputs, and is the documented replacement for the soon-to-be-retired `llama-3.3-70b-versatile` endpoint. These time-sensitive observations must be rechecked before every live checkpoint.
 
 `tests/ai/run_gate5d_external_candidate_validate.php --mode=validate` passed 151 offline guards. It verified all 30 fixture metadata rows, the 25 selected-test-approval-only readable fixtures, the five external-transmission-prohibited boundary fixtures, the empty accepted payload-manifest register, the ignored `.env` credential location, the strict synthetic request contract, and the absence of a Groq key-shaped value in the tracked preflight files. It read no fixture/query/evidence/chunk/vector content, made zero network requests, created zero payload-manifest rows, changed no register/schema/database state, and authorized no external evidence transmission.
 
-The next permitted Gate 5D action is not a grounded evaluation. It is a separately approved one-request connectivity probe containing only a harmless project-independent sentence, after the user creates a project-specific Groq key and verifies Zero Data Retention. A second approval and reviewed payload manifest are required before any selected synthetic BPC evidence may be transmitted.
+After the user manually confirmed project-level Inference API Zero Data Retention, a one-model allowlist, conservative project limits, and an ignored project-specific key, `tests/ai/run_gate5d_external_connectivity.php --mode=apply --approve=EXTERNAL_RUNTIME_PROBE_ONLY` passed one explicitly approved live probe. Groq returned HTTP 200 with the exact strict JSON contract in 1,668.951 ms using 158 prompt, 59 completion, and 217 total tokens. The checker made one request, retried zero times, sent no BPC content, and persisted neither the response nor the key.
+
+The next permitted Gate 5D action is not application integration or candidate selection. First decide whether a bounded external grounded comparison is justified. A second approval, reviewed payload-manifest row, exact selected synthetic evidence, and declared request/token/cost ceiling are required before any BPC evidence may be transmitted.
 
 ### Gate 6 — Bounded AI prototype integration
 
@@ -458,7 +460,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, ten-case natural-language follow-up comparison, Gate 5B lifecycle/fallback validation, Gate 5C live relation-metadata/link validation, and Gate 5D external-candidate offline validation are complete. The next required work is the separately approved synthetic connectivity probe, followed by a decision on whether a bounded external grounded comparison is justified. Final evidence reconciliation must preserve the remaining application-fallback, production-session, processing-readiness, derived-data-cleanup, and generation limitations. This does not authorize BPC evidence transmission or AI application integration yet.
+The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, ten-case natural-language follow-up comparison, Gate 5B lifecycle/fallback validation, Gate 5C live relation-metadata/link validation, and Gate 5D external-candidate offline and synthetic-connectivity checks are complete. The next required work is a decision on whether a bounded external grounded comparison is justified. Final evidence reconciliation must preserve the remaining application-fallback, production-session, processing-readiness, derived-data-cleanup, and generation limitations. This does not authorize BPC evidence transmission or AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 
