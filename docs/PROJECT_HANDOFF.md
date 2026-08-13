@@ -870,25 +870,12 @@ Completed checkpoints:
 
 Current next checkpoint:
 
-4. **Perform the clean-hardware and runtime baseline.**
+4. **Continue Gate 5 live safety and feasibility validation.**
 
-   * Restart Windows.
-   * Close unnecessary heavy applications.
-   * Run:
-
-```text
-llmfit system
-```
-
-* Run:
-
-```text
-nvidia-smi
-```
-
-* Record the clean baseline exactly.
-* Do not treat the previous high-load scan as the final benchmark.
-* Do not begin model/provider selection during this checkpoint.
+   * Gates 0–4 provide the working non-AI authentication, upload, moderation, Approved-only discovery, resource-detail, and controlled-download vertical slice.
+   * The unrouted Gate 5A model-independent safety foundation is implemented under `src/ai/` and passed 18/18 deterministic CLI checks using a fake provider plus SELECT-only live database observations.
+   * The Gate 5A result proves its bounded control seam only. It adds no AI route/UI, calls no model/provider, writes no database state, changes no schema, and selects no model or architecture.
+   * Next, validate controlled live lifecycle transitions and complete the missing final-feasibility evidence before deciding whether Gate 6 integration is justified.
 
 Remaining order:
 
@@ -896,7 +883,8 @@ Remaining order:
 
    * Completed checkpoints cover extraction success/failure, source-location fidelity, corrected segmentation, complete local embedding, PHP cosine correctness/timing, standalone retrieval relevance/latency, targeted manual relevance review, bounded local grounded-generation comparison, deterministic grounded-response controls, deterministic session/lifecycle controls, bounded related-resource evaluation, metadata-guarded safe no-result and positive regression, isolated end-user source-attribution presentation, and natural-language follow-up comparison.
    * Continue using the accepted representative corpus, query set, versioned evaluator ground truth, and evidence-recording rules.
-   * Remaining checkpoints include real request classification, live application session, live relation-metadata and attribution-link validation, stale-source/lifecycle exclusion, complete application fallback, any justified external-generation comparison, generation dependencies, maintainability, and any missing resource observations.
+   * The Gate 5A candidate foundation now covers default-off configuration, active-account and Approved/available source checks, exact source-file reference and protected-file checks, second-point revalidation, protected `/resources/{id}` attribution links, bounded session-only identifiers, and metadata-search fallback in deterministic tests.
+   * Remaining checkpoints include controlled live Hidden/Restricted/Removed/Replaced and stale/missing-file transitions, processing-readiness and retrieval integration design, real request classification, complete application fallback, any justified external-generation comparison, generation dependencies, maintainability, and any missing resource observations.
 
 6. **Evaluate and accept the complete measured findings.**
 
@@ -1077,7 +1065,7 @@ Read the latest source files first:
 Current verified state:
 
 - AI_FEASIBILITY_SPIKE.md Sections 1–26 are complete and accepted.
-- The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, audited versioned ground-truth evaluation, two bounded local grounded-generation comparisons, the registered 21-case grounded-response control layer, the registered 200-case deterministic session/lifecycle control checkpoint, the registered five-case related-resource evaluation, the registered one-case safe no-result related-resource boundary control, the registered five-case metadata-guarded positive regression, the registered ten-case isolated source-attribution presentation checkpoint, and the registered ten-case natural-language follow-up comparison for Llama 3.2 3B and Qwen3.5 4B.
+- The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, audited versioned ground-truth evaluation, two bounded local grounded-generation comparisons, the registered 21-case grounded-response control layer, the registered 200-case deterministic session/lifecycle control checkpoint, the registered five-case related-resource evaluation, the registered one-case safe no-result related-resource boundary control, the registered five-case metadata-guarded positive regression, the registered ten-case isolated source-attribution presentation checkpoint, and the registered ten-case natural-language follow-up comparison for Llama 3.2 3B and Qwen3.5 4B. An unrouted model-independent Gate 5A PHP safety-foundation candidate also passed 18/18 deterministic checks on 2026-08-13 with zero model/provider requests and zero database writes.
 - The bounded retrieval candidate achieved 100% resource top-five, 96% corrected passage top-five, practical isolated latency, 100% metadata fallback, and 100% explicit-filter correctness under the tested corpus.
 - The automatic predeclared-misleading criterion remains not met at 25%; manual review provides separate interpretation and does not erase that historical result.
 - Two synthetic local-generation preflights and two fixed six-case grounded comparisons are recorded. Llama 3.2 3B and Qwen3.5 4B each reached only 50% usefulness against the accepted 80% requirement; neither is selected as the interactive local solution or a reliable fallback. The later natural-language follow-up comparison completed ten cases per model: Llama interpreted 10/10 references but produced only 8/10 grounded correct answers, including one critical RBAC error, while Qwen produced 8/10 grounded correct answers and 8/10 correct context interpretations with two unnecessary clarification outcomes. Both missed the 15-second median target, so both follow-up runs are registered as failed and neither candidate is selected. The grounded-response control layer passed 21/21 cases, the deterministic session/lifecycle checkpoint passed 200/200 cases, the unguarded related-resource configuration met its two scored positive-case thresholds at 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness, and the metadata-guarded configuration passed one predeclared synthetic safe no-result boundary case plus a five-case positive regression at 100% expected-resource display and 100% reviewed top-three usefulness without selecting a cosine threshold. The isolated source-attribution presentation checkpoint passed 10/10 cases. Live application session, relation-metadata, attribution-link and lifecycle/fallback behavior, and final recommendation evidence remain pending.

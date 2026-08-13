@@ -234,6 +234,19 @@ These checks extend the accepted feasibility package. Raw detailed evidence rema
 | AI-REL-001 | P1 | Request related resources | Small relevant Approved-only set with live filters | Not run |
 | AI-REL-002 | P1 | Make a related resource ineligible | It disappears from new suggestions | Not run |
 
+#### Gate 5A model-independent foundation verification
+
+These checks exercise the reusable PHP control seam with a deterministic fake provider and SELECT-only live database observations. They do not mark the lifecycle-transition, real-provider, HTTP-route, or integrated UI tests above and below as passed.
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-CTRL-001 | P0 | Read absent `ai_enabled` setting | AI fails closed as disabled | Passed — 2026-08-13 |
+| AI-CTRL-002 | P0 | Force disabled, unavailable, throwing, and invalid fake-provider outcomes | No answer/source leakage; metadata-search fallback remains available | Passed — 2026-08-13 |
+| AI-CTRL-003 | P0 | Require request-scoped evidence and revalidate its source before and after deterministic generation | Missing evidence or an ineligible, changed, unknown, or stale reference returns no answer or source | Passed — 2026-08-13 |
+| AI-CTRL-004 | P0 | Present a verified source and optional trusted locator | Link uses `/resources/{id}`; protected filename is omitted; unreliable locator is omitted | Passed — 2026-08-13 |
+| AI-CTRL-005 | P0 | Begin, clear, authenticate, log out, and expire a CLI inquiry session | Context remains session-only, contains no question text, and clears at every tested boundary | Passed — 2026-08-13 |
+| AI-CTRL-006 | P0 | Read current live account/resource/file/fingerprint and run metadata discovery | Current eligible source passes, wrong fingerprint fails, metadata discovery still works, AI tables/settings remain unchanged | Passed — 2026-08-13 |
+
 ### 11.4 Final AI recommendation
 
 | ID | Priority | Test | Expected result | Status |
@@ -332,4 +345,3 @@ Stop adding features and enter presentation freeze when:
 - a proposed addition would risk authentication, authorization, upload safety, moderation, file protection, Approved-only visibility, or honest AI behavior.
 
 A smaller tested prototype is preferred over a larger unreliable one.
-

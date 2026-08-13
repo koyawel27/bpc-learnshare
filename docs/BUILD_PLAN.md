@@ -3,7 +3,7 @@
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Planning horizon:** Two-week prototype and presentation checkpoint
 **Status:** Active implementation plan
-**Last updated:** 2026-08-01
+**Last updated:** 2026-08-13
 **Scope authority:** This plan sequences accepted requirements. It does not replace `PROJECT_BRIEF.md`, `DECISIONS.md`, `USER_ROLES.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `SECURITY_NOTES.md`, `DATA_PRIVACY.md`, or `AI_FEASIBILITY_SPIKE.md`.
 
 ---
@@ -38,10 +38,10 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 ### 2.2 Current implementation reality
 
-- Gates 0 and 1 now have a working native-PHP foundation, database connectivity, Student registration, login/logout, session protection, CSRF handling, live account rechecks, and a non-public first-Admin bootstrap.
-- Gate 2 now has a server-rendered Student/Teacher upload form, controlled prototype taxonomy, guarded file validation, protected randomized storage, and transactional `Pending` resource creation.
-- Moderation, Approved-only discovery, controlled file serving, and the remaining core workflows are still pending.
-- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. The 21-case grounded-response control layer, 200-case deterministic session/lifecycle control checkpoint, five-case related-resource evaluation, one-case safe no-result related-resource boundary control, five-case metadata-guarded positive regression, and natural-language follow-up comparison are registered; live integration/fallback and the final AI recommendation remain pending.
+- Gates 0–4 now have a working native-PHP core covering database connectivity, account registration and authentication, protected sessions and CSRF, non-public first-Admin bootstrap, guarded Student/Teacher upload, transactional `Pending` creation, staff moderation, Approved-only metadata discovery, resource details, and controlled protected downloads.
+- Gate 5A now has an unrouted, model-independent PHP safety-foundation candidate covering default-off AI configuration, active-account and Approved/available source revalidation, source-fingerprint and protected-file checks, second-point revalidation, protected citation-link shaping, bounded session-only context, and metadata-search fallback. Its deterministic CLI verification passed 18/18 checks with zero real model/provider requests and zero database writes.
+- The Gate 5A classes are not a user-facing AI feature and do not prove processing readiness, retrieval integration, request classification, grounded-answer quality, or complete lifecycle behavior.
+- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. Live transition testing, complete fallback, the final feasibility recommendation, and any later architecture decision remain pending.
 
 ---
 
@@ -374,6 +374,25 @@ Pass when:
 - a final spike recommendation records measured strengths, failures, constraints, and unresolved risks;
 - any proposed schema or architecture change is reviewed separately before implementation.
 
+#### Gate 5A — Model-independent live safety foundation
+
+Status: **Implemented as an unrouted candidate foundation; deterministic verification passed.**
+
+The bounded foundation under `src/ai/` now provides:
+
+- fail-closed `system_settings.ai_enabled` handling, where a missing or non-`enabled` value keeps AI off;
+- replaceable feature, source-eligibility, and answer-provider interfaces without selecting a provider or model;
+- a requirement for non-blank, bounded, valid UTF-8 request-scoped repository evidence before any provider can be invoked;
+- live checks for an Active requester, current `Approved` status, `file_availability = 'available'`, exact source-file reference, protected stored-file location, and recorded file size;
+- revalidation before a provider could receive evidence and again before an answer or source link could be returned;
+- source presentation through `/resources/{id}` only, with locators accepted only from separately trusted extraction evidence and omitted otherwise;
+- session-only inquiry identifiers and source references, with no stored question text and clearing on authentication, logout, idle expiration, explicit clear, or a new inquiry context;
+- safe feature-specific fallback to ordinary Approved-resource metadata search.
+
+`tests/ai/run_gate5a_control.php` passed 18/18 deterministic checks against a fake provider and SELECT-only live database observations. It made zero real AI/model requests, zero database writes, and no schema change.
+
+This checkpoint does **not** add an inquiry route or UI, choose a provider/model, connect extraction or retrieval, prove request classification or generated-answer quality, approve a citation UI, or authorize Gate 6. The current schema still has no approved processing-readiness, chunk, embedding, or retrieval-index representation. Those boundaries remain subject to the final Gate 5 recommendation and a later explicit architecture/schema decision.
+
 ### Gate 6 — Bounded AI prototype integration
 
 Pass only if Gate 5 approves a candidate direction.
@@ -456,6 +475,7 @@ The related-resource positive-case evaluation, one-case safe no-result boundary 
 
 ### 7.7 Later integration-level lifecycle and fallback
 
+- Reuse the Gate 5A foundation as a candidate control seam; do not route it to users or attach a real provider until Gate 5 records an accepted direction.
 - Confirm against live PHP/database state that Hidden, Restricted, Removed, Replaced, stale-source, missing-file, and unavailable-AI states cannot leak or block core workflows.
 - Verify the registered natural-language follow-up controls against the production PHP session and live database without weakening the preserved model-quality findings.
 - Confirm metadata search and controlled resource access still work with AI disabled.
