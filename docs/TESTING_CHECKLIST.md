@@ -231,8 +231,8 @@ These checks extend the accepted feasibility package. Raw detailed evidence rema
 | AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Partial — live metadata search and protected-download lookup passed; upload/moderation HTTP regression remains |
 | AI-FOLL-001 | P1 | Ask context-dependent follow-up in active session | Uses bounded session context and repository evidence | Not run |
 | AI-FOLL-002 | P1 | Start new session and refer to old conversation | No unauthorized permanent memory | Not run |
-| AI-REL-001 | P1 | Request related resources | Small relevant Approved-only set with live filters | Not run |
-| AI-REL-002 | P1 | Make a related resource ineligible | It disappears from new suggestions | Not run |
+| AI-REL-001 | P1 | Request related resources | Small relevant Approved-only set with live filters | Passed at unrouted live Gate 5C metadata-fallback seam — 2026-08-13; route/UI and semantic integration remain unbuilt |
+| AI-REL-002 | P1 | Make a related resource ineligible | It disappears from new suggestions | Passed with rollback for Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, and disabled-requester cases — 2026-08-13 |
 
 #### Gate 5A model-independent foundation verification
 
@@ -252,6 +252,14 @@ These checks exercise the reusable PHP control seam with a deterministic fake pr
 `tests/ai/run_gate5b_live_lifecycle.php` passed 19/19 checks against live MariaDB state on 2026-08-13. All temporary mutations used one transaction that was rolled back. The selected resource, account, AI setting state, AI-output count, audit-log count, and protected-file SHA-256 were unchanged afterward. No real model/provider request, retrieval rerun, embedding rerun, schema change, route, or UI was introduced.
 
 The checks covered baseline eligibility; Hidden, Restricted, Removed, and Replaced status exclusion; deleted and invalidated file states; changed source reference; missing protected file; file-size drift; disabled requester; missing/enabled/disabled `ai_enabled`; disabled and unavailable AI fallback; a source becoming Hidden between initial and final revalidation; Hidden-resource exclusion from metadata search/download lookup; and continued metadata search/download lookup while AI was disabled.
+
+#### Gate 5C live related-resource verification
+
+`tests/ai/run_gate5c_live_related_resources.php` passed 18/18 checks against four clearly labelled project-created synthetic resources uploaded and Approved through the normal application workflow. Two Security resources and two Usability resources share the same subject but retain distinct topics and exact content-justified tags. The bounded shared-active-tag metadata fallback returned the expected peer within the top five for 4/4 targets and achieved 4/4 reviewed useful top-three results. It excluded self-results and same-subject cross-topic resources, returned safe no-result output where no active shared tag existed, omitted protected stored filenames, and produced `/resources/{id}` links that resolved through Approved-only detail lookup.
+
+Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, disabled-requester, and stale-link cases failed closed. All state-changing checks were rolled back; resource/account/tag rows, AI-output and audit counts, and protected-file hashes were unchanged after the accepted run. The first harness attempt exposed that resource-detail lookup increments `view_count`; the four increments and timestamps were restored exactly before the lookup was moved inside the rollback transaction and the accepted run was repeated.
+
+Gate 5C does not add a route or UI, rerun retrieval or embeddings, call a model, select a final relation rule, or authorize Gate 6. Its 100% quality figures apply only to the four controlled live resources.
 
 ### 11.4 Final AI recommendation
 

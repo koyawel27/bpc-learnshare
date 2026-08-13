@@ -41,8 +41,9 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gates 0–4 now have a working native-PHP core covering database connectivity, account registration and authentication, protected sessions and CSRF, non-public first-Admin bootstrap, guarded Student/Teacher upload, transactional `Pending` creation, staff moderation, Approved-only metadata discovery, resource details, and controlled protected downloads.
 - Gate 5A now has an unrouted, model-independent PHP safety-foundation candidate covering default-off AI configuration, active-account and Approved/available source revalidation, source-fingerprint and protected-file checks, second-point revalidation, protected citation-link shaping, bounded session-only context, and metadata-search fallback. Its deterministic CLI verification passed 18/18 checks with zero real model/provider requests and zero database writes.
 - Gate 5B reused that foundation against live MariaDB state and passed 19/19 rollback-based lifecycle and fallback checks. Hidden, Restricted, Removed, Replaced, deleted, invalidated, stale-reference, missing-file, size-drift, disabled-account, disabled-AI, unavailable-provider, and final-revalidation cases failed closed; metadata search and protected-download lookup remained available when AI was disabled. The transaction was rolled back, the protected file hash was unchanged, and no real provider was called.
-- The Gate 5A/5B classes are not a user-facing AI feature and do not prove processing readiness, retrieval integration, live relation-metadata mapping, real request classification, grounded-answer quality, a production-session follow-up flow, or complete derived-data cleanup.
-- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. Live relation-metadata and attribution-link integration, complete application fallback, the final feasibility recommendation, and any later architecture decision remain pending.
+- Gate 5C added an unrouted shared-active-tag metadata-fallback candidate and passed 18/18 live PHP/MariaDB checks against two accepted synthetic Security resources and two accepted synthetic Usability resources. Expected-pair top-five coverage and reviewed top-three usefulness were both 4/4 (100%); self-results and same-subject cross-topic results were excluded; protected `/resources/{id}` links resolved through Approved-only lookup; and Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, and disabled-requester cases failed closed. All test mutations and view increments were rolled back in the accepted run.
+- The Gate 5A/5B/5C classes are not user-facing AI features and do not prove processing readiness, semantic retrieval integration, real request classification, grounded-answer quality, a production-session follow-up flow, or complete derived-data cleanup. Gate 5C validates one bounded metadata fallback on four controlled live resources; it does not select the final related-resource rule.
+- Two synthetic local-generation preflights, two bounded six-case grounded comparisons, and the ten-case natural-language follow-up comparison are complete. Neither Llama 3.2 3B nor Qwen3.5 4B met all accepted follow-up quality and latency criteria, and neither is selected. Complete application fallback, final evidence reconciliation, the final feasibility recommendation, and any later architecture decision remain pending.
 
 ---
 
@@ -364,7 +365,7 @@ Deferred boundaries:
 
 ### Gate 5 — AI feasibility decision
 
-Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. Gate 5A passed 18/18 model-independent control checks, and Gate 5B passed 19/19 rollback-based live MariaDB lifecycle and fallback checks without a real provider or persistent state change. The bounded unguarded positive-case related-resource configuration met its two scored thresholds with limited usefulness margin. The metadata-guarded configuration then passed one predeclared synthetic safe no-result boundary case and a separate five-case positive regression at 100% expected-resource display and 100% reviewed top-three usefulness without selecting a cosine threshold. Live relation-metadata mapping remains unvalidated, and no final candidate or architecture is selected.
+Current evidence: bounded local grounded comparisons are complete for Llama 3.2 3B and Qwen3.5 4B, and neither met the accepted usefulness criterion. The model-independent grounded-response and session/lifecycle controls passed their fixed deterministic checkpoints. Gate 5A passed 18/18 model-independent control checks, Gate 5B passed 19/19 rollback-based live MariaDB lifecycle and fallback checks, and Gate 5C passed 18/18 live related-resource metadata/link checks without a real provider or persistent test mutation. The earlier bounded unguarded positive-case related-resource configuration met its two scored thresholds with limited usefulness margin. The metadata-guarded configuration then passed one predeclared synthetic safe no-result boundary case and a separate five-case positive regression. Gate 5C now provides a four-resource live-database proof for a shared-active-tag metadata fallback at 100% expected-pair top-five coverage and 100% reviewed top-three usefulness. This small controlled proof does not select a final relation rule, model, or architecture.
 
 Pass when:
 
@@ -404,6 +405,18 @@ All temporary database changes were enclosed in one transaction and rolled back.
 
 This checkpoint validates the live control seam only. It does **not** prove persistent derived-data cleanup, live subject/topic/tag relation mapping, an HTTP attribution route, real-provider failure handling, natural-language follow-up through the production session, or full upload/moderation fallback while AI is disabled.
 
+#### Gate 5C — Live related-resource metadata and link validation
+
+Status: **Implemented as an unrouted bounded fallback candidate; live validation passed.**
+
+`src/ai/DatabaseRelatedResourceMetadata.php` uses only shared, active, human-assigned tags to prepare a maximum of five metadata-fallback candidates. It excludes the target itself, treats same subject alone as insufficient, reuses the live account/resource/file eligibility seam, and presents only protected `/resources/{id}` links without stored filenames. A safe no-result response is returned when the target, requester, tag, candidate, or protected file is not currently eligible.
+
+`tests/ai/run_gate5c_live_related_resources.php` passed 18/18 checks using four clearly labelled, project-created synthetic resources uploaded and Approved through the normal application workflow. The controlled set contains one Security pair and one Usability pair under the same subject, allowing positive relations and cross-topic exclusions to be tested separately. Expected peers appeared within the top five for 4/4 targets, and all four displayed top-three results were human-preclassified as useful. Hidden, deleted, missing-file, inactive-tag, ineligible-target, disabled-requester, self-result, and same-subject cross-topic cases were excluded. Every returned link resolved through the existing Approved-only resource-detail lookup.
+
+The accepted run enclosed every state-changing lookup and lifecycle mutation in one transaction and rolled it back. Resource rows, account state, tag state, AI-output/audit counts, and protected-file hashes were unchanged afterward. An initial harness attempt revealed that the detail lookup increments `view_count`; those four increments and timestamps were restored exactly, the lookup was moved inside the rollback boundary, and only the corrected run is accepted.
+
+This checkpoint selects no cosine threshold, semantic model, final relation rule, schema change, route, or UI. Its 100% result is limited to four deliberately controlled live resources and must not be generalized to a larger real repository without broader evaluation.
+
 ### Gate 6 — Bounded AI prototype integration
 
 Pass only if Gate 5 approves a candidate direction.
@@ -435,7 +448,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, ten-case natural-language follow-up comparison, and Gate 5B live lifecycle/fallback control-seam validation are complete. The next required work is live relation-metadata mapping, attribution-link integration, remaining application fallback checks, and final evidence reconciliation; this does not authorize AI application integration yet.
+The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, ten-case natural-language follow-up comparison, Gate 5B lifecycle/fallback validation, and Gate 5C live relation-metadata/link validation are complete. The next required work is final evidence reconciliation and a bounded feasibility recommendation identifying the remaining application-fallback, production-session, processing-readiness, derived-data-cleanup, and generation limitations. This does not authorize AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 
@@ -484,13 +497,15 @@ The related-resource positive-case evaluation, one-case safe no-result boundary 
 - Qwen produced 8/10 grounded correct answers with zero unsupported substantive answers, but reached only 8/10 context continuity because two clear supported turns were unnecessarily left unanswered.
 - Both candidates missed the 15-second median interactive target. Neither candidate passed the complete checkpoint or was selected for application integration.
 
-### 7.7 Live integration-level lifecycle and fallback
+### 7.7 Live integration-level lifecycle, fallback, and relation metadata
 
 - Gate 5B passed 19/19 CLI-only checks against live PHP/MariaDB state using one rollback transaction and no real provider.
 - Hidden, Restricted, Removed, Replaced, deleted, invalidated, stale-reference, missing-file, file-size-drift, disabled-account, disabled-AI, unavailable-provider, and final-revalidation cases failed closed without answer or source leakage.
 - Hidden resources were absent from metadata search and protected-download lookup. Metadata search and protected-download lookup still worked while AI was disabled.
 - The resource, account, AI-setting state, AI-output count, audit-log count, and protected file were unchanged after rollback.
-- Remaining integration work includes production-session natural-language follow-up, live subject/topic/tag relation mapping, an actual protected attribution-link route, real-provider interruption behavior, persistent derived-data lifecycle/cleanup, and the broader upload/moderation fallback cases.
+- Gate 5C passed 18/18 live metadata-fallback checks using two Security and two Usability resources uploaded and Approved through the normal workflow. Expected peers appeared for 4/4 targets; same-subject cross-topic and ineligible results were excluded; and links used the existing Approved-only `/resources/{id}` detail path.
+- Gate 5C made no model call or retrieval rerun and selected no final relation rule. Its 100% figures are limited to four controlled live resources.
+- Remaining integration work includes production-session natural-language follow-up, processing-readiness/retrieval integration, real-provider interruption behavior, persistent derived-data lifecycle/cleanup, and the broader upload/moderation fallback cases.
 
 ### 7.8 Final recommendation
 
