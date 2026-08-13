@@ -417,6 +417,16 @@ The accepted run enclosed every state-changing lookup and lifecycle mutation in 
 
 This checkpoint selects no cosine threshold, semantic model, final relation rule, schema change, route, or UI. Its 100% result is limited to four deliberately controlled live resources and must not be generalized to a larger real repository without broader evaluation.
 
+#### Gate 5D — External-generation candidate research and offline validation
+
+Status: **GroqCloud `openai/gpt-oss-120b` candidate reviewed; offline validation passed; no provider request or evidence transmission performed.**
+
+`docs/ai-feasibility-spike/EXTERNAL_GENERATION_PREFLIGHT.md` records the 2026-08-13 provider, model, price, quota, data-retention, Zero Data Retention, deprecation, credential, and payload-boundary review. The candidate was chosen for a future probe because it is currently production-listed, available under the reviewed Free-plan limits, supports strict Structured Outputs, and is the documented replacement for the soon-to-be-retired `llama-3.3-70b-versatile` endpoint. These time-sensitive observations must be rechecked before every live checkpoint.
+
+`tests/ai/run_gate5d_external_candidate_validate.php --mode=validate` passed 151 offline guards. It verified all 30 fixture metadata rows, the 25 selected-test-approval-only readable fixtures, the five external-transmission-prohibited boundary fixtures, the empty accepted payload-manifest register, the ignored `.env` credential location, the strict synthetic request contract, and the absence of a Groq key-shaped value in the tracked preflight files. It read no fixture/query/evidence/chunk/vector content, made zero network requests, created zero payload-manifest rows, changed no register/schema/database state, and authorized no external evidence transmission.
+
+The next permitted Gate 5D action is not a grounded evaluation. It is a separately approved one-request connectivity probe containing only a harmless project-independent sentence, after the user creates a project-specific Groq key and verifies Zero Data Retention. A second approval and reviewed payload manifest are required before any selected synthetic BPC evidence may be transmitted.
+
 ### Gate 6 — Bounded AI prototype integration
 
 Pass only if Gate 5 approves a candidate direction.
@@ -448,7 +458,7 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, ten-case natural-language follow-up comparison, Gate 5B lifecycle/fallback validation, and Gate 5C live relation-metadata/link validation are complete. The next required work is final evidence reconciliation and a bounded feasibility recommendation identifying the remaining application-fallback, production-session, processing-readiness, derived-data-cleanup, and generation limitations. This does not authorize AI application integration yet.
+The related-resource positive-case evaluation, one-case safe no-result boundary control, five-case metadata-guarded positive regression, isolated end-user source-attribution presentation evaluation, ten-case natural-language follow-up comparison, Gate 5B lifecycle/fallback validation, Gate 5C live relation-metadata/link validation, and Gate 5D external-candidate offline validation are complete. The next required work is the separately approved synthetic connectivity probe, followed by a decision on whether a bounded external grounded comparison is justified. Final evidence reconciliation must preserve the remaining application-fallback, production-session, processing-readiness, derived-data-cleanup, and generation limitations. This does not authorize BPC evidence transmission or AI application integration yet.
 
 ### 7.1 Completed bounded generation evidence
 

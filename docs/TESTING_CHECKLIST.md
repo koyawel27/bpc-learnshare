@@ -261,13 +261,21 @@ Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, disable
 
 Gate 5C does not add a route or UI, rerun retrieval or embeddings, call a model, select a final relation rule, or authorize Gate 6. Its 100% quality figures apply only to the four controlled live resources.
 
+#### Gate 5D external-generation candidate preflight
+
+`tests/ai/run_gate5d_external_candidate_validate.php --mode=validate` passed 151/151 offline checks on 2026-08-13. The reviewed candidate is GroqCloud `openai/gpt-oss-120b`, but it is not registered, selected, integrated, or authorized to receive BPC evidence.
+
+The validator reconciled the 25 readable fixtures that permit external transmission only after selected-test approval, the five boundary fixtures that prohibit it, the header-only payload-manifest register, the ignored local `.env` credential location, and a strict-schema connectivity payload containing only one harmless project-independent sentence. It read no fixture/query/evidence/chunk/vector content and made zero network requests. No Groq credential is currently configured.
+
+Before the one-request synthetic connectivity probe, recheck current provider/model availability, Free-plan quota and price, data controls, and terms; create a project-specific key; verify Zero Data Retention; and obtain explicit approval. Before any later grounded external run, approve the exact selected fixtures/evidence and add a reviewed payload-manifest row. Do not transmit boundary fixtures, account data, private information, credentials, protected filenames, or unrelated repository content.
+
 ### 11.4 Final AI recommendation
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
 | AI-FIN-001 | P0 | Reconcile every accepted criterion with registered evidence | No invented or omitted measurements | Not run |
 | AI-FIN-002 | P0 | Document passed, failed, and unresolved capabilities | Honest bounded conclusion | Not run |
-| AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | Not run |
+| AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | In progress — Groq/GPT-OSS offline review passed; live connectivity and quality remain untested |
 | AI-FIN-004 | P0 | Prepare smallest justified architecture/schema impact | No premature vector database or schema expansion | Not run |
 | AI-FIN-005 | P0 | Confirm core non-AI independence | Final direction preserves graceful fallback | Not run |
 
