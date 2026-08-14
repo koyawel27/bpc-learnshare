@@ -1,6 +1,6 @@
 # External Generation Candidate Preflight
 
-**Status:** Synthetic connectivity and six-case grounded comparison completed; mixed quality result registered
+**Status:** Connectivity, grounded comparison, and Gate 5E summary/suggestion comparison completed; mixed capability evidence registered
 **Reviewed:** 2026-08-13
 **Registered evidence candidate:** `GEN-GROQ-GPT-OSS-120B-001`
 
@@ -149,6 +149,27 @@ promising for interactive latency and bounded usefulness, but it is not
 accepted, selected, or integrated. No final provider, model, schema, storage, or
 architecture decision follows from this result.
 
+## Gate 5E summary and controlled-suggestion result
+
+The first approved eight-resource attempt stopped after request 1 returned HTTP
+400 `unsupported_uniqueItems`. It produced no model output, used zero retries,
+did not transmit requests 2–8, and preserved the failed evidence. A separately
+reviewed and approved v2 removed only the unsupported response-schema keywords
+while retaining runner-side uniqueness enforcement and every content, privacy,
+cost, and authority boundary.
+
+The corrected run completed 8/8 HTTP 200 requests with zero retries. Median
+latency was 1,944.858 ms and all eight completed within 15 seconds. Usage was
+12,488 prompt tokens and 3,290 completion tokens; estimated published-rate cost
+was USD 0.0038472. User-approved review measured 100% supported summaries, 90%
+directly usable Active tags, 100% eligible-tag coverage, 85.71% supported
+metadata suggestions, and 100% outputs usable as-is or after light editing.
+
+All Gate 5E thresholds passed, with weak Handout and broad Programming
+suggestions preserved as human-review findings. This result is specific to
+non-authoritative summaries and controlled suggestions. It does not override the
+failed grounded-answer claim-support/attribution result and does not select or
+integrate the provider/model.
 ## Official sources reviewed
 
 - Groq supported models and pricing:

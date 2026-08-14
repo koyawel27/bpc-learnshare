@@ -155,6 +155,29 @@ rather than accepted or selected. Provider dependency, privacy controls, quota,
 cost continuity, interruption behavior, and application fallback remain material
 limitations.
 
+#### Gate 5E summary and controlled suggestions
+
+The first approved Gate 5E attempt stopped safely when request 1 returned HTTP
+400 `unsupported_uniqueItems`. It produced zero model outputs, made zero retries,
+did not send the remaining seven requests, and preserved the failed evidence. A
+separately reviewed v2 removed only unsupported provider-schema keywords while
+retaining runner-side uniqueness validation and all other payload and safety
+boundaries.
+
+The corrected v2 run completed 8/8 HTTP 200 requests with zero retries, a
+1,944.858 ms median, and 8/8 within 15 seconds. Provider usage was 15,778 total
+tokens and estimated published-rate cost was USD 0.0038472. User-approved review
+found 8/8 source-supported summaries (100%), 9/10 directly usable Active tags
+(90%), 6/6 clearly tag-eligible cases covered (100%), 18/21 supported metadata
+suggestions (85.71%), and 8/8 outputs usable as-is or after light editing (100%).
+Every accepted Gate 5E threshold passed.
+
+The review preserved three weak Handout suggestions, one broad Programming tag,
+and broad but source-related secondary tags. These support mandatory human review
+before any future assignment. The result is a bounded pass for non-authoritative
+summary and controlled-suggestion feasibility only. It does not repair the same
+candidate's failed grounded-answer claim-support and source-attribution result,
+select Groq/GPT-OSS, authorize application integration, or choose storage/schema.
 ### 2.12 Optional Experimental Local Generation
 
 Two bounded synthetic preflights used Ollama 0.32.1, the same five non-project cases, `num_ctx=4096`, temperature 0, seed 42, `think=false`, a 256-token output limit, and zero automatic retries.

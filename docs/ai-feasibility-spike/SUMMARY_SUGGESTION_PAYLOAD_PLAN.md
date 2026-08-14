@@ -1,6 +1,6 @@
 # Gate 5E Summary and Controlled Suggestion Payload Plan
 
-**Status:** Offline candidate payload packet prepared and audited; live generation unauthorized
+**Status:** Versioned live execution and approved quality review completed; evidence registration prepared; candidate unselected
 **Prepared:** 2026-08-14
 **Candidate:** `GEN-GROQ-GPT-OSS-120B-001`
 **Model:** `openai/gpt-oss-120b`
@@ -86,4 +86,18 @@ The packet contains eight exact serialized request bodies. Their combined body s
 
 `tests/ai/run_gate5e_summary_suggestion_payload_audit.php` independently passed 187/187 checks. It reconciled all seven files, five manifested content artifacts, eight request bodies, hashes, sizes, schema/settings, answer-key exclusion, eight unique accepted synthetic fixtures, data exclusions, token totals, and the explicit no-send boundary.
 
-No network/provider request was made, no credential was read, and no accepted payload-register row was created. The next step still requires a separate live-run decision after human review and rechecking current provider controls.
+At that preparation stage, no provider request was made, no credential was read, and no accepted payload-register row was created.
+
+## Versioned execution result
+
+After current ZDR, model allowlist, project limits, credential, payload, and cost guards were reconfirmed, the first approved v1 execution transmitted only request 1. Groq returned HTTP 400 because its strict-schema subset did not support `uniqueItems`. No model output was produced, zero automatic retries occurred, requests 2–8 were not sent, and the failed folder was preserved.
+
+A separately reviewed v2 removed only the three unsupported `uniqueItems` keywords from each response schema. Input content, model, messages, temperature, reasoning effort, output limit, request count, exclusions, and safety rules remained unchanged; output-array uniqueness continued to be enforced by the runner. After separate approval, v2 completed 8/8 HTTP 200 requests with zero retries, a 1,944.858 ms median, and 8/8 within 15 seconds. Provider usage was 12,488 prompt tokens and 3,290 completion tokens. Estimated published-rate cost was USD 0.0038472.
+
+## Approved quality result
+
+The user-approved review found 8/8 source-supported summaries (100%), 9/10 directly usable Active tag suggestions (90%), 6/6 clearly tag-eligible fixtures covered (100%), 18/21 supported metadata suggestions (85.71%), and 8/8 outputs usable as-is or after light editing (100%). Every accepted Gate 5E threshold passed.
+
+The review preserved weaknesses instead of silently correcting outputs: Handout was insufficiently supported for `FX-PDF-005` and unsupported for `FX-TXT-001` and `FX-TXT-005`; Programming was broad for `FX-TXT-001`; some secondary tags were broad but source-related. These observations support mandatory human review before any future assignment.
+
+This is a bounded pass for non-authoritative summaries and controlled suggestions. It does not repair the same candidate's earlier grounded-answer claim-support and source-attribution failure, choose Groq/GPT-OSS, authorize application integration, change taxonomy or resource rows, or select permanent storage/schema.

@@ -271,7 +271,7 @@ The user then manually confirmed Inference API Zero Data Retention, the single-m
 
 The synthetic probe proved connectivity only. A later exact six-payload review and separate approval authorized one guarded grounded comparison. The fixed run completed 6/6 HTTP 200 requests with zero retries, a 1,618.82 ms median, and 6/6 cases within 30 seconds. Manual review found 16/18 supported substantive claims (88.89%, below 95%) and 5/6 acceptable-usefulness cases (83.33%, above 80%). Insufficient-evidence, prohibited-request, and partial-support behavior passed; exact source attribution failed. The test run is registered as failed on strict quality while preserving complete execution and evidence integrity. No candidate selection or application integration is authorized.
 
-#### Gate 5E summary and controlled suggestion preparation
+#### Gate 5E summary and controlled suggestion evaluation
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
@@ -279,11 +279,17 @@ The synthetic probe proved connectivity only. A later exact six-payload review a
 | AI-SUMSUG-002 | P0 | Validate predeclared human reference notes | Expected coverage, prohibited invention, ambiguity, tags, metadata, and unsupported values are reviewable | Passed — 2026-08-14 |
 | AI-SUMSUG-003 | P0 | Validate controlled tag fixture | Five seed-backed Active tags; two test-only Inactive tags; absent values remain out of vocabulary | Passed — 2026-08-14 |
 | AI-SUMSUG-004 | P0 | Validate metadata subset | Only subject, resource type, and topic are scored; non-inferable values are allowed | Passed — 2026-08-14 |
-| AI-SUMSUG-005 | P0 | Validate authority and evidence boundaries | Zero generation/network/credential access; no taxonomy, database, schema, register, route, UI, or candidate-selection change | Passed — 2026-08-14 |
+| AI-SUMSUG-005 | P0 | Validate authority and evidence boundaries | No authority action, taxonomy/resource mutation, candidate selection, or integration | Passed — 2026-08-14 |
+| AI-SUMSUG-006 | P0 | Fail closed on provider schema incompatibility | Stop after first failure; zero retries; preserve failure; do not send remaining requests | Passed — 2026-08-14 |
+| AI-SUMSUG-007 | P0 | Complete corrected versioned execution | 8/8 HTTP 200; strict schema plus runner guards; all within 15 seconds | Passed — 2026-08-14 |
+| AI-SUMSUG-008 | P0 | Review summary support | No material unsupported summary content | Passed — 8/8 (100%) |
+| AI-SUMSUG-009 | P0 | Review controlled-tag relevance and coverage | At least 80% directly usable and at least 75% eligible-case coverage | Passed — 90% / 100% |
+| AI-SUMSUG-010 | P0 | Review limited metadata suggestions | At least 80% source-supported | Passed — 18/21 (85.71%) |
+| AI-SUMSUG-011 | P0 | Review overall output usability | At least 80% usable as-is or after light editing | Passed — 8/8 (100%) |
 
-`tests/ai/run_gate5e_summary_suggestion_validate.php --mode=validate` passed 234/234 checks. This authorizes only a later strict payload-preview preparation. Summary/tag/metadata quality remains `Not run` until a separately reviewed candidate execution and human scoring are completed.
+The first approved v1 request returned HTTP 400 because the provider schema subset rejected `uniqueItems`. The run stopped with zero outputs and retries, seven unsent requests, and preserved failed evidence. A separately reviewed and approved v2 removed only those unsupported schema keywords while retaining runner-side uniqueness checks and every content/safety boundary.
 
-The candidate-specific offline preparation then passed 104/104 checks and created an ignored seven-file review packet containing eight exact strict-schema Groq/GPT-OSS request bodies. The independent saved-packet audit passed 187/187 checks covering the manifest, hashes, sizes, request settings, answer-key exclusion, eight unique accepted synthetic fixtures, data exclusions, total planning ceilings, and no-send markers. The planning ceiling is 14,232 input tokens plus 5,600 maximum completion tokens, with an estimated published-rate worst case of USD 0.0054948. No provider request, credential read, accepted payload registration, model selection, or live authorization occurred.
+The v2 run completed 8/8 requests with a 1,944.858 ms median and 8/8 within 15 seconds. Usage was 15,778 total tokens and estimated published-rate cost USD 0.0038472. The approved review preserved three weak Handout suggestions and one broad Programming tag rather than hiding them. Gate 5E passes for non-authoritative summary and controlled-suggestion feasibility only; it does not override the earlier grounded-answer failure, select the candidate, or authorize application integration.
 
 ### 11.4 Final AI recommendation
 
