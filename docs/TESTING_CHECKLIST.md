@@ -263,13 +263,13 @@ Gate 5C does not add a route or UI, rerun retrieval or embeddings, call a model,
 
 #### Gate 5D external-generation candidate preflight
 
-`tests/ai/run_gate5d_external_candidate_validate.php --mode=validate` passed 151/151 offline checks on 2026-08-13. The reviewed candidate is GroqCloud `openai/gpt-oss-120b`, but it is not registered, selected, integrated, or authorized to receive BPC evidence.
+`tests/ai/run_gate5d_external_candidate_validate.php --mode=validate` passed 151/151 offline checks on 2026-08-13. The reviewed candidate is GroqCloud `openai/gpt-oss-120b`. It is now registered as a measured candidate after the separately authorized grounded comparison, but it is not accepted, selected, or integrated.
 
 The validator reconciled the 25 readable fixtures that permit external transmission only after selected-test approval, the five boundary fixtures that prohibit it, the header-only payload-manifest register, the ignored local `.env` credential location, and a strict-schema connectivity payload containing only one harmless project-independent sentence. It read no fixture/query/evidence/chunk/vector content and made zero network requests.
 
 The user then manually confirmed Inference API Zero Data Retention, the single-model allowlist, limits of 5 requests/minute, 25 requests/day, 8,000 tokens/minute, and 50,000 tokens/day, and an ignored project-specific key. After explicit approval, `tests/ai/run_gate5d_external_connectivity.php --mode=apply --approve=EXTERNAL_RUNTIME_PROBE_ONLY` sent one harmless probe. It received HTTP 200 and the exact strict JSON response in 1,668.951 ms using 158 prompt, 59 completion, and 217 total tokens. There were zero retries and zero BPC fixture/query/evidence/chunk/vector transmissions. The checker persisted neither the response nor the key.
 
-The synthetic probe proves connectivity only. Before any grounded external run, recheck current provider/model availability, quota, price, data controls, and terms; approve the exact selected fixtures/evidence; add a reviewed payload-manifest row; and declare the request/token/cost ceiling. Do not transmit boundary fixtures, account data, private information, credentials, protected filenames, or unrelated repository content.
+The synthetic probe proved connectivity only. A later exact six-payload review and separate approval authorized one guarded grounded comparison. The fixed run completed 6/6 HTTP 200 requests with zero retries, a 1,618.82 ms median, and 6/6 cases within 30 seconds. Manual review found 16/18 supported substantive claims (88.89%, below 95%) and 5/6 acceptable-usefulness cases (83.33%, above 80%). Insufficient-evidence, prohibited-request, and partial-support behavior passed; exact source attribution failed. The test run is registered as failed on strict quality while preserving complete execution and evidence integrity. No candidate selection or application integration is authorized.
 
 ### 11.4 Final AI recommendation
 
@@ -277,7 +277,7 @@ The synthetic probe proves connectivity only. Before any grounded external run, 
 |---|---|---|---|---|
 | AI-FIN-001 | P0 | Reconcile every accepted criterion with registered evidence | No invented or omitted measurements | Not run |
 | AI-FIN-002 | P0 | Document passed, failed, and unresolved capabilities | Honest bounded conclusion | Not run |
-| AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | In progress — Groq/GPT-OSS offline review passed; live connectivity and quality remain untested |
+| AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | In progress — Groq/GPT-OSS preparation, connectivity, and bounded grounded quality were measured; terms, dependency, interruption, privacy, and continuity limitations remain |
 | AI-FIN-004 | P0 | Prepare smallest justified architecture/schema impact | No premature vector database or schema expansion | Not run |
 | AI-FIN-005 | P0 | Confirm core non-AI independence | Final direction preserves graceful fallback | Not run |
 

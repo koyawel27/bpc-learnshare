@@ -132,7 +132,28 @@ The positive regression passed its bounded criteria without rewriting the accept
 
 ### 2.11 External Generation
 
-Not yet executed.
+The guarded GroqCloud `openai/gpt-oss-120b` comparison completed all six fixed
+cases with HTTP 200, zero retries, and all required bounded outcomes. Median
+latency was 1,618.82 ms, and all six cases completed within 30 seconds. Usage was
+8,220 prompt tokens, 1,253 completion tokens, and 9,473 total tokens. The
+estimated published-rate cost was USD 0.0019848.
+
+Manual review found 16 of 18 substantive claims fully supported (88.89%), below
+the accepted 95% threshold. Five of six cases were acceptable as-is or after
+light wording improvement (83.33%), meeting the accepted 80% usefulness
+threshold. Insufficient-evidence behavior, prohibited-request refusal, and
+partial-support separation passed. Exact source attribution failed because
+`Q-SEM-004` and `Q-MULTI-001` each contained one unsupported detail attached to
+supplied evidence labels.
+
+`Q-MULTI-001` also inherited a frozen input limitation: the comparison supplied
+an ERD checklist rather than the accepted ERD definition passage. This was
+preserved rather than repaired after the result. The registered run is failed on
+strict quality, not execution integrity. The external candidate is the fastest
+and most useful generation candidate tested so far, but it remains promising
+rather than accepted or selected. Provider dependency, privacy controls, quota,
+cost continuity, interruption behavior, and application fallback remain material
+limitations.
 
 ### 2.12 Optional Experimental Local Generation
 

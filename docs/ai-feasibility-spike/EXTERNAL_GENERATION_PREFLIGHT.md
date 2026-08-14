@@ -1,13 +1,14 @@
 # External Generation Candidate Preflight
 
-**Status:** Synthetic connectivity validated; grounded evaluation not authorized
+**Status:** Synthetic connectivity and six-case grounded comparison completed; mixed quality result registered
 **Reviewed:** 2026-08-13
-**Candidate ID reserved only for later review:** `GEN-GROQ-GPT-OSS-120B-001`
+**Registered evidence candidate:** `GEN-GROQ-GPT-OSS-120B-001`
 
-This checkpoint does not register, select, or integrate an external provider or
-model. It identifies one bounded candidate, records one approved synthetic
-connectivity probe, and leaves any small grounded evaluation subject to a
-separate reviewed payload and approval.
+This checkpoint registers measured evidence for one bounded external candidate.
+It does not select or integrate the provider or model. The completed grounded
+comparison met latency, usefulness, insufficient-evidence, refusal, and partial-
+support criteria, but failed strict claim-support and exact source-attribution
+criteria.
 
 ## Candidate
 
@@ -117,15 +118,36 @@ There were zero retries. No fixture, query, expected-evidence, chunk, vector,
 account, filename, or database content was read or transmitted. The checker
 persisted neither the provider response nor the key.
 
-This proves only credential, endpoint, model-family, latency, and structured-
-response connectivity for one harmless probe. It does not prove grounded
-academic quality, refusal behavior, citation correctness, reliability under
-quota or interruption, final cost, provider suitability, or application
-integration readiness. The candidate remains unregistered and unselected.
+This probe proved only credential, endpoint, model-family, latency, and
+structured-response connectivity for one harmless request. Grounded quality was
+evaluated separately under the guarded comparison below.
 
-Any grounded external comparison still requires a reviewed payload-manifest
-row, exact selected synthetic evidence, a declared request/token/cost ceiling,
-and separate explicit approval before transmission.
+## Guarded grounded-comparison result
+
+After exact payload review and separate explicit approval, the fixed six-case
+comparison ran once on 2026-08-13 with zero automatic retries. All six requests
+returned HTTP 200, matched the required bounded outcome contract, and completed
+within 30 seconds. Median latency was 1,618.82 ms. Provider-reported usage was
+8,220 prompt tokens and 1,253 completion tokens. The estimated published-rate
+cost was USD 0.0019848.
+
+Independent manual review found 16 of 18 substantive claims fully supported
+(88.89%), below the accepted 95% threshold. Five of six cases were acceptable
+as-is or after light wording improvement (83.33%), meeting the accepted 80%
+usefulness threshold. The insufficient-evidence, prohibited-request, and
+partial-support behaviors passed. Exact source attribution did not pass.
+
+`Q-SEM-004` added one unsupported definition. `Q-MULTI-001` added one
+unsupported ERD definition and also inherited a frozen payload-selection
+limitation: the supplied evidence used an ERD checklist instead of the accepted
+ERD definition passage. The input limitation was preserved rather than repaired
+after seeing the result.
+
+The test run is registered as `failed` because accepted quality criteria failed,
+not because execution or evidence capture was incomplete. The candidate is
+promising for interactive latency and bounded usefulness, but it is not
+accepted, selected, or integrated. No final provider, model, schema, storage, or
+architecture decision follows from this result.
 
 ## Official sources reviewed
 

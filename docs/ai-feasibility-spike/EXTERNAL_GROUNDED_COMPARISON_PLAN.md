@@ -1,14 +1,14 @@
 # External Grounded-Answer Comparison Plan
 
-**Status:** Offline payload preparation and review only
+**Status:** Fixed comparison completed, independently reviewed, and registered with a failed strict-quality verdict
 **Prepared:** 2026-08-13
 **Candidate:** `GEN-GROQ-GPT-OSS-120B-001`
 **Provider/model:** GroqCloud `openai/gpt-oss-120b`
 **Reserved test-run ID:** `TR-GEN-GROQ-GROUNDED-001`
 
-This plan does not authorize a provider request. It defines the smallest fair
-external comparison after the successful synthetic connectivity probe. The
-external candidate remains unregistered, unselected, and outside the live
+This document preserves the pre-run comparison contract. The exact six requests
+were later approved, executed once, independently audited, manually reviewed,
+and registered. The external candidate remains unselected and outside the live
 application.
 
 ## Comparison scope
@@ -144,6 +144,32 @@ Any later live runner must:
 
 No full response or provider error may be written to application logs, the
 database, or tracked documentation.
+
+## Completed comparison result
+
+Run `run-20260813-152340Z` completed 6/6 sequential requests with HTTP 200,
+zero retries, and all required bounded outcomes. Median latency was 1,618.82 ms,
+and 6/6 cases completed within 30 seconds. Provider-reported usage was 8,220
+prompt tokens, 1,253 completion tokens, and 9,473 total tokens. The estimated
+published-rate cost was USD 0.0019848.
+
+Manual review atomized 18 substantive claims. Sixteen were fully supported and
+two were unsupported, producing 88.89% claim support against the accepted 95%
+minimum. Five of six cases were acceptable as-is or after light wording
+improvement, producing 83.33% usefulness against the accepted 80% minimum. The
+insufficient-evidence, prohibited-request, and partial-support behaviors passed;
+exact source attribution did not pass.
+
+The two unsupported details occurred in `Q-SEM-004` and `Q-MULTI-001`.
+`Q-MULTI-001` also inherited a frozen payload-selection limitation because the
+supplied evidence contained an ERD checklist rather than the accepted ERD
+definition passage. No request, evidence mapping, threshold, or ground truth was
+changed after observing the results.
+
+`TR-GEN-GROQ-GROUNDED-001` is therefore registered as `failed` for quality
+while preserving its complete execution and evidence integrity. Candidate
+`GEN-GROQ-GPT-OSS-120B-001` is promising but not accepted, selected, or
+integrated.
 
 ## Current official references
 
