@@ -2,7 +2,7 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0
-**Last Updated:** 2026-07-13
+**Last Updated:** 2026-08-20
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
 **Purpose:** Reflect the current accepted planning, AI-scope, verified schema, security, privacy, and feasibility-spike state — including the accepted `AI_FEASIBILITY_SPIKE.md` specification and the completed MariaDB 10.4.32 schema-compatibility verification — so a new Claude or GPT conversation can continue into the clean hardware baseline and measured spike execution without reopening settled decisions or re-deriving context from old chat history. This document summarizes accepted decisions, completed verification, and current work; it does not itself introduce new decisions.
@@ -59,16 +59,16 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `PROJECT_BRIEF.md`   | Accepted and aligned through D042. Reflects the required minimum v1.0 AI package and the Planned/Deferred AI tiers.                                                                                                                                                                                                                                                                                                                      |
 | `USER_ROLES.md`      | Accepted and aligned through D042. Preserves exactly four roles and defines general AI-assisted search/inquiry access without expanding role authority.                                                                                                                                                                                                                                                                                  |
 | `WORKFLOWS.md`       | Accepted and aligned through D043. D043 resolves the retrieval-persistence direction while preserving live eligibility, lifecycle, fallback, and session-only inquiry-context rules. |
-| `DATABASE_DESIGN.md` | Accepted direction through D043. It defines `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, keeps `ai_outputs` separate, and records the 51-check disposable migration/rollback result. Live application remains pending. |
+| `DATABASE_DESIGN.md` | Accepted direction through D043. It defines `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, keeps `ai_outputs` separate, and records the disposable and guarded live/canonical migration results. Application repositories/processors remain pending. |
 | `DECISIONS.md`       | Complete through **D043**. D043 accepts targeted MariaDB derived-data persistence and bounded PHP cosine without selecting a provider/model or enabling generated inquiry. |
-| `schema.sql`         | Accepted and live-verified current 18-table SQL baseline on MariaDB 10.4.32. The D043 up/down package is disposable-verified, but `schema.sql` and the live database remain unchanged pending a separate live-application gate. |
+| `schema.sql`         | Accepted and verified current 22-table SQL baseline on MariaDB 10.4.32. The guarded live migration preserved all original rows, and the canonical fresh-import/migration/rollback verifier passed 60/60 checks. |
 | `AI_FEASIBILITY_SPIKE.md` | Complete and accepted. Final reconciliation remains **Partially feasible — alternative or mixed architecture required**, with Moderate confidence and 6/4/2/0 capability results. D043 uses that evidence without rewriting it. |
-| `AI_FEATURES.md`     | Accepted D043 AI behavior/architecture baseline. Provider/model selection, generated inquiry, live migration, repositories/processor, and application integration remain pending. |
+| `AI_FEATURES.md`     | Accepted D043 AI behavior/architecture baseline. Storage migration is complete; provider/model selection, generated inquiry, repositories/processor, and application integration remain pending. |
 | `SECURITY_NOTES.md`  | Accepted through the D043 targeted propagation, including derived-data protection, live revalidation, late-result rejection, secret/log rules, and migration-security testing. |
 | `DATA_PRIVACY.md`    | Accepted through the D043 targeted propagation, including local derived-data minimization, lifecycle cleanup, session-only inquiry context, and provider payload boundaries. |
-| `PROJECT_HANDOFF.md` | This updated version. It records the accepted D043 direction and clearly separates it from the still-unmodified 18-table SQL/runtime state. |
+| `PROJECT_HANDOFF.md` | This updated version. It records the verified 22-table D043 storage state while preserving the separate application-integration boundary. |
 
-**Prepared and disposable-verified, but not live-applied:** exact D043 migration/rollback SQL and its 51-check verifier. **Not yet implemented:** four-table migration in the configured database/canonical schema, processing repositories/runner, routed semantic retrieval/related-resource integration, and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
+**Completed:** restore-verified backup, exact D043 live migration, canonical 22-table schema update, and revised 60-check disposable verification. **Not yet implemented:** processing repositories/runner, routed semantic retrieval/related-resource integration, and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
 
 `AI_FEASIBILITY_SPIKE.md` is complete and accepted. Final reconciliation covers all 12 Required capabilities and records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. D043 now accepts the smallest persistent architecture direction supported by that evidence. It still does not select a provider/model, repair the grounded-answer failure, or authorize generated inquiry/application integration.
 
@@ -395,7 +395,7 @@ The completed feasibility reconciliation remains **Partially feasible — altern
 * MariaDB 10.4.32 remains the single system of record.
 * Readable-text extraction and source-bound segmentation remain local where practical.
 * Local embeddings and bounded PHP cosine are retained for semantic retrieval with metadata guards/fallback.
-* Four targeted derived-data tables are the later migration target.
+* Four targeted derived-data tables are now the verified persistence baseline.
 * Optional summaries/suggestions may use a separately reviewed replaceable adapter.
 * Generated inquiry/follow-up remains unavailable until another candidate passes every criterion.
 * Providers and models remain replaceable and nonbinding.
@@ -415,13 +415,13 @@ This document does not select:
 
 Those names may appear in planning discussions as candidates or comparison options only.
 
-The exact executable migration, rollback, existing-row backfill, and live application integration remain separate approval gates. No database upgrade, second database, hosted vector service, dedicated vector layer, or provider-specific structure is approved.
+The exact executable migration, rollback, existing-row handling, backup, guarded live execution, and canonical-schema verification are complete. Live application repositories/processors remain a separate approval gate. No database upgrade, second database, hosted vector service, dedicated vector layer, or provider-specific structure is approved.
 
 ---
 
 ## 7B. AI/Retrieval Schema Status
 
-The currently implemented and verified schema baseline remains **18 tables**. D043 accepts a conceptual **22-table** target after a separately reviewed migration.
+The currently implemented and verified schema baseline is **22 tables**. The original **18-table** design remains the guarded rollback baseline for the D043 migration package.
 
 D039 and D040 modified existing structures or behavior:
 
@@ -430,7 +430,7 @@ D039 and D040 modified existing structures or behavior:
 
 Neither decision added a table.
 
-D043 authorizes these four conceptual table additions:
+D043 added these four provider-neutral derived-data tables:
 
 * `ai_source_versions`;
 * `ai_processing_states`;
@@ -448,19 +448,19 @@ D043 authorizes these four conceptual table additions:
 * a conversation-history store;
 * a permanent inquiry-response store.
 
-The remaining schema implementation follows this sequence:
+The completed schema implementation followed this sequence:
 
 1. Draft exact MariaDB 10.4.32 migration and rollback SQL.
 2. Inspect/backfill any existing `ai_outputs` without fabricating source identity.
 3. Verify migration, 22-table count, constraints, and rollback on a disposable database.
-4. Obtain separate approval.
-5. Update `schema.sql` and apply the migration only within that approved gate.
+4. Obtain separate approval and restore-verify an ignored local backup.
+5. Apply the live migration under maintenance, verify the exact 22-table set and preserved rows, update `schema.sql`, and rerun canonical/forward/rollback verification.
 
 D043 is the accepted architecture/conceptual schema decision.
 
-D033 remains the current installed SQL baseline; D043 amends its future table-count direction.
+D033 remains the historical 18-table baseline decision; D043 now establishes the current installed 22-table persistence baseline.
 
-Do not treat the accepted 22-table target as an already executed migration. `database/schema.sql` and the live database remain at 18 until the separate SQL gate is completed.
+Do not treat the completed storage migration as AI feature integration. The four new tables are initially empty, and no processor, provider/model, semantic route, or generated inquiry was enabled by the schema change.
 
 ---
 
@@ -560,11 +560,11 @@ Most recent decisions:
 * **D040** — Defines D022's Removed-resource “minimal record” requirement through exact removal-time sanitization of title, description, topic, and original filename; deletion of associated `resource_tags`; preservation of necessary accountability relationships; and distinction from Withdrawn-resource retention.
 * **D041** — Required v1.0 AI deliverable with a runtime-independent non-AI core. The minimum AI package defined by D042 is required in the completed capstone. Repository-grounded inquiry becomes a defining v1.0 capability rather than an optional stretch feature. D041 supersedes D016 and clarifies, but does not remove, D004, D013, D014, D015, or D018.
 * **D042** — Defines the Required, Planned, and Deferred v1.0 AI capability tiers; establishes the feasibility-gated candidate hybrid direction; keeps providers and models replaceable; and defers schema expansion until after the feasibility spike and an explicit later architecture/schema decision.
-* **D043** — Accepts targeted MariaDB persistence through four named AI-derived-data tables, bounded PHP cosine with metadata fallback/live revalidation, source-bound current `ai_outputs`, no permanent inquiry/chat history, no provider/model selection, and generated inquiry unavailable until a later candidate passes. The current 18-table SQL baseline remains unchanged pending separately reviewed migration/rollback SQL.
+* **D043** — Accepts targeted MariaDB persistence through four named AI-derived-data tables, bounded PHP cosine with metadata fallback/live revalidation, source-bound current `ai_outputs`, no permanent inquiry/chat history, no provider/model selection, and generated inquiry unavailable until a later candidate passes. The separately reviewed migration/rollback package has now been applied and verified, establishing the current 22-table SQL baseline.
 
 ---
 
-## 10. Current Verified 18-Table Baseline and Accepted 22-Table Target
+## 10. Current Verified 22-Table Baseline and Historical 18-Table Rollback Baseline
 
 `schema.sql` is the accepted current SQL baseline.
 
@@ -588,6 +588,10 @@ It includes:
 16. `notifications`
 17. `system_settings`
 18. `audit_log`
+19. `ai_source_versions`
+20. `ai_processing_states`
+21. `ai_chunks`
+22. `ai_embeddings`
 
 The baseline includes:
 
@@ -601,29 +605,26 @@ The baseline includes:
   * `invalidated`;
 * one open replacement per original resource through `open_replacement_tracking`;
 * one unresolved report per reporter/resource pair through `open_report_tracking`;
-* one current AI-output row per `(resource_id, output_type)`;
+* one current AI-output row per `(resource_id, output_type)`, bound to its source version and generator identity;
+* provider-neutral source-version, processing-state, chunk, and embedding persistence through the four D043 tables;
 * polymorphic `target_type`/`target_id` references for notifications and audit logging, enforced through application validation rather than direct foreign keys.
 
 D039 did not add a table. It extended enum values on the existing `audit_log` table.
 
 D040 did not add a table or column. It uses existing `resources` columns, removes existing `resource_tags` junction rows during removal, and defines application-level lifecycle behavior.
 
-D041–D042 also do not change the accepted 18-table count. They establish required AI scope and a feasibility-gated architecture direction but intentionally defer any retrieval-schema consequence.
+D041–D042 did not themselves change the historical 18-table count. D043 and its separately approved migration package later established the verified 22-table baseline.
 
-The current baseline does not yet contain dedicated structures for:
+The current baseline contains dedicated structures for:
 
-* extracted text;
-* chunks;
-* preserved source locations;
-* embeddings;
-* semantic indexes;
-* hosted vector references;
-* retrieval indexes;
-* inquiry evidence.
+* source-version identity and extracted-text hashes;
+* processing readiness and failure state;
+* chunks with preserved source locations;
+* provider-neutral embedding vectors and candidate identity.
 
-Whether any such structure is required remains subject to the feasibility spike, architecture selection, and explicit later decision described in Section 7B.
+It does not add permanent query vectors, inquiry answers, citation history, chat transcripts, cross-session memory, a hosted vector service, or a selected provider/model. Those boundaries remain governed by D043 and Section 7B.
 
-The baseline has now been executed against a fresh MariaDB 10.4.32 database in the actual XAMPP environment. All 18 tables were created successfully. MariaDB recognized and enforced the remaining 13 `CHECK` constraints; an invalid `system_settings.ai_enabled = 'maybe'` update was rejected while the valid value remained unchanged. The original `chk_resources_no_self_replace` definition was removed because MariaDB 10.4.32 rejects a `CHECK` that compares against the `AUTO_INCREMENT` `resources.id` column. PHP application logic remains responsible for rejecting both direct self-replacement and longer replacement cycles under D037.
+The historical 18-table baseline and the current 22-table baseline have both been executed against MariaDB 10.4.32 in the actual XAMPP environment. The D043 package passed backup/restore verification, live forward migration, rollback, fresh canonical import, legacy-row preservation, and table-health checks. The original `chk_resources_no_self_replace` definition remains omitted because MariaDB 10.4.32 rejects a `CHECK` that compares against the `AUTO_INCREMENT` `resources.id` column. PHP application logic remains responsible for rejecting both direct self-replacement and longer replacement cycles under D037.
 
 ---
 
@@ -682,7 +683,7 @@ The following verification checkpoint is complete:
 * **MariaDB/XAMPP schema compatibility is verified.**
 
   * Actual server and client version: MariaDB 10.4.32.
-  * The canonical schema creates exactly 18 tables in a fresh verification database.
+  * The historical canonical schema created exactly 18 tables; the current D043 canonical schema creates exactly 22 tables in a fresh verification database.
   * The remaining 13 `CHECK` constraints are recognized and enforced.
   * An invalid `ai_enabled = 'maybe'` update was rejected with a constraint error, and the prior valid value remained unchanged.
   * MariaDB 10.4.32 rejected `chk_resources_no_self_replace` because it compared `replaces_resource_id` with the `AUTO_INCREMENT` `resources.id` column.
@@ -852,7 +853,7 @@ The planned clean-baseline checkpoint appears in Section 13.
 
 ## 13. Current Documentation and Verification Order
 
-**D043 continuation note — 2026-08-20:** The historical sequence below records how the project reached the decision. Steps asking for an architecture preview/decision, D041–D042 propagation, and initial `AI_FEATURES.md` drafting are now complete. The active next step is exact migration/rollback preview and disposable-database verification; `schema.sql` and the live database must remain unchanged until that separate gate is approved.
+**D043 continuation note — 2026-08-20:** The historical sequence below records how the project reached the decision. Architecture review, D041–D043 propagation, migration/rollback review, restore-verified backup, guarded live migration, canonical schema update, and post-migration verification are complete. The next active gate is bounded repository/processor integration; storage completion alone does not enable AI features.
 
 Completed checkpoints:
 
@@ -864,7 +865,7 @@ Completed checkpoints:
    * Required capability coverage, measurements, mandatory guardrails, pre-run criteria, evidence rules, and architecture/schema handoff are accepted.
    * The spike is partially executed; completed and remaining checkpoints are recorded below.
 
-3. **Executed and verified the canonical 18-table `schema.sql` in the actual XAMPP/MariaDB environment.**
+3. **Executed and verified the historical 18-table `schema.sql` baseline in the actual XAMPP/MariaDB environment.**
 
    * Actual server/client version: MariaDB 10.4.32.
    * Fresh import result: successful.
@@ -887,69 +888,38 @@ Current next checkpoint:
    * Gate 5E used eight accepted synthetic extraction inputs (two per readable format), five seed-backed Active demo tags, two non-persistent test-only Inactive tags, and the `subject`/`resource_type`/`topic` subset. The first approved v1 request failed safely with HTTP 400 `unsupported_uniqueItems`, zero model outputs, zero retries, and seven unsent requests. After separate review and approval, v2 removed only the unsupported schema keywords and completed 8/8 HTTP 200 requests with a 1,944.858 ms median. User-approved review measured 100% supported summaries, 90% directly usable Active tags, 100% eligible-tag coverage, 85.71% supported metadata, and 100% overall light-edit usability. All Gate 5E criteria passed, but the prior grounded-answer failure remains and the candidate is not selected or integrated.
    * Gates 5A through 5E and the final reconciliation prove bounded component feasibility and control seams only. They add no AI route/UI and select no final model or provider.
    * The accepted final outcome is **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions.
-   * D043 selects the smallest supportable provider-neutral MariaDB/PHP persistence direction for the passing components, explicitly keeps generated inquiry unavailable, and preserves the non-AI core. The exact executable migration, rollback, and live application remain a separate approval gate; `schema.sql` is unchanged.
+   * D043 selects the smallest supportable provider-neutral MariaDB/PHP persistence direction for the passing components, explicitly keeps generated inquiry unavailable, and preserves the non-AI core.
+
+5. **Completed the separately approved D043 storage gate.**
+
+   * Restore-verified the pre-migration backup against the exact 18-table and row-count baseline.
+   * Applied the exact 18-to-22 migration while Apache was stopped.
+   * Verified the exact 22-table set, five new D043 foreign keys, required checks, preserved original rows, empty new tables, and table health.
+   * Updated canonical `database/schema.sql` and passed the revised 60/60 fresh-schema/rollback/forward-migration verification without changing the configured live database during that disposable run.
 
 Remaining order:
 
-5. **Prepare the later architecture/schema decision without premature implementation.**
+6. **Implement the smallest provider-neutral persistence layer.**
 
-   * Completed checkpoints cover extraction success/failure, source-location fidelity, corrected segmentation, complete local embedding, PHP cosine correctness/timing, standalone retrieval relevance/latency, targeted manual relevance review, bounded local grounded-generation comparison, deterministic grounded-response/session/lifecycle controls, bounded related-resource evaluation, metadata-guarded safe no-result and positive regression, isolated end-user source-attribution presentation, natural-language follow-up comparison, rollback-based live lifecycle/fallback validation, and live relation-metadata/link validation.
-   * Continue using the accepted representative corpus, query set, versioned evaluator ground truth, and evidence-recording rules.
-   * The Gate 5A/5B/5C candidate foundation now covers default-off configuration, active-account and Approved/available source checks, exact source-file reference and protected-file checks, rollback-tested lifecycle/stale/missing-file transitions, second-point revalidation, protected `/resources/{id}` attribution shaping, bounded session-only identifiers, metadata-search/download fallback, and shared-active-tag live relation fallback with same-subject cross-topic exclusion.
-   * Final evidence reconciliation and the bounded recommendation are complete. Remaining design/integration questions include processing readiness, retrieval integration, real request classification, production-session behavior, persistent derived-data cleanup, complete application fallback, provider interruption/dependency handling, generation maintainability, and any missing resource observations.
-   * Classify the minimum persistent support for extracted content, locators, chunks, embeddings, readiness, failure, freshness, eligibility, invalidation, replacement independence, and cleanup without overloading `ai_outputs`.
-   * Keep provider/model selection separate and capability-specific; the Gate 5E pass does not authorize the failed grounded-inquiry configuration.
+   * Add bounded repositories for source versions, capability state, chunks, embeddings, and current outputs.
+   * Keep processing default-off and unrouted until integration tests pass.
 
-6. **Preserve and apply the accepted measured finding.**
+7. **Add one guarded local processing path.**
 
-   * Preserve both successful and failed runs.
-   * Distinguish original measurements from later versioned corrections and reviewer interpretation.
-   * Do not treat the final recommendation as an architecture decision. Its missing integration evidence is reflected in the Moderate confidence label and explicit risk/limitation sections.
+   * Reuse the accepted extraction, segmentation, embedding, readiness, run-token, and lifecycle controls.
+   * Persist no query vectors, inquiry transcripts, permanent answers, or cross-session memory.
 
-7. **Select the simplest workable architecture based on the measured results.**
+8. **Integrate semantic search and related resources behind live revalidation and metadata fallback.**
 
-   * Do not prefer a more complex architecture merely because it is newer or more scalable.
-   * Preserve beginner maintainability and capstone feasibility.
+   * Keep the non-AI repository fully usable.
+   * Preserve both successful and failed feasibility evidence; do not change thresholds to manufacture a pass.
 
-8. **Record the architecture/schema decision explicitly in `DECISIONS.md`.**
+9. **Consider optional summary/suggestion routing only after the storage/retrieval path passes.**
 
-   * Use the next available decision number at that time.
-   * Do not pre-assign the number in advance.
+   * Provider/model configuration remains separate and capability-specific.
+   * The Gate 5E pass does not authorize the failed grounded-inquiry configuration.
 
-9. **Apply targeted changes to `DATABASE_DESIGN.md` and `schema.sql`.**
-
-   * Only after the architecture/schema decision is accepted.
-   * Do not redesign unrelated tables.
-
-10. **Perform targeted D041–D042 AI/retrieval propagation into `SECURITY_NOTES.md` and `DATA_PRIVACY.md`.**
-
-    * Preserve accepted security/privacy principles.
-    * Correct superseded optional/stretch wording.
-    * Add only architecture-relevant retrieval controls and privacy handling.
-
-11. **Draft `AI_FEATURES.md`.**
-
-    * Use the accepted architecture, lifecycle rules, role rules, workflow rules, security rules, and privacy rules.
-
-12. **Draft `BUILD_PLAN.md`.**
-
-    * Use the accepted AI feature specification and updated database design.
-
-13. **Draft `TESTING_CHECKLIST.md`.**
-
-    * Include core workflows, AI behaviors, security controls, privacy-sensitive behavior, fallback behavior, and lifecycle exclusions.
-
-14. **Perform a final cross-document consistency review before implementation.**
-
-`BUILD_PLAN.md` must not be drafted before:
-
-* the feasibility spike;
-* the resulting architecture decision;
-* the targeted database-design/schema update;
-* the targeted security/privacy propagation;
-* `AI_FEATURES.md`.
-
-This ordering replaces the pre-D041/D042 documentation sequence.
+10. **Keep generated inquiry unavailable until a future versioned candidate passes every accepted criterion.**
 
 ---
 
@@ -1015,9 +985,9 @@ Read the latest project files first and treat them as source of truth:
 2. PROJECT_BRIEF.md (accepted and aligned through D042)
 3. USER_ROLES.md (accepted and aligned through D042)
 4. WORKFLOWS.md (accepted and aligned through D042)
-5. DATABASE_DESIGN.md (accepted conceptual target through D043; executable migration still deferred)
+5. DATABASE_DESIGN.md (accepted and executable 22-table baseline through D043)
 6. DECISIONS.md (through D043)
-7. schema.sql (verified current 18-table MariaDB 10.4.32 baseline; 13 enforced CHECK constraints; D043 target not yet applied)
+7. schema.sql (verified current 22-table MariaDB 10.4.32 baseline; D043 source/version/state/chunk/embedding persistence applied)
 8. SECURITY_NOTES.md (accepted and propagated through D043)
 9. DATA_PRIVACY.md (accepted and propagated through D043)
 10. AI_FEASIBILITY_SPIKE.md (accepted complete pre-run specification, Sections 1–26)
@@ -1026,11 +996,11 @@ Current verified state:
 
 - AI_FEASIBILITY_SPIKE.md is complete and accepted; the spike is partially executed, and the current completed and pending checkpoints are recorded in the controlling status sections below.
 - The canonical schema was verified on MariaDB 10.4.32.
-- All 18 tables import successfully.
+- All 22 tables import successfully from the canonical schema.
 - The remaining 13 CHECK constraints are recognized and enforced.
 - chk_resources_no_self_replace was removed because MariaDB 10.4.32 rejects a CHECK that compares against the AUTO_INCREMENT resources.id column.
 - PHP must enforce direct self-replacement and longer replacement-cycle prevention under D037.
-- D043 selects the provider-neutral MariaDB/PHP persistence and retrieval direction. No final provider, model, database upgrade, second database, or executable retrieval-related migration has been selected.
+- D043 selects and now persists the provider-neutral MariaDB/PHP storage direction. No final provider, model, database upgrade, second database, or generated-inquiry implementation has been selected.
 
 Current task:
 
@@ -1083,10 +1053,10 @@ Current verified state:
 - The bounded retrieval candidate achieved 100% resource top-five, 96% corrected passage top-five, practical isolated latency, 100% metadata fallback, and 100% explicit-filter correctness under the tested corpus.
 - The automatic predeclared-misleading criterion remains not met at 25%; manual review provides separate interpretation and does not erase that historical result.
 - Two synthetic local-generation preflights and two fixed six-case grounded comparisons are recorded. Llama 3.2 3B and Qwen3.5 4B each reached only 50% usefulness against the accepted 80% requirement; neither is selected as the interactive local solution or a reliable fallback. The later natural-language follow-up comparison completed ten cases per model: Llama interpreted 10/10 references but produced only 8/10 grounded correct answers, including one critical RBAC error, while Qwen produced 8/10 grounded correct answers and 8/10 correct context interpretations with two unnecessary clarification outcomes. Both missed the 15-second median target, so both follow-up runs are registered as failed and neither candidate is selected. The grounded-response control layer passed 21/21 cases, the deterministic session/lifecycle checkpoint passed 200/200 cases, the unguarded related-resource configuration met its two scored positive-case thresholds at 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness, and the metadata-guarded configuration passed one safe no-result case plus a five-case positive regression at 100% expected-resource display and 100% reviewed top-three usefulness. Isolated source-attribution presentation passed 10/10 cases. Gate 5C then passed 18/18 live shared-active-tag fallback checks at 4/4 expected-peer top-five coverage and 4/4 reviewed top-three usefulness on four controlled resources, with protected links and rollback-tested lifecycle exclusion. Final evidence reconciliation is complete and records the partial-feasibility outcome. Live production-session follow-up, processing-readiness/retrieval integration, persistent derived-data cleanup, and complete application fallback remain pending as integration-stage work.
-- MariaDB 10.4.32 successfully imports the verified 18-table schema.
+- MariaDB 10.4.32 successfully imports the verified 22-table canonical schema; the D043 rollback restores the exact historical 18-table baseline.
 - The remaining 13 CHECK constraints are recognized and enforced.
 - The incompatible direct self-replacement CHECK was removed; PHP must prevent direct self-replacement and longer cycles under D037.
-- D043 selects a provider-neutral MariaDB/PHP persistence and retrieval direction, while the provider, model, exact executable migration, database upgrade, second database, and generated-inquiry integration remain unselected or unauthorized.
+- D043 selects a provider-neutral MariaDB/PHP persistence and retrieval direction, and its exact executable migration/database upgrade is complete. The provider, model, second database, application persistence integration, and generated-inquiry integration remain unselected or unauthorized.
 
 Your job:
 
@@ -1201,9 +1171,9 @@ AI capabilities explicitly deferred beyond v1.0 — including OCR, AI vision, pe
 
 The accepted schema has now been executed and verified against MariaDB 10.4.32.
 
-Do not reintroduce the incompatible direct self-replacement `CHECK`, silently change the verified 18-table baseline, or treat database enforcement as a replacement for PHP validation.
+Do not reintroduce the incompatible direct self-replacement `CHECK`, silently change the verified 22-table baseline, or treat database enforcement as a replacement for PHP validation.
 
-Future retrieval-related schema work must remain separate and must wait for measured spike findings plus an explicit architecture/schema decision.
+Any future retrieval-related schema change beyond D043 must remain separate and must wait for measured evidence plus an explicit architecture/schema decision.
 
 ### 19.2 Decision-propagation gaps
 
@@ -1300,7 +1270,7 @@ BPC LearnShare v1.0 currently has:
 * `WORKFLOWS.md` — accepted and aligned through D043;
 * `DATABASE_DESIGN.md` — accepted conceptual direction through D043 with four targeted derived-data tables;
 * `DECISIONS.md` — accepted through D043;
-* `schema.sql` — accepted and verified current 18-table MariaDB 10.4.32 baseline; D043's 22-table target is not yet migrated;
+* `schema.sql` — accepted and verified current 22-table MariaDB 10.4.32 baseline after the guarded D043 migration;
 * `SECURITY_NOTES.md` — complete and accepted through D043 targeted propagation;
 * `DATA_PRIVACY.md` — complete and accepted through D043 targeted propagation;
 * `AI_FEATURES.md` — drafted as the D043 AI behavior/architecture baseline;
@@ -1327,17 +1297,17 @@ Completed verification:
 
 * actual server/client version recorded as MariaDB 10.4.32;
 * canonical schema imported successfully into a fresh verification database;
-* all 18 accepted tables created;
-* 13 remaining `CHECK` constraints recognized;
+* all 22 accepted tables created by the current canonical schema;
+* legacy and D043 `CHECK` constraints recognized and the five new D043 foreign keys verified;
 * actual `CHECK` enforcement confirmed through rejection of an invalid `ai_enabled` value;
-* incompatible `chk_resources_no_self_replace` removed without changing the 18-table design;
+* incompatible `chk_resources_no_self_replace` removed from the historical 18-table baseline without weakening the PHP replacement-cycle rule;
 * direct self-replacement and longer-cycle prevention explicitly retained as mandatory PHP application rules under D037.
+* restore-verified pre-migration backup preserved under the ignored local evidence directory;
+* live 18-to-22 migration preserved every original row count and left the four new tables empty;
+* revised canonical/fresh/forward/rollback verifier passed 60/60 checks.
 
 Known scheduled implementation remains:
 
-* exact executable D043 migration and rollback review;
-* disposable MariaDB 10.4.32 migration/rollback verification and 22-table count;
-* `schema.sql` update and live migration only after separate approval;
 * source-version/state/chunk/embedding repositories and bounded processor;
 * routed semantic retrieval/related-resource integration and complete lifecycle/fallback regression.
 
@@ -1352,7 +1322,7 @@ Important remaining items:
 * evaluate the observed external-provider dependence, quota, cost, privacy, interruption, and fallback limitations before any candidate or architecture decision;
 * select the simplest workable AI architecture only after the complete evidence package is reviewed.
 
-The bounded related-resource evaluation, safe no-result controls, source-attribution presentation, follow-up comparison, lifecycle/fallback validation, external grounded comparison, summary/suggestion evaluation, final evidence reconciliation, and D043 disposable migration/rollback verification are complete. The reconciled outcome remains **Partially feasible — alternative or mixed architecture required**. D043 selects the targeted persistence/retrieval direction, but no generation provider/model, live migration, generated inquiry, or application UI integration is selected. The next decision is whether to accept the verified package for a separately guarded live/canonical-schema migration before bounded repository/processor integration.
+The bounded related-resource evaluation, safe no-result controls, source-attribution presentation, follow-up comparison, lifecycle/fallback validation, external grounded comparison, summary/suggestion evaluation, final evidence reconciliation, and D043 live/canonical migration verification are complete. The reconciled outcome remains **Partially feasible — alternative or mixed architecture required**. The 22-table persistence baseline is established, but no generation provider/model, generated inquiry, or application AI UI is selected. The next implementation gate is the smallest provider-neutral repository/processor path with complete lifecycle and fallback verification.
 
 The registered 200-case session/lifecycle checkpoint establishes deterministic control behavior only. Gate 5B separately passed its bounded live PHP/MariaDB status, staleness, file, account, final-revalidation, and fallback control-seam checks. Production-session natural-language follow-up, persistent derived-data cleanup, real-provider interruption behavior, and complete application fallback remain separate integration-stage requirements.
 

@@ -4,7 +4,7 @@
 
 This document is the security reference for BPC LearnShare v1.0. It states the security controls that must be enforced, where they must be enforced, and what practical risks they reduce for a local machine or small campus LAN deployment demonstrated on XAMPP.
 
-This document does not introduce new roles, resource statuses, report statuses, or workflow authority. Its original Sections 1–15 were written against the verified 18-table D033 baseline. D043 later accepted a conceptual 22-table target for four named AI-derived-data tables while leaving the current `schema.sql` and live database at 18 tables until a separate migration review. The D043 propagation in Section 15.8 controls that targeted addition.
+This document does not introduce new roles, resource statuses, report statuses, or workflow authority. Its original Sections 1–15 were written against the verified 18-table D033 baseline. D043 later added four named AI-derived-data tables through a separately approved, restore-verified, guarded migration. The current `schema.sql` and configured database are now the verified 22-table baseline. The D043 propagation in Section 15.8 controls those additions.
 
 This document also resolves a small number of implementation-level security mechanics that earlier documents intentionally left open, including:
 
@@ -37,11 +37,11 @@ This document translates confirmed rules into security-framed requirements. It d
 
 Specifically, this document:
 
-* **Does not introduce new roles, resource statuses, report statuses, or authority.** The four roles, nine resource statuses, and four report statuses remain exactly as confirmed. D043 separately authorizes four named AI-derived-data tables as a later migration target.
+* **Does not introduce new roles, resource statuses, report statuses, or authority.** The four roles, nine resource statuses, and four report statuses remain exactly as confirmed. D043 separately authorized and now persists four named AI-derived-data tables.
 * **Does not change any confirmed permission, workflow transition, or access rule.** Where this document restates a rule from `USER_ROLES.md`, `WORKFLOWS.md`, or `DATABASE_DESIGN.md`, it must match the original rule exactly.
 * **Does not change the AI eligibility model.** Status-based AI eligibility (D014), the non-authoritative AI rule (D013, D015), and the notice-acknowledgment gate remain unchanged.
 * **Does not change the `file_availability` model.** The three states (`available`, `deleted`, `invalidated`) and the dual-gate serving rule from D034 remain as confirmed.
-* **Does not execute a schema change.** D043 accepts only the targeted AI persistence direction. Any unrelated security column/table, and the exact D043 executable migration itself, still require their appropriate review gates.
+* **Does not itself execute a schema change.** The D043 migration was completed through its own approved gate. Any unrelated security column/table still requires its appropriate review and decision gate.
 
 If a proposed security control conflicts with a confirmed decision, the conflict must be flagged and resolved through the project's established process, not resolved by quietly treating this document as more authoritative.
 
@@ -1836,7 +1836,7 @@ This document was written against, and remains consistent with:
 * `WORKFLOWS.md`
 * `DATABASE_DESIGN.md`
 * `DECISIONS.md` through D043
-* `schema.sql` with the D039-patched `audit_log` table and D040 application-level removal-behavior documentation; still 18 tables pending the separate D043 migration gate
+* `schema.sql` with the D039-patched `audit_log` table, D040 application-level removal-behavior documentation, and the separately approved and verified D043 22-table persistence baseline
 * `PROJECT_HANDOFF.md`
 
 No unresolved conflict with these source documents remains as of this section. The still-open MariaDB/MySQL CHECK-constraint confirmation is a verification task, not a document conflict.
@@ -1845,7 +1845,7 @@ No unresolved conflict with these source documents remains as of this section. T
 
 The following implementation-security decisions were resolved within `SECURITY_NOTES.md` because earlier documents either assigned them here or left them for security planning.
 
-These decisions do not change v1.0 scope, roles, resource statuses, report statuses, or the 18-table schema count:
+These decisions do not change v1.0 scope, roles, resource statuses, or report statuses. The current 22-table count is established separately by D043:
 
 * passwords are hashed and verified using `password_hash()` and `password_verify()`;
 * minimum password length is 8 characters, with no forced composition rules;
@@ -1907,7 +1907,8 @@ The CHECK-constraint version check must be completed before `BUILD_PLAN.md` trea
 | Draft 1.0 | 2026-07-09 | Initial complete draft of `SECURITY_NOTES.md`, Sections 1–15. Translates confirmed authentication, authorization, resource/file-status, audit, document-root, file-upload, validation, AI, and concurrency rules into security-specific requirements. Resolves the implementation-security decisions listed in Section 15.3. Identifies and resolves the D039 audit-log alignment gap. Consolidates known v1.0 security limitations into the risk register in Section 13 and identifies security behaviors to verify later in Section 14. |
 | Draft 1.1 | 2026-07-09 | Consistency pass: closed the D039 propagation gap in Section 6.3, Section 9.1, Section 9.5, Section 9.8, Section 10.2, and Section 10.6, where the audit-log `action_type` / `target_type` extension was correctly resolved in Section 9.6 but not fully propagated into surrounding references. No new scope, roles, statuses, workflows, modules, or schema tables introduced. |
 | Draft 1.2 | 2026-07-10 | Integrated D040 Removed-resource minimization: exact descriptive-field placeholders, `resource_tags` deletion, retained-but-not-anonymized accountability data, distinction from Withdrawn handling, coordinated database/filesystem lifecycle guidance, risk-register coverage, and dedicated security-testing seeds. No new table, column, role, status, module, workflow, or AI feature introduced. |
-| Draft 1.3 | 2026-08-20 | Propagated D041–D043: required-capability inquiry framing with current generated-inquiry unavailability; targeted source-version/state/chunk/embedding persistence; live eligibility/freshness revalidation; late-result rejection; local/provider secret and payload boundaries; and explicit separation between the accepted 22-table target and the still-unmodified 18-table SQL baseline. |
+| Draft 1.3 | 2026-08-20 | Propagated D041–D043 before migration execution: required-capability inquiry framing with current generated-inquiry unavailability; targeted source-version/state/chunk/embedding persistence; live eligibility/freshness revalidation; late-result rejection; local/provider secret and payload boundaries; and explicit separation between the then-accepted 22-table target and then-unmodified 18-table SQL baseline. |
+| Draft 1.4 | 2026-08-20 | Reconciled the completed D043 storage gate: restore-verified backup, live 18-to-22 migration, canonical 22-table schema, disposable rollback/forward verification, preserved legacy rows, and empty derived-data tables. Application AI integration remains separately gated. |
 
 ### 15.7 Relationship to Other Source-of-Truth Documents
 

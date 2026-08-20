@@ -25,7 +25,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 ### 2.1 Planning and evidence already available
 
 - Accepted project scope, role model, workflows, database design, security rules, and privacy rules.
-- Verified MariaDB 10.4.32-compatible 18-table current schema baseline; D043 accepts a later reviewed 22-table AI-derived-data target.
+- Verified MariaDB 10.4.32-compatible 22-table current schema. The guarded D043 live migration and canonical fresh-import update were completed on 2026-08-20 from the restore-verified 18-table legacy baseline.
 - Completed AI feasibility evidence for:
   - readable-text extraction;
   - corrected segmentation;
@@ -34,7 +34,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
   - standalone semantic retrieval;
   - manual relevance review;
   - versioned ground-truth correction and evaluation.
-- D043 now accepts the bounded native-PHP/MariaDB direction with four targeted derived-data tables and PHP cosine retrieval. Exact migration SQL, provider/model selection, generated inquiry, and application integration remain separately gated.
+- D043 accepts the bounded native-PHP/MariaDB direction with four targeted derived-data tables and PHP cosine retrieval. The exact migration/rollback and canonical schema are verified; provider/model selection, generated inquiry, and application integration remain separately gated.
 
 ### 2.2 Current implementation reality
 
@@ -43,7 +43,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 - Gate 5B reused that foundation against live MariaDB state and passed 19/19 rollback-based lifecycle and fallback checks. Hidden, Restricted, Removed, Replaced, deleted, invalidated, stale-reference, missing-file, size-drift, disabled-account, disabled-AI, unavailable-provider, and final-revalidation cases failed closed; metadata search and protected-download lookup remained available when AI was disabled. The transaction was rolled back, the protected file hash was unchanged, and no real provider was called.
 - Gate 5C added an unrouted shared-active-tag metadata-fallback candidate and passed 18/18 live PHP/MariaDB checks against two accepted synthetic Security resources and two accepted synthetic Usability resources. Expected-pair top-five coverage and reviewed top-three usefulness were both 4/4 (100%); self-results and same-subject cross-topic results were excluded; protected `/resources/{id}` links resolved through Approved-only lookup; and Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, and disabled-requester cases failed closed. All test mutations and view increments were rolled back in the accepted run.
 - The Gate 5A/5B/5C classes are not user-facing AI features and do not prove processing readiness, semantic retrieval integration, real request classification, grounded-answer quality, a production-session follow-up flow, or complete derived-data cleanup. Gate 5C validates one bounded metadata fallback on four controlled live resources; it does not select the final related-resource rule.
-- Two synthetic local-generation preflights, two bounded local six-case grounded comparisons, the ten-case natural-language follow-up comparison, and one guarded six-case external grounded comparison are complete. Neither local candidate met all accepted follow-up quality and latency criteria. The external Groq/GPT-OSS candidate met latency and usefulness criteria but failed strict claim support and source attribution. Gate 5E later met every accepted summary/controlled-suggestion threshold. Final evidence reconciliation is complete with the bounded outcome **Partially feasible — alternative or mixed architecture required** and Moderate confidence within tested conditions. D043 selects the targeted local persistence/PHP retrieval direction only. No provider/model or generated-inquiry implementation is selected; exact migration, routed integration, cleanup, and complete fallback remain implementation work.
+- Two synthetic local-generation preflights, two bounded local six-case grounded comparisons, the ten-case natural-language follow-up comparison, and one guarded six-case external grounded comparison are complete. Neither local candidate met all accepted follow-up quality and latency criteria. The external Groq/GPT-OSS candidate met latency and usefulness criteria but failed strict claim support and source attribution. Gate 5E later met every accepted summary/controlled-suggestion threshold. Final evidence reconciliation is complete with the bounded outcome **Partially feasible — alternative or mixed architecture required** and Moderate confidence within tested conditions. D043 selects the targeted local persistence/PHP retrieval direction only. Its 22-table storage migration is complete, but no provider/model or generated-inquiry implementation is selected; routed integration, cleanup, and complete fallback remain implementation work.
 
 ---
 
@@ -86,7 +86,7 @@ The presentation checkpoint does not redefine this final scope.
 2. **Work in vertical slices.** Finish and test one complete user path before starting another.
 3. **Enforce rules on the server.** Hidden buttons are not authorization.
 4. **Fail closed.** If identity, role, status, ownership, file availability, CSRF, or input validity cannot be confirmed, deny the operation.
-5. **Use the current 18-table schema as-is until the exact D043 migration and rollback are separately reviewed, approved, and verified.**
+5. **Use the verified 22-table D043 schema as the current baseline.** Do not add provider-specific tables or bypass its source-version, readiness, freshness, and lifecycle controls.
 6. **Keep uploaded files outside `public/`.** Serve them only through a checked PHP endpoint.
 7. **Use prepared statements and output escaping everywhere.**
 8. **Keep state-changing requests protected by CSRF tokens.**
@@ -474,16 +474,16 @@ Pass when:
 
 ## 7. Next AI Checkpoints
 
-The related-resource, lifecycle/fallback, live relation-metadata/link, external grounded-generation, Gate 5E summary/controlled-suggestion, final evidence-reconciliation, and D043 disposable-migration checkpoints are complete. D043 accepts the smallest measured architecture direction: four targeted MariaDB derived-data tables, bounded PHP cosine with metadata filters/fallback, optional reviewed summaries/suggestions behind a replaceable adapter, and generated inquiry unavailable until a later candidate passes. The exact migration/rollback package passed 51/51 checks on a disposable MariaDB 10.4.32 database. No provider/model, live migration, or application integration is selected.
+The related-resource, lifecycle/fallback, live relation-metadata/link, external grounded-generation, Gate 5E summary/controlled-suggestion, final evidence-reconciliation, and D043 storage checkpoints are complete. D043 accepts the smallest measured architecture direction: four targeted MariaDB derived-data tables, bounded PHP cosine with metadata filters/fallback, optional reviewed summaries/suggestions behind a replaceable adapter, and generated inquiry unavailable until a later candidate passes. The guarded live migration established 22 tables with preserved legacy rows, and the revised disposable verifier passed 60/60 checks for canonical creation, forward migration, and rollback. No provider/model or application AI integration is selected.
 
 ### 7.9 D043 architecture and migration sequence
 
-D043 accepts the conceptual 22-table target. The executable package is now disposable-verified but has not changed the current database. Continue in these gates:
+D043's 22-table target is now the verified live and canonical schema. Continue in these gates:
 
 1. **Completed:** draft exact MariaDB 10.4.32 migration and rollback SQL for `ai_source_versions`, `ai_processing_states`, `ai_chunks`, `ai_embeddings`, and targeted `ai_outputs` identity fields.
 2. **Completed:** inspect existing `ai_outputs` and define fail-closed sequencing. The live read-only count was zero; the migration invalidates rather than fabricates identity for any legacy active row.
 3. **Completed:** pass 51/51 checks for the exact 18-to-22 migration, constraints, controlled legacy-row handling, and 22-to-18 rollback on a disposable database.
-4. **Pending separate approval:** decide whether to update the canonical schema/migration state and apply SQL to the project database under backup, maintenance, and post-check guards.
+4. **Completed:** restore-verify the ignored local backup, apply the live 18-to-22 migration under maintenance, preserve original row counts, verify constraints/table health, update canonical `schema.sql`, and pass the revised 60-check disposable verifier.
 5. Implement small PHP repositories and one CLI/admin-triggered processor with source/run-token revalidation.
 6. Integrate semantic search and related resources with live status/access/file/readiness/freshness checks and metadata fallback.
 7. Add optional summary/suggestion adapter only after provider configuration/terms/privacy are separately reviewed.

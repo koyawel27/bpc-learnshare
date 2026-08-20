@@ -4,7 +4,7 @@
 
 This document is the privacy reference for BPC LearnShare v1.0. It aligns the already-confirmed v1.0 design — roles, resource statuses, workflows, database design, accepted schema, and security controls — with general principles of the Philippine Data Privacy Act (Republic Act No. 10173), at a level appropriate for a local/LAN BS Information Systems capstone MVP, not a production campus deployment.
 
-This document does not itself introduce new roles, resource statuses, report statuses, database tables, fields, modules, workflows, or AI features. The four confirmed v1.0 roles (Student, Teacher/Instructor, Moderator, Admin), nine confirmed resource statuses, and four report statuses remain unchanged. The executable schema remains the verified 18-table baseline; D043 separately accepts a provider-neutral 22-table target for a later, independently reviewed AI persistence migration.
+This document does not itself introduce new roles, resource statuses, report statuses, database tables, fields, modules, workflows, or AI features. The four confirmed v1.0 roles (Student, Teacher/Instructor, Moderator, Admin), nine confirmed resource statuses, and four report statuses remain unchanged. The separately approved D043 migration established the verified provider-neutral 22-table persistence baseline.
 
 This document consolidates privacy-relevant rules already established in `PROJECT_BRIEF.md`, `DECISIONS.md`, `USER_ROLES.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `schema.sql`, and `SECURITY_NOTES.md`. It explains their significance from a data-privacy standpoint rather than redefining them as new workflow, database, security, or AI requirements.
 
@@ -29,7 +29,7 @@ This document restates confirmed decisions. It does not reopen, silently reinter
 
 Specifically, this document:
 
-* **Does not itself introduce new roles, resource statuses, report statuses, tables, fields, modules, workflows, permissions, or AI features.** The executable schema remains at 18 tables until the separate D043 migration gate is approved and applied; the accepted later target is 22 tables.
+* **Does not itself introduce new roles, resource statuses, report statuses, tables, fields, modules, workflows, permissions, or AI features.** The separate D043 gate has already established the verified 22-table schema; this privacy document only explains the handling requirements for those structures.
 * **Does not change any confirmed permission, ownership rule, workflow transition, or visibility rule.** Where this document restates a rule from `USER_ROLES.md` or `WORKFLOWS.md`, it must match the original rule.
 * **Does not change the AI eligibility model.** Status-based AI eligibility (D014), the non-authoritative AI rule (D013 and D015), the optional Phase 5 boundary (D016), and the Pending-file validation, notice, and acknowledgment requirements remain unchanged.
 * **Does not change the `file_availability` model.** The three values (`available`, `deleted`, `invalidated`) and the dual-gate file-serving rule from D034 remain as confirmed.
@@ -101,7 +101,7 @@ Under D041–D042, repository-grounded inquiry is a defining completed-capstone 
 | `USER_ROLES.md`        | Source of the four-role permission model, ownership boundaries, staff authority, status-based visibility expectations, and AI-related permissions. This document explains their privacy significance without redefining them.                                                                                                                                                 |
 | `WORKFLOWS.md`         | Source of the confirmed operational behavior for registration, upload, moderation, resource visibility, reporting, withdrawal, replacement, AI notice and acknowledgment, AI output lifecycle, notifications, and historical handling.                                                                                                                                        |
 | `DATABASE_DESIGN.md`   | Source of the conceptual data inventory and data-minimization direction. Section 3 and Appendix A identify the required data areas and table purposes; Sections 14 and 18.5 inform AI-output lifecycle and retained-accountability discussion.                                                                                                                                |
-| `schema.sql`           | Source of the currently verified 18-table implementation baseline. D043 accepts a later 22-table target for four AI-derived-data tables, but the executable migration remains separately gated and has not changed `schema.sql` yet. |
+| `schema.sql`           | Source of the currently verified 22-table implementation baseline. D043 added four provider-neutral AI-derived-data tables through a separately reviewed, backup-protected, and verified migration; application AI integration remains separately gated. |
 | `SECURITY_NOTES.md`    | Source of the implementation-facing controls that enforce privacy-relevant boundaries, especially object/view restrictions, controlled file serving, audit-log safety, polymorphic target validation, AI security boundaries, and known v1.0 limitations. This document explains why those controls matter for privacy without re-deriving them.                              |
 | `PROJECT_HANDOFF.md`   | Identifies `DATA_PRIVACY.md` as the current documentation phase and defines the scope, AI privacy rules, institutional-responsibility boundaries, and conflict-handling requirements this document must follow.                                                                                                                                                               |
 | `BUILD_PLAN.md`        | Written after this document. The privacy carry-forward section will identify requirements the implementation sequence must preserve.                                                                                                                                                                                                                                          |
@@ -163,7 +163,7 @@ This document continues to use general Philippine Data Privacy Act (RA 10173) pr
 
 ### 3.1 Purpose of This Inventory
 
-This section identifies the categories of data that BPC LearnShare v1.0 actually stores and processes, based only on the accepted 18-table schema (`schema.sql`) and the confirmed workflows in `WORKFLOWS.md` and `DATABASE_DESIGN.md`. It does not introduce new fields, tables, or tracking mechanisms, and it does not reach a formal legal conclusion about which items constitute personal or sensitive personal information under RA 10173 in every circumstance.
+This section identifies the categories of data that BPC LearnShare v1.0 stores or is structurally prepared to store and process, based only on the accepted 22-table schema (`schema.sql`) and the confirmed workflows in `WORKFLOWS.md` and `DATABASE_DESIGN.md`. It does not introduce new fields, tables, or tracking mechanisms beyond that baseline, and it does not reach a formal legal conclusion about which items constitute personal or sensitive personal information under RA 10173 in every circumstance.
 
 It describes what the system handles and notes where privacy relevance is apparent so that later sections can build on an accurate inventory rather than an assumed one.
 
@@ -5269,7 +5269,7 @@ After `DATA_PRIVACY.md` is completed and before detailed `BUILD_PLAN.md` draftin
 
 1. run the accepted `schema.sql` against a fresh local XAMPP database;
 2. confirm the actual database engine and version;
-3. verify that the accepted 18-table schema executes successfully;
+3. verify that the accepted schema executes successfully (historically 18 tables at this checkpoint; now 22 tables after the separately approved D043 gate);
 4. check actual CHECK-constraint support and enforcement;
 5. verify foreign keys, unique constraints, CHECK constraints, and critical indexes;
 6. fix only actual SQL execution or compatibility errors without redesigning the accepted schema by preference;
@@ -5763,7 +5763,7 @@ Verify:
 * the actual database version;
 * actual CHECK-constraint support and enforcement;
 * PHP validation remains effective regardless of CHECK behavior;
-* the accepted schema creates exactly 18 tables;
+* the current accepted schema creates exactly 22 tables, while the D043 rollback restores the historical 18-table baseline;
 * D039 action and target enums are present;
 * D039 action/target CHECK behavior is present where supported;
 * D040 schema comments and application behavior remain aligned;
@@ -5870,7 +5870,7 @@ This document was written against and remains aligned with:
 * `USER_ROLES.md`;
 * `WORKFLOWS.md`;
 * `DATABASE_DESIGN.md`;
-* `schema.sql` — the currently verified 18-table baseline with the D039 `audit_log` patch and D040 removal-lifecycle documentation; the accepted D043 22-table target remains pending separate migration approval;
+* `schema.sql` — the currently verified 22-table baseline with the D039 `audit_log` patch, D040 removal-lifecycle documentation, and the separately approved and verified D043 persistence structures;
 * `SECURITY_NOTES.md`;
 * `PROJECT_HANDOFF.md`.
 
@@ -5930,7 +5930,7 @@ D040 introduces:
 * no new column;
 * no additional resource status.
 
-The currently implemented and verified schema remains exactly 18 tables. D043 separately accepts a conceptual 22-table target by adding `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`; no executable migration has been approved or run by this privacy-document update.
+The currently implemented and verified schema is exactly 22 tables. D043 added `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings` through a separately approved migration with backup/restore, rollback, forward-migration, legacy-row-preservation, and empty-new-table verification. This structural completion does not authorize application processing, a provider/model, or generated inquiry.
 
 No D041 is required solely because of this document.
 
@@ -6054,7 +6054,8 @@ They are intentionally assigned to the later documents and verification stages t
 | Version         | Date         | Change                                                                                                                                                                                                                                                                                                         | Status                                                                           |
 | --------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `v1.0-planning` | `2026-07-11` | Created and aligned `DATA_PRIVACY.md` Sections 1–15 with accepted sources through D040, including two-ledger privacy rules, AI notice and external-transmission boundaries, AI-output lifecycle privacy, D040 Removed-resource minimization, retention limitations, and downstream carry-forward requirements. | Complete for v1.0 planning — pending final whole-document consistency validation |
-| `v1.1-d043` | `2026-08-20` | Propagated D041–D043 inquiry scope and targeted local persistence: derived extracted text/chunks/vectors as protected data, source-version freshness, live eligibility, late-result rejection, provider payload/log minimization, Removed cleanup, session-only inquiry context, and the distinction between the accepted 22-table target and the still-unmodified 18-table SQL baseline. | Complete for D043 privacy propagation; migration remains pending separate approval |
+| `v1.1-d043` | `2026-08-20` | Propagated D041–D043 inquiry scope and targeted local persistence: derived extracted text/chunks/vectors as protected data, source-version freshness, live eligibility, late-result rejection, provider payload/log minimization, Removed cleanup, session-only inquiry context, and the distinction between the 22-table target and historical 18-table rollback baseline. | Complete for D043 privacy propagation |
+| `v1.2-d043-storage` | `2026-08-20` | Reconciled the separately approved and verified D043 storage gate. The current schema/live database contain 22 tables; application AI processing, provider/model selection, and generated inquiry remain separately gated. | Complete for structural storage reconciliation |
 
 ### 15.7 Final Boundary
 
@@ -6107,7 +6108,7 @@ Privacy controls are:
 
 Any optional external summary/suggestion adapter requires separately reviewed provider terms, retention/ZDR, quota, security, and authorization; clear applicable notice; payload minimization; secret protection; and a working non-AI path. Provider/model selection remains unresolved.
 
-The exact migration must include deletion/rollback/backfill tests and must not be executed on the live project database merely because the conceptual 22-table target is accepted.
+The exact migration was executed only after separate approval and passed backup/restore, deletion/rollback, forward-migration, legacy-row-preservation, and empty-new-table checks. Future migration or backfill changes must receive the same separate review and must not be inferred from D043 alone.
 
 ---
 

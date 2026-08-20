@@ -3,7 +3,7 @@
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0 — D043 implementation baseline
 **Last Updated:** 2026-08-20
-**Status:** Accepted AI architecture/behavior planning through D043; migration and application integration pending
+**Status:** Accepted AI architecture/behavior planning through D043; 22-table persistence migration applied and verified; application integration pending
 
 ---
 
@@ -32,14 +32,14 @@ The accepted architecture does not select a permanent provider/model and does no
 
 ## 3. Persistent derived-data boundary
 
-After a separately approved migration, the conceptual 22-table target adds:
+The approved and verified 22-table schema adds:
 
 * `ai_source_versions` for exact protected-file fingerprint/version and extracted readable text;
 * `ai_processing_states` for per-capability readiness/failure/configuration and late-result protection;
 * `ai_chunks` for version-bound text and verified locators;
 * `ai_embeddings` for chunk-bound vector data and embedding identity.
 
-The current SQL baseline remains 18 tables until the migration is separately approved, implemented, and verified.
+On 2026-08-20, the guarded migration changed the configured database and canonical `database/schema.sql` from the legacy 18-table baseline to the accepted 22-table target. The four new tables were verified empty, all original row counts were preserved, and the up/down package remained disposable-tested. This structural completion does not mean that an AI processor, provider/model, generated inquiry, or user-facing AI route is integrated.
 
 `ai_outputs` remains the current-value store for accepted output types such as summaries, controlled suggestions, duplicate flags, and moderation hints. It must not store extraction text, chunks, vectors, retrieval histories, query vectors, inquiry answers, citations, chat messages, or permanent session memory.
 
@@ -161,13 +161,14 @@ Moving the local model directory does not change vector meaning when the same mo
 
 ## 10. Implementation and testing gate
 
-D043 accepts the architecture direction. The exact migration package has passed disposable verification; before integration:
+D043 accepts the architecture direction. The exact migration package has passed disposable and guarded live verification; before application integration:
 
 1. **Completed:** review exact executable migration and rollback SQL;
 2. **Completed:** verify a fresh MariaDB 10.4.32 import and expected 22-table count;
 3. **Completed:** verify fail-closed handling for existing `ai_outputs` without fabricated source/configuration identity;
-4. implement repositories and processing orchestration;
-5. pass source freshness, concurrency, cleanup, eligibility, security/privacy, retrieval regression, and AI-disabled fallback tests;
-6. obtain owner browser acceptance for any user-visible AI surface.
+4. **Completed:** back up and restore-verify the legacy database, apply the live 18-to-22 migration, verify preserved rows/constraints, and update the canonical schema;
+5. implement repositories and processing orchestration;
+6. pass source freshness, concurrency, cleanup, eligibility, security/privacy, retrieval regression, and AI-disabled fallback tests;
+7. obtain owner browser acceptance for any user-visible AI surface.
 
 No provider/model selection or generated-inquiry integration is implied by completing the storage migration.

@@ -301,22 +301,25 @@ The v2 run completed 8/8 requests with a 1,944.858 ms median and 8/8 within 15 s
 | AI-FIN-004 | P0 | Prepare and review smallest justified architecture/schema impact | No premature vector database or provider-specific expansion | Passed — D043 accepts four targeted MariaDB derived-data tables and bounded PHP cosine; no vector database, second database, upgrade, provider/model, or generated inquiry selected |
 | AI-FIN-005 | P0 | Confirm core non-AI independence | Final direction preserves graceful fallback | Passed — core upload, moderation, metadata search, browsing, view, and protected download remain independent of AI |
 
-The final evidence outcome is **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. This closes the feasibility-reconciliation checkpoint only. It does not select a provider/model, authorize generated inquiry or application integration, change the database schema, or replace the integrated tests below.
+The final evidence outcome is **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. That recommendation did not itself change the schema or select a provider/model. The separately approved D043 gate later established the verified 22-table persistence baseline; generated inquiry and application AI integration remain unauthorized or unimplemented.
 
 ### 11.5 D043 architecture/schema decision checks
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
 | AI-ARCH-001 | P0 | Reconcile D043 with the final feasibility recommendation | Four targeted local tables; PHP cosine; no unsupported infrastructure | Passed — documentation review 2026-08-20 |
-| AI-ARCH-002 | P0 | Confirm current/target schema distinction | Current `schema.sql` remains 18 tables; 22 is a later migration target | Passed — documentation review 2026-08-20 |
+| AI-ARCH-002 | P0 | Confirm current/legacy schema distinction | Current `schema.sql` and configured database are exactly 22 tables; 18 remains the guarded rollback baseline | Passed — live/canonical verification 2026-08-20 |
 | AI-ARCH-003 | P0 | Confirm `ai_outputs` boundary | Current outputs only; no chunks, vectors, retrieval/chat history | Passed — documentation review 2026-08-20 |
 | AI-ARCH-004 | P0 | Confirm provider/model/inquiry boundary | No provider/model selected; generated inquiry unavailable until a passing candidate | Passed — documentation review 2026-08-20 |
 | AI-ARCH-005 | P0 | Confirm non-AI fallback | Core upload/moderation/search/view/download remain independent | Passed — decision review; live regression still required after integration |
-| AI-MIG-001 | P0 | Review exact executable MariaDB migration and rollback | SQL, backfill, constraints, and rollback accepted before execution | Passed — exact guarded up/down package reviewed and executed only on disposable MariaDB 10.4.32, 2026-08-20 |
+| AI-MIG-001 | P0 | Review exact executable MariaDB migration and rollback | SQL, backfill, constraints, and rollback accepted before execution | Passed — exact guarded up/down package reviewed before disposable and live execution on MariaDB 10.4.32, 2026-08-20 |
 | AI-MIG-002 | P0 | Apply migration to disposable MariaDB 10.4.32 database | Exactly 22 tables; all expected foreign keys/indexes/checks present | Passed — exact 22-table set plus required columns, foreign keys, CHECK constraints, source uniqueness, locator, vector-dimension, and cross-resource binding guards verified |
 | AI-MIG-003 | P0 | Roll back disposable migration | Original 18-table baseline restored without unrelated data loss | Passed — exact 18-table set restored; controlled account, resource, and AI-output accountability rows preserved; derived tables removed |
 | AI-MIG-004 | P0 | Inspect/backfill existing `ai_outputs` | No active output receives fabricated source/config identity | Passed — live read-only count was zero; a controlled legacy active row was preserved but invalidated and left unbound during disposable verification |
 | AI-MIG-005 | P0 | Verify protected repo/database gate | No live DB or `schema.sql` change occurred before approval | Passed — 51-check accepted run retained live 18-table count and exact protected schema hash; disposable database removed |
+| AI-MIG-006 | P0 | Create and restore-verify pre-migration backup | Exact legacy schema and row counts recoverable before live DDL | Passed — ignored single-transaction dump SHA-256 verified by exact 18-table temporary restore and row-count reconciliation |
+| AI-MIG-007 | P0 | Apply guarded live migration | Configured database becomes exact 22-table set with original rows preserved and four new empty tables | Passed — table set, five D043 foreign keys, required checks, original counts, empty new tables, and `CHECK TABLE` results verified |
+| AI-MIG-008 | P0 | Update and verify canonical schema | Fresh import creates exact 22-table set; legacy up/down path remains valid | Passed — revised disposable verifier passed 60/60 checks for fresh 22, rollback 18, forward 22, behavior guards, and final rollback 18 while live remained 22 |
 
 The first disposable harness attempt failed safely after the forward SQL because its expected statement count was incorrect (expected 10, actual 8). The disposable database was removed. Only the verifier's forward/rollback statement-count expectations were corrected to the actual 8/8; no SQL constraint or acceptance criterion was weakened. The corrected run then passed 51/51 checks.
 
@@ -324,7 +327,7 @@ The first disposable harness attempt failed safely after the forward SQL because
 
 ## 12. Integrated AI Prototype Tests
 
-Run only after D043's verified migration package receives separate live-application approval and the relevant application integration is implemented. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
+Run only after the relevant application repositories/processors and routes are separately implemented. D043 storage is now available, but empty tables alone do not make any AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|

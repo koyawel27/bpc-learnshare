@@ -2,11 +2,11 @@
 
 **Date:** 2026-08-20
 **Target:** MariaDB 10.4.32
-**Status:** Executable package passed disposable-database verification; live application remains unauthorized
+**Status:** Executable package, guarded live migration, and canonical 22-table schema verified; application persistence integration remains unauthorized
 
 ## 1. Purpose
 
-This package converts D043's accepted conceptual direction into exact MariaDB SQL without changing the current `database/schema.sql` baseline or the configured BPC LearnShare database.
+This package converted D043's accepted conceptual direction into exact MariaDB SQL. It first passed disposable verification without changing the legacy baseline, then received separate approval for a restore-verified backup, guarded live execution, canonical schema update, and post-migration verification.
 
 The package contains:
 
@@ -58,7 +58,7 @@ After later processor integration, an eligible resource may be reprocessed throu
 
 MariaDB DDL auto-commits. The full migration and rollback cannot be made atomic with a normal transaction.
 
-Any future live application requires a separate approval and must include:
+The approved live gate included:
 
 1. confirmed backup and restore procedure;
 2. maintenance window with application writes stopped;
@@ -68,7 +68,7 @@ Any future live application requires a separate approval and must include:
 6. application repository/processor deployment only after database verification;
 7. rollback decision point and post-operation audit.
 
-No live migration is authorized by this plan.
+The storage migration is complete. This does not authorize application repositories/processors, AI routes, provider/model calls, or generated inquiry.
 
 ## 5. Rollback Behavior
 
@@ -87,13 +87,13 @@ The verifier:
 
 * creates a randomly named database beginning with `bpc_learnshare_d043_verify_`;
 * refuses to use the configured live database name;
-* imports the unchanged 18-table baseline;
-* inserts controlled synthetic rows;
-* applies the forward migration;
+* imports the current canonical 22-table schema;
+* applies rollback to recreate the guarded 18-table legacy baseline;
+* inserts controlled synthetic rows and applies the forward migration;
 * verifies the exact 22-table set, columns, foreign keys, checks, invalidation behavior, source-version uniqueness, locator rules, vector dimension checks, and cross-resource binding rejection;
 * applies rollback;
 * verifies the exact 18-table set and preservation of unrelated rows;
-* confirms the configured live database table count and `database/schema.sql` hash did not change;
+* confirms the configured live database remains at 22 tables and `database/schema.sql` does not change during the disposable run;
 * deletes only the guarded disposable database.
 
 Administrative connection settings are read from:
@@ -106,11 +106,12 @@ The password is never printed. These variables are local test settings and must 
 
 ### 6.1 Verification result
 
-On 2026-08-20, the corrected verifier passed 51/51 checks on the exact local `10.4.32-MariaDB` runtime.
+On 2026-08-20, the original corrected pre-live verifier passed 51/51 checks. After the live/canonical update, the revised verifier passed 60/60 checks on the exact local `10.4.32-MariaDB` runtime.
 
 Confirmed results:
 
-* fresh baseline import: exact 18 tables;
+* fresh canonical import: exact 22 tables;
+* canonical rollback: exact 18-table legacy baseline;
 * forward migration: exact 22 tables;
 * required columns, foreign keys, and CHECK constraints present;
 * second current source version rejected;
@@ -122,34 +123,35 @@ Confirmed results:
 * controlled legacy active output preserved but invalidated and left unbound;
 * rollback: exact 18 tables;
 * controlled account, resource, and AI-output accountability rows preserved;
-* live configured database remained at 18 tables;
-* `database/schema.sql` retained SHA-256 `8C56089A01A1D6DED5C457AEBA26F695B372C4A95F536A77ECA507EA7F9BBEEE`;
+* live configured database remained at 22 tables during disposable verification;
+* Apache restarted successfully after the maintenance window;
+* `/login` and `/health` both returned HTTP 200 after restart;
+* live recovery retained 2 accounts, 5 resources, 5 resource-action rows, and 5 resource-tag rows;
+* all four new D043 derived-data tables remained empty after recovery;
+* canonical `database/schema.sql` SHA-256: `EF1673B9DF5B618C80025B608C02E5688C3406822FBC67862C1EFEA2A6DAD740`;
 * guarded disposable database removed;
 * provider/model requests: zero.
 
 The first harness attempt failed after forward execution because it expected 10 forward statements while the file correctly contained 8. Cleanup removed that disposable database. Only the verifier's statement-count expectations were corrected to the actual 8 forward and 8 rollback statements; the SQL and quality gates were not weakened.
 
-Accepted package hashes after that correction:
+Accepted migration hashes and current canonical artifacts:
 
 * forward SQL SHA-256: `0874AE6D7ACE35674D75AD3FE643B8E3EB55FB1C30138E70DF7BBD5AD117D4BE`;
 * rollback SQL SHA-256: `8CFCE04828D887DF857F14BBAAA7A7B3B6CDCDFAB3C8FB96622565CB387A5B91`;
-* disposable verifier SHA-256: `67B84937DCC3B22B0EED58197978C5C881E0FEF6E03EE96BA79EA3B69EF166B9`.
+* disposable verifier SHA-256: `922120A32640407327D3C90CDC5F73BDED7BCE2840F9D06DA1251C80019E13B7`;
+* pre-migration dump SHA-256: `1A81C661FB37B116C2A0249FD1EB79FD337F0462586C78B425417B779730B2C1`.
 
 ## 7. Still Unselected or Unauthorized
 
-This migration does not:
+Completing this migration does not:
 
-* modify `database/schema.sql`;
-* change the configured live database;
 * select Groq, Ollama, a model, or an embedding provider;
 * add a vector database, second database, or MariaDB upgrade;
 * persist query vectors, retrieval histories, inquiry answers, citations, chat messages, or cross-session memory;
 * authorize generated inquiry/follow-up;
 * add an AI route, UI, scheduler, or autonomous moderation authority;
-* authorize commit or push.
+* authorize commit or push without a separate reviewed Git checkpoint.
 
 ## 8. Next Approval Boundary
 
-After the disposable run passes and its evidence is reviewed, the next decision is whether to accept the migration package as implementation-ready.
-
-That acceptance still does not automatically authorize applying it to `bpc_learnshare_dev`. Live application requires its own explained approval, backup confirmation, and coordinated application integration plan.
+The next decision is whether to implement the smallest provider-neutral repositories and one guarded processor against the now-empty D043 tables. Approval would permit bounded code and tests for source versioning, readiness, chunk/embedding persistence, freshness, cleanup, and fallback. It would not select a generation provider/model or enable generated inquiry.

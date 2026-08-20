@@ -370,7 +370,7 @@ try {
         $liveDatabase === '' || $disposableDatabase !== $liveDatabase,
         'Disposable database differs from configured live database'
     );
-    d043Assert(is_file($schemaPath), 'Baseline schema file present');
+    d043Assert(is_file($schemaPath), 'Canonical schema file present');
     d043Assert(is_file($upPath), 'Forward migration file present');
     d043Assert(is_file($downPath), 'Rollback migration file present');
 
@@ -403,7 +403,7 @@ try {
         );
         $liveCountStatement->execute(['schema_name' => $liveDatabase]);
         $liveTableCountBefore = (int) $liveCountStatement->fetchColumn();
-        d043AssertSame(18, $liveTableCountBefore, 'Configured live database remains at baseline before test');
+        d043AssertSame(22, $liveTableCountBefore, 'Configured live database remains at D043 target before test');
     }
 
     $server->exec(
@@ -438,8 +438,44 @@ try {
     );
 
     $schemaStatements = d043ExecuteSqlFile($database, $schemaPath);
-    d043Assert($schemaStatements >= 18, 'Baseline schema statements executed');
-    d043AssertTables($database, $baselineTables, 'Fresh baseline has exact 18-table set');
+    d043Assert($schemaStatements >= 22, 'Canonical schema statements executed');
+    d043AssertTables($database, $migratedTables, 'Fresh canonical schema has exact 22-table set');
+
+    foreach ([
+        'source_version_id',
+        'candidate_configuration_id',
+        'prompt_template_version',
+    ] as $column) {
+        d043Assert(
+            d043ColumnExists($database, 'ai_outputs', $column),
+            'Fresh canonical ai_outputs column present: ' . $column
+        );
+    }
+
+    $baselineDownStatements = d043ExecuteSqlFile($database, $downPath);
+    d043AssertSame(8, $baselineDownStatements, 'Canonical-to-baseline rollback statement count');
+    d043AssertTables($database, $baselineTables, 'Canonical rollback creates exact 18-table legacy baseline');
+
+    foreach ([
+        'source_version_id',
+        'candidate_configuration_id',
+        'prompt_template_version',
+    ] as $column) {
+        d043Assert(
+            !d043ColumnExists($database, 'ai_outputs', $column),
+            'Canonical rollback removed ai_outputs column: ' . $column
+        );
+    }
+
+    d043Assert(
+        d043ConstraintExists(
+            $database,
+            'ai_outputs',
+            'chk_ai_outputs_content_state',
+            'CHECK'
+        ),
+        'Canonical rollback restored legacy ai_outputs content-state constraint'
+    );
 
     $database->exec(
         "INSERT INTO accounts
@@ -939,9 +975,10 @@ if ($failed) {
 
 fwrite(STDOUT, "\nD043 DISPOSABLE MIGRATION VERIFICATION PASSED.\n");
 fwrite(STDOUT, "Checks passed: {$d043Checks}\n");
+fwrite(STDOUT, "Fresh canonical result: exact 22-table target.\n");
 fwrite(STDOUT, "Forward result: exact 22-table target.\n");
 fwrite(STDOUT, "Rollback result: exact 18-table baseline.\n");
 fwrite(STDOUT, "Live configured database changed: No.\n");
-fwrite(STDOUT, "database/schema.sql changed: No.\n");
+fwrite(STDOUT, "database/schema.sql changed during verification: No.\n");
 fwrite(STDOUT, "Provider/model request performed: No.\n");
-fwrite(STDOUT, "Next boundary: review evidence before any live migration.\n");
+fwrite(STDOUT, "Next boundary: review canonical/live migration evidence before AI persistence integration.\n");

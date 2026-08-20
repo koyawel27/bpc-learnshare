@@ -5,7 +5,7 @@
 **Last Updated:** 2026-08-20
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted conceptual database-design direction through D043; executable AI migration pending separate approval
+**Status:** Draft v1.0 — accepted conceptual database-design direction through D043; executable 22-table schema and live migration verified
 
 ---
 
@@ -1580,7 +1580,7 @@ These items are no longer open cleanup tasks. Future documentation changes must 
 
 ### 23.4 Status
 
-`DATABASE_DESIGN.md` Sections 1–23 and Appendix A are complete at the conceptual database-design level through D043. The currently verified SQL baseline remains 18 tables; D043 authorizes a later reviewed migration target of 22 tables.
+`DATABASE_DESIGN.md` Sections 1–23 and Appendix A are complete at the conceptual database-design level through D043. On 2026-08-20, the approved migration and canonical schema update established and verified the 22-table SQL baseline on MariaDB 10.4.32.
 
 This document intentionally does not include SQL, exact column types, exact index definitions, foreign-key syntax, or full table definitions. Those belong in the later schema-drafting pass after the conceptual design is accepted.
 
@@ -1807,11 +1807,11 @@ The following items are intentionally deferred outside this appendix:
 
 ### A.7 D043 AI-Derived Data Persistence Direction
 
-#### A.7.1 Current SQL baseline versus accepted target
+#### A.7.1 Current SQL baseline and legacy migration path
 
-The live-verified `database/schema.sql` remains the 18-table MariaDB 10.4.32 baseline until a separate live-application gate is approved and run.
+The current live-verified `database/schema.sql` is the 22-table MariaDB 10.4.32 baseline.
 
-D043 accepts a conceptual 22-table target by adding four AI-derived-data tables. The exact up/down SQL package was later verified through a 51-check disposable MariaDB 10.4.32 run. That evidence does not mean the migration has been applied to `database/schema.sql` or the configured project database.
+D043 added four AI-derived-data tables to the legacy 18-table baseline. The exact up/down package first passed a 51-check disposable run. After a restore-verified backup and maintenance boundary, the configured project database was migrated to 22 tables and the canonical schema was updated. The revised verifier then passed 60 checks covering fresh 22-table creation, 22-to-18 rollback, 18-to-22 forward migration, fail-closed behavior, and final rollback without changing the configured live database during that disposable run.
 
 #### A.7.2 `ai_source_versions`
 
@@ -1864,7 +1864,7 @@ MariaDB does not perform vector search in the accepted v1.0 direction. PHP loads
 
 The existing current-value `ai_outputs` design remains separate from the four retrieval-derived-data tables.
 
-A later migration may add:
+The applied migration added:
 
 * `source_version_id`;
 * `candidate_configuration_id`;
@@ -1898,14 +1898,14 @@ Generated inquiry remains unavailable until a later candidate passes every accep
 
 #### A.7.9 Accepted table additions
 
-The four later-migration target tables are:
+The four D043 tables are:
 
 * `ai_source_versions` — source identity, extracted readable text, and current/stale state;
 * `ai_processing_states` — per-capability readiness/failure/configuration and late-result protection;
 * `ai_chunks` — version-bound passages and verified locators;
 * `ai_embeddings` — chunk-bound vector data and exact embedding identity.
 
-Together with the original 18 tables, these produce the accepted conceptual target of 22 tables after migration. They are derived-data structures, not new roles, modules, resource statuses, permissions, or autonomous AI authority.
+Together with the original 18 tables, these produce the current verified 22-table schema. They are derived-data structures, not new roles, modules, resource statuses, permissions, or autonomous AI authority.
 
 #### A.7.10 Executable migration evidence
 
@@ -1916,8 +1916,8 @@ The reviewed executable package is:
 * `tests/database/run_d043_migration_disposable.php`;
 * `docs/ai-feasibility-spike/D043_MIGRATION_PLAN.md`.
 
-On 2026-08-20, the corrected disposable run passed 51/51 checks on MariaDB 10.4.32. It verified the exact 18-to-22 table set, required source/configuration binding, current-source uniqueness, locator and vector-shape checks, fail-closed legacy-output handling, cross-resource binding rejection, and exact 22-to-18 rollback without unrelated row loss. The test deleted its guarded disposable database and confirmed that the configured 18-table database and `database/schema.sql` hash were unchanged.
+On 2026-08-20, the corrected pre-live disposable run passed 51/51 checks on MariaDB 10.4.32. It verified the exact 18-to-22 table set, required source/configuration binding, current-source uniqueness, locator and vector-shape checks, fail-closed legacy-output handling, cross-resource binding rejection, and exact 22-to-18 rollback without unrelated row loss.
 
 The first harness attempt expected the wrong forward statement count and stopped after reporting 8 rather than 10. Cleanup succeeded. Correcting only the harness count to the actual 8 forward and 8 rollback statements did not change or weaken the SQL package.
 
-This evidence authorizes package review only. Updating the canonical schema state or applying SQL to the configured database still requires a separate explained approval, backup/restore confirmation, maintenance boundary, and post-migration verification.
+The separately approved live gate then restore-verified the ignored local backup, applied the exact forward SQL, preserved all original row counts, left the four new tables empty, verified all required constraints and table checks, and established the exact 22-table live set. The canonical fresh-import verifier now passes 60/60 checks. Application repositories/processors and user-facing AI features remain separate implementation gates.

@@ -27,3 +27,6 @@ Thumbs.db
 
 # Local-only AI feasibility-spike artifacts
 .local/ai-feasibility-spike/
+
+# Local database backups (may contain private application data)
+.local/database-backups/
