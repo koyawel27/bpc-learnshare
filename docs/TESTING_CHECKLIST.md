@@ -295,11 +295,13 @@ The v2 run completed 8/8 requests with a 1,944.858 ms median and 8/8 within 15 s
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| AI-FIN-001 | P0 | Reconcile every accepted criterion with registered evidence | No invented or omitted measurements | Not run |
-| AI-FIN-002 | P0 | Document passed, failed, and unresolved capabilities | Honest bounded conclusion | Not run |
-| AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | In progress — Groq/GPT-OSS preparation, connectivity, and bounded grounded quality were measured; terms, dependency, interruption, privacy, and continuity limitations remain |
-| AI-FIN-004 | P0 | Prepare smallest justified architecture/schema impact | No premature vector database or schema expansion | Not run |
-| AI-FIN-005 | P0 | Confirm core non-AI independence | Final direction preserves graceful fallback | Not run |
+| AI-FIN-001 | P0 | Reconcile every accepted criterion with registered evidence | No invented or omitted measurements | Passed — 12/12 Required capabilities reconciled against 17 candidates, 64 test runs, 15 payload manifests, and 751 measurements |
+| AI-FIN-002 | P0 | Document passed, failed, and unresolved capabilities | Honest bounded conclusion | Passed — 6 Meets criteria, 4 Meets with targeted changes, 2 Does not meet under tested candidate, and 0 documented blockers |
+| AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | Passed for recommendation — local hardware limits and time-sensitive external dependency, terms, quota, retention/ZDR, interruption, privacy, and continuity risks are explicit; no provider/model selected |
+| AI-FIN-004 | P0 | Prepare smallest justified architecture/schema impact | No premature vector database or schema expansion | Passed — targeted persistent support appears necessary; exact schema and architecture remain deferred to a separate decision |
+| AI-FIN-005 | P0 | Confirm core non-AI independence | Final direction preserves graceful fallback | Passed — core upload, moderation, metadata search, browsing, view, and protected download remain independent of AI |
+
+The final evidence outcome is **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. This closes the feasibility-reconciliation checkpoint only. It does not select a provider/model, authorize generated inquiry or application integration, change the database schema, or replace the integrated tests below.
 
 ---
 

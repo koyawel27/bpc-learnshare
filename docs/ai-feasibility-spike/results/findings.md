@@ -1,9 +1,9 @@
 # AI Feasibility Spike — Findings
 
-**Status:** Partially executed; retrieval, bounded local grounded-generation, model-independent grounded-response controls, and deterministic session/lifecycle controls registered and reviewed, later required capabilities pending
+**Status:** Final evidence reconciliation completed; measured capability findings are recorded, while application integration and the later architecture/schema decision remain pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
-These findings distinguish original measurements, later reviewed interpretation, and versioned ground-truth correction. They do not constitute the final spike recommendation or an architecture decision.
+These findings distinguish original measurements, later reviewed interpretation, and versioned ground-truth correction. The bounded conclusion is recorded separately in `final_recommendation.md`; neither document is an architecture/schema decision.
 
 ## 1. Execution Scope
 
@@ -14,7 +14,7 @@ These findings distinguish original measurements, later reviewed interpretation,
 - Embedding candidate: `EMB-OLLAMA-ALL-MINILM-001`, Ollama 0.32.1, `all-minilm:latest`, 384 dimensions.
 - Similarity method: `SIM-PHP-COSINE-001`.
 - Retrieval configuration: `RET-SEMANTIC-STANDALONE-001`.
-- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-09.
+- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-14.
 
 ## 2. Observed Results by Capability
 
@@ -24,11 +24,11 @@ Meets the completed extraction checkpoint. `EX-LOCAL-PHP-001` passed all 9 smoke
 
 ### 2.2 Processing Readiness, Failure, Independence, and Staleness
 
-Partially tested. Failed embedding input was isolated without invalidating extraction or segmentation evidence, and the corrected 102-chunk artifact was generated deterministically. Full source-status lifecycle, stale-output exclusion, replacement independence, and late-result handling remain pending.
+Meets with targeted changes. Failed embedding input was isolated without invalidating extraction or segmentation evidence, and the corrected 102-chunk artifact was generated deterministically. The model-independent lifecycle checkpoint and Gate 5B live rollback test excluded stale, ineligible, missing-file, invalidated, and final-revalidation-failed evidence without false success. Persistent readiness state, replacement cleanup, late-result handling, and complete application integration remain pending.
 
 ### 2.3 Summaries and Controlled Tag/Metadata Suggestions
 
-Not yet executed.
+Meets the bounded summary and controlled-suggestion criteria under `TR-GEN-GROQ-SUMSUG-001`. Eight of eight summaries were source-supported and usable; 90% of returned Active tags were directly usable; clearly tag-eligible cases had 100% coverage; 85.71% of limited metadata suggestions were supported; and all eight outputs were usable as-is or after light editing. The preserved weak Handout suggestions and broad Programming tag require human review. This capability-specific pass does not select Groq/GPT-OSS or authorize automatic metadata assignment.
 
 ### 2.4 Embeddings and Bounded Retrieval
 
@@ -190,11 +190,11 @@ In the six-case grounded comparison, Llama's pooled conventional median was 41.6
 
 ### 2.13 Non-AI Fallback
 
-Not yet executed.
+Meets with targeted changes. Gate 5A deterministic controls, Gate 5B live rollback checks, and `TR-CTRL-SESSION-LIFECYCLE-001` preserved metadata search and protected-download behavior while suppressing AI output for disabled, unavailable, stale, missing-file, ineligible, and final-revalidation-failed states. Complete routed upload/moderation behavior, provider interruption, and application-wide fallback still require implementation testing.
 
 ### 2.14 Security, Privacy, Eligibility, and Lifecycle
 
-Local-only fixture processing, explicit file-type filters, ignored raw-vector storage, and boundary-fixture exclusion were verified in the completed checkpoints. The deterministic grounded-response control layer rejected stale or ineligible synthetic evidence and prevented answers after second revalidation failed. The later session/lifecycle checkpoint passed all 110 mid-session ineligibility cases and all 10 final-revalidation cases with zero unsupported or ineligible carryover. It used deterministic supplied state rather than live database transitions, so live database-backed eligibility revalidation, replacement cleanup, and graceful application fallback remain pending.
+Local-only fixture processing, explicit file-type filters, ignored raw-vector storage, and boundary-fixture exclusion were verified in the completed checkpoints. The deterministic grounded-response control layer rejected stale or ineligible synthetic evidence and prevented answers after second revalidation failed. The later session/lifecycle checkpoint passed all 110 mid-session ineligibility cases and all 10 final-revalidation cases with zero unsupported or ineligible carryover. Gate 5B separately passed 19/19 rollback-based live MariaDB lifecycle/fallback checks. Persistent replacement cleanup, late-result handling, and complete routed application fallback remain pending.
 
 ### 2.15 Model-Independent Grounded-Response Control Layer
 
@@ -228,6 +228,8 @@ Completed checkpoint guardrails passed for:
 - one five-case metadata-guarded positive regression with 100% expected-resource display, 15/15 clearly or meaningfully related reviewed top-three suggestions, zero false no-result outcomes, and zero new model/provider requests;
 - 10/10 model-independent source-attribution presentation cases, six verified displayed source records, five fail-closed safe states, and desktop/mobile visual review without horizontal overflow;
 - zero BPC resource or registered-query content transmitted during the synthetic generation preflights;
+- one guarded external grounded comparison with complete execution, preserved strict-quality failure, minimized authorized payloads, zero retries, and no hidden unsupported claims;
+- one preserved Gate 5E schema-compatibility failure followed by a separately approved versioned run whose summary, tag, metadata, usability, latency, and boundary criteria all passed;
 - zero final candidate, integration, schema, commit, or push decision during evidence generation.
 
 ## 4. Measurement Limitations
@@ -240,6 +242,7 @@ Completed checkpoint guardrails passed for:
 - The grounded local-generation comparison used only six fixed cases per candidate. Its results are directional; sustained hardware use, concurrency, live control-layer integration, live application citation/link behavior, and most application-level lifecycle/fallback capabilities remain untested. The later isolated presentation checkpoint does not repair those model-quality limitations.
 - The session/lifecycle checkpoint supplied deterministic state changes and did not call a model. The later natural-language comparison tested model reference interpretation but still did not use the production PHP session, live database transitions, cleanup synchronization, or provider-side retention.
 - The natural-language comparison used ten fixed turns per model on one laptop with sequential requests. It does not establish concurrency, sustained-load behavior, live eligibility revalidation, or final local/external generation suitability.
+- The external grounded and summary/suggestion runs used one provider/model under time-sensitive limits, terms, retention controls, and network conditions. The Gate 5E pass is capability-specific and does not repair the failed grounded-inquiry result.
 
 ## 5. Open Questions
 
@@ -247,6 +250,8 @@ Completed checkpoint guardrails passed for:
 - Whether lifecycle, freshness, and live eligibility revalidation remain simple enough for the bounded PHP/MariaDB MVP.
 - Whether a hybrid metadata-semantic presentation should be tested for exact-title searches.
 - What temporary or persistent retrieval-data behavior is actually necessary.
-- Whether the completed and remaining evidence ultimately supports the simplest PHP/MariaDB direction.
+- How the later architecture decision should represent the targeted persistent extraction, chunk, embedding, readiness, freshness, invalidation, and cleanup behavior without unnecessary infrastructure.
+- Which replaceable provider/model, if any, should be considered only for optional reviewed summaries and suggestions.
+- Which future inquiry candidate can meet grounding, attribution, usefulness, and latency together.
 
-No final candidate, architecture, provider, storage format, database upgrade, schema expansion, or application integration is selected by these findings.
+The reconciled outcome is **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. No final candidate, architecture, provider, storage format, database upgrade, schema expansion, or application integration is selected by these findings.

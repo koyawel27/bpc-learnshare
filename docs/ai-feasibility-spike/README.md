@@ -1,7 +1,7 @@
 # AI Feasibility Spike — Evidence Package
 
 **Project:** BPC LearnShare  
-**Status:** Partially executed — extraction, corrected segmentation, local embedding, PHP cosine, standalone retrieval, manual review, synthetic preflights, bounded local grounded-generation comparisons, model-independent grounded-response controls, deterministic session/lifecycle controls, bounded related-resource evaluation, one-case safe no-result related-resource boundary control, five-case metadata-guarded positive regression, audited end-user source-attribution presentation, and two-model natural-language follow-up comparison recorded; live integration, complete fallback, and final recommendation pending
+**Status:** Final evidence reconciliation completed — bounded outcome recorded as **Partially feasible — alternative or mixed architecture required**; application integration and the later architecture/schema decision remain pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 ## Purpose
@@ -31,11 +31,20 @@ Completed and registered checkpoints now cover:
 13. a separate one-case safe no-result related-resource boundary control using a frozen synthetic resource, three local embeddings, five retained raw neighbors, zero displayed suggestions, and no cosine threshold;
 14. a five-case metadata-guarded related-resource positive regression using the existing saved vectors, frozen relation groups, zero model/provider requests, and manual review of all 15 displayed top-three suggestions;
 15. a ten-case model-independent end-user source-attribution presentation checkpoint, including independent saved-evidence audit and desktop/mobile visual review; and
-16. a ten-case natural-language follow-up comparison for each of two installed local models, including 20 sequential requests and complete manual review.
+16. a ten-case natural-language follow-up comparison for each of two installed local models, including 20 sequential requests and complete manual review;
+17. Gate 5A model-independent safety controls and Gate 5B rollback-based live lifecycle/fallback checks;
+18. Gate 5C live related-resource metadata/link validation on four controlled Approved resources;
+19. Gate 5D external-candidate offline validation, harmless connectivity, guarded grounded execution, and manual quality review;
+20. Gate 5E versioned summary/controlled-suggestion execution, independent audit, and approved quality review; and
+21. final reconciliation of all 12 Required capabilities, tested candidates, limitations, schema impact, and downstream handoffs.
 
 Bounded repository-grounded answer construction, corpus-based insufficient-evidence behavior, prohibited-request behavior, and claim-to-source labeling were executed using six fixed cases per model. Both candidates completed every request, but each reached only 3/6 (50%) useful as-is or after a light edit against the accepted 80% requirement. Neither is accepted as the interactive local solution or as a reliable fallback.
 
-The deterministic session/lifecycle checkpoint passed its supplied-state control criteria, but it did not call a model or test the production PHP session or live database. The related-resource positive-case configuration met the accepted thresholds at 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness. That pass is narrow and four top-three suggestions were weak or unrelated. A separate metadata-guarded configuration passed one predeclared synthetic safe no-result control: five raw cross-group neighbors were retained for diagnosis, zero suggestions were displayed, and the safe no-result message was returned without selecting a cosine threshold. Its later five-case positive regression retained an expected resource in 5/5 cases, displayed 20/20 same-group eligible suggestions, returned no false safe-no-result outcome, and achieved 15/15 clearly or meaningfully related reviewed top-three suggestions using zero new model/provider requests. These guarded results remain bounded to frozen relation groups; they do not validate live subject/topic/tag mapping or erase the earlier unguarded quality findings. The isolated source-attribution checkpoint passed 10/10 presentation-contract cases with six verified displayed source records, zero invalid-source disclosures, correct locator omission, safe refusal and insufficiency states, and desktop/mobile layouts without horizontal overflow. It made zero model/provider calls and zero retrieval reruns, but it did not select a final citation UI or test live database-backed resource links. The natural-language follow-up comparison completed ten cases per model. Llama reached 10/10 context interpretation but only 8/10 grounded correct answers and produced one critical RBAC error. Qwen reached 8/10 context interpretation and 8/10 grounded correct answers, with zero unsupported substantive answers but two unnecessary clarification outcomes. Both missed the 15-second median target; both runs are registered as failed and neither model is selected. Live application session/attribution-link integration, live relation-metadata mapping, lifecycle/staleness behavior, complete fallback, any justified external-generation comparison, and the final recommendation remain incomplete. The completed checkpoints do not select a final model, provider, retrieval method, permanent storage design, database change, mixed architecture, or application integration.
+The deterministic and live control checkpoints passed their bounded criteria, but complete routed application behavior, persistent derived-data cleanup, production-session follow-up, provider interruption, and larger-scale concurrency remain incomplete. Related-resource testing passed both positive and safe no-result boundaries under small controlled relation groups; this does not select a final ranking rule. Isolated attribution presentation passed, but no tested generator met strict grounding and attribution requirements.
+
+The external Groq/GPT-OSS grounded comparison met latency and usefulness but failed claim support at 88.89% against the 95% requirement and failed exact source attribution. The later Gate 5E configuration met every accepted summary and controlled-suggestion threshold, including 100% supported summaries, 90% directly usable Active tags, 85.71% supported limited metadata, and 100% light-edit usability. That capability-specific pass does not repair the grounded-inquiry failure or select the provider/model.
+
+The final recommendation therefore records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. Supported components may proceed only through a later architecture/schema decision. Generated repository inquiry remains unavailable until a future candidate passes. No provider, model, permanent retrieval method, storage design, database change, or application integration is selected by the evidence package.
 
 ## File Map
 
@@ -73,7 +82,7 @@ Summarizes observed results after measurements exist. Do not write conclusions b
 
 ### `results/final_recommendation.md`
 
-Uses the final-report structure required by Section 25 of `AI_FEASIBILITY_SPIKE.md`. Keep it as a template until the spike is complete.
+Records the completed Section 25 evidence reconciliation, bounded outcome, capability results, candidate comparison, recommended direction, schema-impact classification, handoffs, and remaining risks. It is input to—not a replacement for—the later architecture/schema decision.
 
 ### `redacted-evidence/`
 
