@@ -167,8 +167,8 @@ D043 accepts the architecture direction. The exact migration package has passed 
 2. **Completed:** verify a fresh MariaDB 10.4.32 import and expected 22-table count;
 3. **Completed:** verify fail-closed handling for existing `ai_outputs` without fabricated source/configuration identity;
 4. **Completed:** back up and restore-verify the legacy database, apply the live 18-to-22 migration, verify preserved rows/constraints, and update the canonical schema;
-5. implement repositories and processing orchestration;
-6. pass source freshness, concurrency, cleanup, eligibility, security/privacy, retrieval regression, and AI-disabled fallback tests;
+5. **Completed:** implement the provider-neutral SQL repository and guarded persistence processor for source versions, capability state, chunks, embeddings, and current outputs;
+6. **Partially completed:** disposable integration passed source freshness, run-token concurrency, complete-result, cleanup, eligibility, and AI-disabled fallback checks; live application hooks, retrieval regression, and final security/privacy integration remain;
 7. obtain owner browser acceptance for any user-visible AI surface.
 
-No provider/model selection or generated-inquiry integration is implied by completing the storage migration.
+No provider/model selection or generated-inquiry integration is implied by completing the storage migration or persistence foundation.

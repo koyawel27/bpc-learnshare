@@ -323,11 +323,31 @@ The final evidence outcome is **Partially feasible — alternative or mixed arch
 
 The first disposable harness attempt failed safely after the forward SQL because its expected statement count was incorrect (expected 10, actual 8). The disposable database was removed. Only the verifier's forward/rollback statement-count expectations were corrected to the actual 8/8; no SQL constraint or acceptance criterion was weakened. The corrected run then passed 51/51 checks.
 
+### 11.6 D043 provider-neutral persistence checks
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-PERS-001 | P0 | Attempt source persistence while AI is disabled | Fail closed and write no source row | Passed — disposable integration |
+| AI-PERS-002 | P0 | Synchronize an Approved, available protected file twice | Exact fingerprint stored; identical bytes reuse one current source | Passed — disposable integration |
+| AI-PERS-003 | P0 | Queue, start, and complete extraction | Opaque token; queued/processing/ready transitions; exact text hash | Passed — disposable integration |
+| AI-PERS-004 | P0 | Supersede a processing run | Late token rejected and writes no chunks/output | Passed — disposable integration |
+| AI-PERS-005 | P0 | Persist verified and explicitly unavailable chunk locators | Complete ordered set stored without fabricated locator | Passed — disposable integration |
+| AI-PERS-006 | P0 | Submit partial then complete normalized embeddings | Partial set writes nothing and never becomes ready; complete set persists | Passed — disposable integration |
+| AI-PERS-007 | P0 | Re-segment a source with ready embeddings | Old embeddings removed and embedding readiness becomes stale | Passed — disposable integration |
+| AI-PERS-008 | P0 | Persist one current output | Exact source, configuration, prompt, and lifecycle identity recorded | Passed — disposable integration |
+| AI-PERS-009 | P0 | Record one bounded capability failure | Safe code/summary stored without changing other capability state | Passed — disposable integration |
+| AI-PERS-010 | P0 | Change protected-file bytes | Old source/readiness/output stale or invalidated; new source version is monotonic | Passed — disposable integration |
+| AI-PERS-011 | P0 | Disable AI after persistence exists | New processing blocked; core/resource data preserved | Passed — disposable integration |
+| AI-PERS-012 | P0 | Exercise Hidden, Rejected, reprocessed, and Removed lifecycle paths | Hidden avoids destructive cleanup; Rejected invalidates; same bytes receive a new monotonic version; Removed deletes content-bearing derived data | Passed — disposable integration |
+| AI-PERS-013 | P0 | Verify isolation and cleanup | Random disposable database/storage removed; configured live database remains 22 tables with zero writes | Passed — 49/49 suite |
+
+`tests/ai/run_d043_ai_persistence.php` passed 49/49 checks on MariaDB 10.4.32. It imported the current canonical schema into a randomly named guarded database, used only synthetic file/text/vector/output values, removed the disposable database and temporary storage, and confirmed the configured live database remained at 22 tables. It performed zero model/provider requests, zero live database writes, and added no route or UI. The earlier first attempt failed safely during synthetic lookup seeding because the test used a nonexistent column name; the disposable database was removed and only the seed was corrected to the accepted lookup schema.
+
 ---
 
 ## 12. Integrated AI Prototype Tests
 
-Run only after the relevant application repositories/processors and routes are separately implemented. D043 storage is now available, but empty tables alone do not make any AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
+Run only after the relevant adapters and routes are separately implemented. D043 storage and the provider-neutral persistence foundation are now available, but neither makes a user-facing AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|

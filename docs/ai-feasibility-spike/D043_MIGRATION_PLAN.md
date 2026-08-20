@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-20
 **Target:** MariaDB 10.4.32
-**Status:** Executable package, guarded live migration, and canonical 22-table schema verified; application persistence integration remains unauthorized
+**Status:** Executable package, guarded live migration, canonical 22-table schema, and unrouted provider-neutral persistence foundation verified; adapter/route integration remains unauthorized
 
 ## 1. Purpose
 
@@ -68,7 +68,7 @@ The approved live gate included:
 6. application repository/processor deployment only after database verification;
 7. rollback decision point and post-operation audit.
 
-The storage migration is complete. This does not authorize application repositories/processors, AI routes, provider/model calls, or generated inquiry.
+The storage migration is complete. A later separately approved checkpoint added the unrouted provider-neutral repository and guarded persistence processor, verified by 49/49 disposable checks. This still does not authorize AI routes, provider/model calls, live processing, or generated inquiry.
 
 ## 5. Rollback Behavior
 
@@ -152,6 +152,8 @@ Completing this migration does not:
 * add an AI route, UI, scheduler, or autonomous moderation authority;
 * authorize commit or push without a separate reviewed Git checkpoint.
 
-## 8. Next Approval Boundary
+## 8. Completed Persistence Foundation and Next Approval Boundary
 
-The next decision is whether to implement the smallest provider-neutral repositories and one guarded processor against the now-empty D043 tables. Approval would permit bounded code and tests for source versioning, readiness, chunk/embedding persistence, freshness, cleanup, and fallback. It would not select a generation provider/model or enable generated inquiry.
+The separately approved provider-neutral persistence foundation is implemented through `AiPersistenceRepository` and `GuardedAiPersistenceProcessor`. `tests/ai/run_d043_ai_persistence.php` passed 49/49 checks for source versioning, readiness, complete chunk/embedding persistence, freshness, run-token rejection, output identity, cleanup, and AI-disabled fallback. The random disposable database and temporary storage were removed; the configured live database remained read-only at 22 tables.
+
+The next decision is whether to connect one already accepted local extraction/segmentation/embedding adapter to this foundation through a bounded CLI/admin-triggered path. That approval would still add no public AI route, select no generation provider/model, and enable no generated inquiry.
