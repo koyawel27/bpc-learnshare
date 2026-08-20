@@ -3,7 +3,7 @@
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Checkpoint:** Two-week working prototype and presentation
 **Status:** Active verification checklist
-**Last updated:** 2026-08-01
+**Last updated:** 2026-08-20
 **Companion:** `BUILD_PLAN.md`
 
 ---
@@ -298,16 +298,33 @@ The v2 run completed 8/8 requests with a 1,944.858 ms median and 8/8 within 15 s
 | AI-FIN-001 | P0 | Reconcile every accepted criterion with registered evidence | No invented or omitted measurements | Passed — 12/12 Required capabilities reconciled against 17 candidates, 64 test runs, 15 payload manifests, and 751 measurements |
 | AI-FIN-002 | P0 | Document passed, failed, and unresolved capabilities | Honest bounded conclusion | Passed — 6 Meets criteria, 4 Meets with targeted changes, 2 Does not meet under tested candidate, and 0 documented blockers |
 | AI-FIN-003 | P0 | Review provider/model/runtime terms and hardware reality | Suitability limitations recorded | Passed for recommendation — local hardware limits and time-sensitive external dependency, terms, quota, retention/ZDR, interruption, privacy, and continuity risks are explicit; no provider/model selected |
-| AI-FIN-004 | P0 | Prepare smallest justified architecture/schema impact | No premature vector database or schema expansion | Passed — targeted persistent support appears necessary; exact schema and architecture remain deferred to a separate decision |
+| AI-FIN-004 | P0 | Prepare and review smallest justified architecture/schema impact | No premature vector database or provider-specific expansion | Passed — D043 accepts four targeted MariaDB derived-data tables and bounded PHP cosine; no vector database, second database, upgrade, provider/model, or generated inquiry selected |
 | AI-FIN-005 | P0 | Confirm core non-AI independence | Final direction preserves graceful fallback | Passed — core upload, moderation, metadata search, browsing, view, and protected download remain independent of AI |
 
 The final evidence outcome is **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. This closes the feasibility-reconciliation checkpoint only. It does not select a provider/model, authorize generated inquiry or application integration, change the database schema, or replace the integrated tests below.
+
+### 11.5 D043 architecture/schema decision checks
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-ARCH-001 | P0 | Reconcile D043 with the final feasibility recommendation | Four targeted local tables; PHP cosine; no unsupported infrastructure | Passed — documentation review 2026-08-20 |
+| AI-ARCH-002 | P0 | Confirm current/target schema distinction | Current `schema.sql` remains 18 tables; 22 is a later migration target | Passed — documentation review 2026-08-20 |
+| AI-ARCH-003 | P0 | Confirm `ai_outputs` boundary | Current outputs only; no chunks, vectors, retrieval/chat history | Passed — documentation review 2026-08-20 |
+| AI-ARCH-004 | P0 | Confirm provider/model/inquiry boundary | No provider/model selected; generated inquiry unavailable until a passing candidate | Passed — documentation review 2026-08-20 |
+| AI-ARCH-005 | P0 | Confirm non-AI fallback | Core upload/moderation/search/view/download remain independent | Passed — decision review; live regression still required after integration |
+| AI-MIG-001 | P0 | Review exact executable MariaDB migration and rollback | SQL, backfill, constraints, and rollback accepted before execution | Passed — exact guarded up/down package reviewed and executed only on disposable MariaDB 10.4.32, 2026-08-20 |
+| AI-MIG-002 | P0 | Apply migration to disposable MariaDB 10.4.32 database | Exactly 22 tables; all expected foreign keys/indexes/checks present | Passed — exact 22-table set plus required columns, foreign keys, CHECK constraints, source uniqueness, locator, vector-dimension, and cross-resource binding guards verified |
+| AI-MIG-003 | P0 | Roll back disposable migration | Original 18-table baseline restored without unrelated data loss | Passed — exact 18-table set restored; controlled account, resource, and AI-output accountability rows preserved; derived tables removed |
+| AI-MIG-004 | P0 | Inspect/backfill existing `ai_outputs` | No active output receives fabricated source/config identity | Passed — live read-only count was zero; a controlled legacy active row was preserved but invalidated and left unbound during disposable verification |
+| AI-MIG-005 | P0 | Verify protected repo/database gate | No live DB or `schema.sql` change occurred before approval | Passed — 51-check accepted run retained live 18-table count and exact protected schema hash; disposable database removed |
+
+The first disposable harness attempt failed safely after the forward SQL because its expected statement count was incorrect (expected 10, actual 8). The disposable database was removed. Only the verifier's forward/rollback statement-count expectations were corrected to the actual 8/8; no SQL constraint or acceptance criterion was weakened. The corrected run then passed 51/51 checks.
 
 ---
 
 ## 12. Integrated AI Prototype Tests
 
-Run only after the feasibility recommendation approves an integration direction.
+Run only after D043's verified migration package receives separate live-application approval and the relevant application integration is implemented. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|

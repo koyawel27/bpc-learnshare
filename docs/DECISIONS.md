@@ -5,7 +5,7 @@
 **Last Updated:** 2026-07-11
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted planning decision baseline through D042
+**Status:** Draft v1.0 — accepted planning decision baseline through D043
 
 ---
 
@@ -1436,7 +1436,63 @@ Affects:
 
 PROJECT_BRIEF.md, DECISIONS.md, USER_ROLES.md, WORKFLOWS.md, DATABASE_DESIGN.md, schema.sql (only upon a future separate architecture/schema decision), SECURITY_NOTES.md, DATA_PRIVACY.md, PROJECT_HANDOFF.md, AI_FEATURES.md, BUILD_PLAN.md, TESTING_CHECKLIST.md
 
-Status: Accepted. Establishes the required minimum AI package under D041. Does not modify D014, D015, D018, D025, D033, or D035 and does not modify the accepted 18-table schema baseline. The feasibility spike, architecture/schema decision, and downstream document propagation remain outstanding follow-on work.
+Status: Accepted. Establishes the required minimum AI package under D041. Does not modify D014, D015, D018, D025, D033, or D035 and does not modify the accepted 18-table schema baseline. The feasibility spike and architecture/schema decision were later completed through the measured final recommendation and D043.
+
+---
+
+### D043 — Targeted MariaDB Persistence for AI-Derived Data
+
+**Decision:**
+
+The measured feasibility evidence supports a bounded mixed architecture for BPC LearnShare v1.0:
+
+* native PHP remains the application/backend stack;
+* MariaDB 10.4.32 remains the single system-of-record database;
+* readable-text extraction, source-bound segmentation, and lightweight embeddings remain local where practical;
+* semantic similarity for the bounded prototype corpus remains application-side PHP cosine combined with metadata filters, fallback, and live eligibility checks;
+* optional non-authoritative summaries and controlled suggestions may use a replaceable provider adapter only when separately configured, authorized, minimized, source-version-bound, and human-reviewed;
+* upload, moderation, metadata search, browsing, protected download, and every other core workflow remain independent of AI availability.
+
+D043 authorizes the conceptual target of four narrowly scoped tables:
+
+1. `ai_source_versions` — exact source-file fingerprint/version, current/stale/invalidated state, and readable extracted text;
+2. `ai_processing_states` — per-capability unprocessed/queued/processing/ready/failed/stale/disabled state, configuration identity, dependency fingerprint, safe failure summary, and late-result run token;
+3. `ai_chunks` — source-version-bound chunk text, stable order, hashes, and verified page/slide/section/heading locators, with explicit locator-unavailable handling;
+4. `ai_embeddings` — chunk-bound vector data plus embedding configuration, model reference/digest, dimension, norm, and vector hash.
+
+The conceptual target after a separately reviewed and executed migration is 22 tables. The currently verified `schema.sql` and live database remain at 18 tables until that migration is approved, implemented, and verified.
+
+The existing `ai_outputs` current-value design is retained for summaries, suggested tags/metadata, duplicate flags, moderation hints, and other accepted current outputs. A later migration may add `source_version_id`, `candidate_configuration_id`, and `prompt_template_version` so active output is traceable to the exact source and generator configuration. `ai_outputs` must not store extracted text, chunks, embeddings, retrieval-result history, inquiry history, citations, query vectors, or conversation history.
+
+Current retrieval eligibility is never represented by a permanently trusted stored boolean. PHP must recheck current account status, permission, resource status, resource access, `file_availability`, processing readiness, current source fingerprint/version, feature configuration, and all other applicable lifecycle rules immediately before external transmission and before displaying a result or protected link.
+
+Retrieved candidate sets, query vectors, inquiry answers, citations, and active follow-up context remain request- or session-scoped. No inquiry-session table, chat-message table, permanent conversation history, or cross-session AI memory is authorized.
+
+No tested generation candidate met the combined repository-grounded inquiry criteria. Generated repository inquiry and generated follow-up therefore remain unavailable until another versioned candidate passes all accepted grounding, exact-attribution, usefulness, insufficiency, safety, and latency criteria. This limitation does not remove the defining v1.0 inquiry requirement established by D041–D042; it records that the generation component still requires a passing candidate.
+
+This decision does not select Groq, Ollama, `all-minilm`, GPT-OSS, Llama, Qwen, or any other provider/model as a permanent dependency. It does not authorize a vector database, second database, MariaDB upgrade, hosted retrieval service, provider-specific schema, or provider-managed file/index object. Those alternatives require new measured need and a later explicit decision.
+
+The exact executable migration, rollback plan, backfill handling for any existing `ai_outputs`, final SQL data types/check constraints, and live-database execution remain a separate approval gate. D043 authorizes the architecture and conceptual schema direction; it does not itself execute or silently authorize SQL changes.
+
+**Alternatives considered:**
+
+* Keep the 18-table schema and use ignored JSONL/evidence files as application runtime storage.
+* Add the four targeted MariaDB tables and retain PHP cosine for the bounded corpus.
+* Upgrade MariaDB for native vector support.
+* Add a second/vector database or hosted retrieval service.
+* Use provider-managed file or retrieval objects.
+
+**Reason:**
+
+The feasibility spike measured complete source-bound chunks, valid local vectors, practical bounded PHP retrieval, and deterministic lifecycle/fallback controls. It also found that durable source identity, readiness/failure state, freshness, invalidation, replacement independence, and cleanup cannot be represented safely by the existing `ai_outputs` table or by ignored experimental artifacts.
+
+The targeted MariaDB design is the smallest evidence-supported option that keeps one local system of record, preserves transactional lifecycle control, remains understandable for the student team, and avoids infrastructure not justified by the bounded corpus. Separating source versions, processing states, chunks, and embeddings also prevents `ai_outputs` from becoming an unsafe catch-all table.
+
+**Affects:**
+
+`DECISIONS.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `AI_FEATURES.md`, `SECURITY_NOTES.md`, `DATA_PRIVACY.md`, `BUILD_PLAN.md`, `TESTING_CHECKLIST.md`, `PROJECT_HANDOFF.md`, and later `schema.sql`/migration files only after separate migration approval.
+
+**Status:** Accepted architecture and conceptual schema direction. Amends D033 by authorizing four named AI-derived-data tables as the later migration target while preserving the currently verified 18-table SQL baseline until migration approval and execution. Does not change roles, resource statuses, permissions, moderation authority, core non-AI independence, provider/model selection, generated-inquiry availability, or permanent-history boundaries.
 
 ---
 
@@ -1448,13 +1504,13 @@ Status: Accepted. Establishes the required minimum AI package under D041. Does n
 
 3. Decisions marked as deferred are not forgotten. They are intentionally postponed to the document where the implementation detail belongs.
 
-4. `WORKFLOWS.md` must follow D005, D006, D008, D009, D010, D011, D012, D019, D020, D021, D022, D023, D024, D026, D027, D029, D030, D031, D032, D034, D036, D038, D040, D041, and D042 when defining registration, upload, moderation, correction, replacement, withdrawal, reporting, notification, taxonomy-management, resource-status, Removed-resource sanitization, AI processing and retrieval, repository-grounded inquiry, graceful fallback, and AI-related lifecycle workflows.
+4. `WORKFLOWS.md` must follow D005, D006, D008, D009, D010, D011, D012, D019, D020, D021, D022, D023, D024, D026, D027, D029, D030, D031, D032, D034, D036, D038, D040, D041, D042, and D043 when defining registration, upload, moderation, correction, replacement, withdrawal, reporting, notification, taxonomy-management, resource-status, Removed-resource sanitization, AI processing and retrieval, repository-grounded inquiry, graceful fallback, persistent derived-data lifecycle, and AI-related workflows.
 
-5. `AI_FEATURES.md`, `DATA_PRIVACY.md`, and `SECURITY_NOTES.md` must follow D014, D015, D018, D025, D028, D035, D037, D040, D041, and D042 when defining AI eligibility, required and planned AI capabilities, AI-output and retrieval-derived-data lifecycle, AI user notice, AI-assisted moderation, repository-grounded inquiry, external-provider handling, AI-related privacy safeguards, image-resource limitations, validation boundaries, and Removed-resource minimization. D016 is retained only as a superseded historical decision and must not be used as the active v1.0 inquiry-scope rule.
+5. `AI_FEATURES.md`, `DATA_PRIVACY.md`, and `SECURITY_NOTES.md` must follow D014, D015, D018, D025, D028, D035, D037, D040, D041, D042, and D043 when defining AI eligibility, required and planned AI capabilities, AI-output and retrieval-derived-data lifecycle, AI user notice, AI-assisted moderation, repository-grounded inquiry, external-provider handling, AI-related privacy safeguards, image-resource limitations, validation boundaries, and Removed-resource minimization. D016 is retained only as a superseded historical decision and must not be used as the active v1.0 inquiry-scope rule.
 
-6. `DATABASE_DESIGN.md` and `schema.sql` must follow D006, D007, D008, D010, D012, D014, D018, D019, D020, D021, D022, D023, D024, D026, D027, D028, D029, D030, D031, D032, D033, D034, D035, D036, D037, D038, D039, D040, D041, and D042 when defining user roles, account provisioning, resource ownership, resource statuses, replacement, withdrawal, reports, bookmarks, Helpful marks, AI-output storage, notifications, audit logs, taxonomy lookups, Removed-resource minimization, retrieval-data requirements, schema-scope boundaries, and database-level constraints. D042 does not itself authorize a schema expansion; any exact retrieval-related addition requires the later architecture/schema decision it specifies.
+6. `DATABASE_DESIGN.md` and later migration/schema work must follow D006, D007, D008, D010, D012, D014, D018, D019, D020, D021, D022, D023, D024, D026, D027, D028, D029, D030, D031, D032, D033, D034, D035, D036, D037, D038, D039, D040, D041, D042, and D043. D043 authorizes the four-table conceptual target and source-bound `ai_outputs` identity direction. The executable migration, rollback, backfill, and update to `schema.sql` remain a separate reviewed implementation gate.
 
-7. `BUILD_PLAN.md` must preserve the existing implementation requirements from D019 and D033–D040 and must also reflect D041–D042. It must sequence the AI feasibility spike before final retrieval architecture and schema lock, preserve the independently functional non-AI core, avoid treating the current hybrid working candidate as an already-proven final architecture, and carry forward the required minimum AI package, planned v1.0 enhancements, graceful fallback behavior, lifecycle controls, and later testing obligations. Before detailed implementation planning relies on database or AI assumptions, the project must also confirm that the basic local development environment, database connection, login flow, and file-upload path can run correctly in XAMPP.
+7. `BUILD_PLAN.md` must preserve the existing implementation requirements from D019 and D033–D040 and must also reflect D041–D043. It must preserve the independently functional non-AI core, implement D043 in reviewed stages, keep provider/model selection separate, keep generated inquiry unavailable until a candidate passes, and carry forward migration, rollback, lifecycle, privacy, fallback, and integration tests.
 
 8. Production deployment concerns listed in D017 are deferred hardening work. They should not be treated as v1.0 requirements unless the project scope is formally changed.
 

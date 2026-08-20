@@ -5,7 +5,7 @@
 **Last Updated:** 2026-07-12
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted workflow baseline through D042
+**Status:** Draft v1.0 — accepted workflow baseline through D043
 
 ---
 
@@ -2071,18 +2071,20 @@ AI output storage must support:
 
 The existing Pending-file AI notice acknowledgment is stored separately on the resource through the accepted `ai_notice_acknowledged` and `ai_notice_acknowledged_at` fields. It is not an `ai_outputs` record and must not be moved into or reimplemented through the AI-output store.
 
-**Open architecture/schema item**
+**Resolved architecture/schema direction under D043**
 
 Sections 18A–18E and 19 require retrieval-derived behavior for extracted text, chunks, source-location information, embeddings, indexes, provider objects, or equivalent representations supporting semantic search, related-resource suggestions, and repository-grounded inquiry.
 
-No exact table, column, external store, file format, or synchronization mechanism for this retrieval-derived data is authorized by this document.
+After the measured feasibility spike, D043 accepted targeted MariaDB persistence through `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, plus later source/configuration identity fields on `ai_outputs`. The current `schema.sql` remains the verified 18-table baseline until a separate executable migration is reviewed and applied.
 
-Per D042 Part F:
+Per D042 Part F and D043:
 
 * `ai_outputs` remains an AI-output store;
 * it must not be overloaded as an extraction, chunk, embedding, retrieval-result, inquiry-history, citation-history, or conversation-history index;
-* exact schema additions, if needed, require the feasibility spike and a later explicit architecture/schema decision;
-* D033's accepted 18-table baseline remains unchanged until that later decision is accepted.
+* the four named D043 tables are the accepted conceptual migration target;
+* `ai_outputs` may receive exact source-version/generator identity fields but remains a current output store;
+* executable SQL, backfill, rollback, and live migration remain a separate reviewed gate;
+* the current installed/fresh-import schema remains 18 tables until that gate is completed.
 
 Retrieved candidate sets, generated inquiry answers, grounded citations, and active-session follow-up context may remain request-scoped or session-scoped and must not be assumed to require permanent database storage.
 
@@ -2100,7 +2102,7 @@ To support the required semantic content search, repository-grounded inquiry ret
 * preventing stale search, recommendation, inquiry, snippet, cache, citation, or provider-side retrieval data from exposing unavailable resources;
 * invalidating, disabling, deleting, or otherwise making retrieval-derived data unusable when required by the source resource lifecycle.
 
-This document does not authorize the exact storage mechanism, vector approach, provider integration, table design, column design, index format, or synchronization strategy. Those remain for the feasibility spike and a later explicit architecture/schema decision under D042.
+D043 now selects MariaDB 10.4.32 as the single system of record for source versions, per-capability processing state, chunks/locators, and embeddings, with bounded application-side PHP cosine retrieval. It does not select a provider/model, vector database, second database, MariaDB upgrade, hosted/provider index, generated-inquiry implementation, or permanent inquiry/session history. Exact migration SQL and synchronization implementation still require their own review.
 
 ### 22.9 Audit log
 
@@ -2376,7 +2378,7 @@ D041–D042 carry-forward requirements:
 * retrieval-derived-data lifecycle, staleness, invalidation, and replacement non-inheritance;
 * no permanent chat-history or cross-session-memory assumption;
 * planned duplicate/similarity indicators and AI moderation hints after the required package is stable;
-* the feasibility spike and later architecture/schema decision before exact retrieval storage or schema changes are locked.
+* the completed feasibility spike and accepted D043 architecture direction, followed by a separate executable migration/rollback review before `schema.sql` or the live database changes.
 
 ### 24.4 D041–D042 Propagation
 
@@ -2385,5 +2387,13 @@ D041–D042 carry-forward requirements:
 * Expanded workflow-to-database implications and test-case seeds without authorizing a new table, column, provider, model, package, vector database, or permanent chat-history structure.
 * `DATABASE_DESIGN.md` and `schema.sql` remain unchanged in this pass. D033's accepted 18-table baseline remains active until the feasibility spike and a later explicit architecture/schema decision justify and approve any exact change.
 * No new role, account status, resource status, report status, LMS feature, autonomous moderation authority, OCR requirement, AI-vision requirement, open-web retrieval capability, persistent cross-session AI memory, or production-scale deployment requirement was introduced.
+
+### 24.5 D043 Propagation
+
+* **D043 propagation — 2026-08-20:** Recorded the accepted targeted MariaDB derived-data direction: `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, with source/configuration binding for current `ai_outputs`.
+* Preserved live eligibility as PHP revalidation rather than a permanently trusted stored flag.
+* Preserved request/session-scoped query vectors, retrieved candidates, answers, citations, and follow-up context; no chat/session-history table was introduced.
+* Preserved the current 18-table SQL baseline until a separate executable migration is approved and verified; D043's later target is 22 tables.
+* Preserved generated inquiry as unavailable until another versioned candidate passes all accepted criteria.
 
 ---

@@ -2,16 +2,16 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0 — Conceptual Database Design
-**Last Updated:** 2026-07-10
+**Last Updated:** 2026-08-20
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted conceptual database-design baseline through D040
+**Status:** Draft v1.0 — accepted conceptual database-design direction through D043; executable AI migration pending separate approval
 
 ---
 
 ## 1. Purpose and Scope
 
-This document translates the confirmed decisions in `DECISIONS.md` through D040 and the confirmed workflows in `WORKFLOWS.md` — particularly Section 22, Workflow-to-Database Implications — into the conceptual database design for BPC LearnShare v1.0.
+This document translates the confirmed decisions in `DECISIONS.md` through D043 and the confirmed workflows in `WORKFLOWS.md` — particularly Section 22, Workflow-to-Database Implications — into the conceptual database design for BPC LearnShare v1.0.
 
 **This document defines:**
 
@@ -21,8 +21,8 @@ This document translates the confirmed decisions in `DECISIONS.md` through D040 
 
 **This document does not yet define, and will not until explicitly noted:**
 
-* Exact SQL `CREATE TABLE` statements.
-* Exact column names, data types, or lengths.
+* Executable SQL `CREATE TABLE` or migration statements.
+* Final SQL data types, lengths, CHECK syntax, backfill steps, or rollback commands. D043 now defines the accepted conceptual names and responsibilities of the four AI-derived-data tables and targeted `ai_outputs` identity fields.
 * Indexes, foreign key syntax, or engine-level tuning.
 
 Those come in a later drafting pass, once the data areas and relationships in this document are reviewed and accepted. A high-level design note is included in a section only where the section cannot be meaningfully understood without one, such as stating that status must be a single field rather than a set of booleans. This is a design principle, not a full schema.
@@ -1580,7 +1580,7 @@ These items are no longer open cleanup tasks. Future documentation changes must 
 
 ### 23.4 Status
 
-`DATABASE_DESIGN.md` Sections 1–23 and Appendix A are complete at the conceptual database-design level and include the D040 Removed-resource minimization rule without changing the accepted 18-table schema.
+`DATABASE_DESIGN.md` Sections 1–23 and Appendix A are complete at the conceptual database-design level through D043. The currently verified SQL baseline remains 18 tables; D043 authorizes a later reviewed migration target of 22 tables.
 
 This document intentionally does not include SQL, exact column types, exact index definitions, foreign-key syntax, or full table definitions. Those belong in the later schema-drafting pass after the conceptual design is accepted.
 
@@ -1801,4 +1801,123 @@ The following items are intentionally deferred outside this appendix:
 * Exact MIME/content validation implementation is deferred to `SECURITY_NOTES.md`.
 * First-Admin bootstrap procedure is deferred to `BUILD_PLAN.md`.
 * Content-hash duplicate detection is not required for v1.0 and may be considered later only if testing shows a real need.
-* Exact column types, indexes, foreign-key syntax, and full `CREATE TABLE` statements belong to the next schema-drafting pass.
+* Exact column types, indexes, foreign-key syntax, backfill/rollback behavior, and full executable `CREATE TABLE`/`ALTER TABLE` statements belong to the separately reviewed migration pass.
+
+---
+
+### A.7 D043 AI-Derived Data Persistence Direction
+
+#### A.7.1 Current SQL baseline versus accepted target
+
+The live-verified `database/schema.sql` remains the 18-table MariaDB 10.4.32 baseline until a separate live-application gate is approved and run.
+
+D043 accepts a conceptual 22-table target by adding four AI-derived-data tables. The exact up/down SQL package was later verified through a 51-check disposable MariaDB 10.4.32 run. That evidence does not mean the migration has been applied to `database/schema.sql` or the configured project database.
+
+#### A.7.2 `ai_source_versions`
+
+`ai_source_versions` binds all stored derived data to one exact protected resource file.
+
+Conceptual data includes:
+
+* resource reference and monotonically increasing source-version number;
+* SHA-256 source fingerprint calculated from server-read file bytes;
+* stored-filename reference, byte size, and detected MIME type snapshot;
+* readable extracted text and its hash when extraction succeeds;
+* current, stale, or invalidated lifecycle state;
+* timestamps needed for freshness and cleanup.
+
+The database design must permit at most one current source version per resource. An older source version may remain temporarily for controlled invalidation/cleanup, but it can never pass current retrieval eligibility.
+
+#### A.7.3 `ai_processing_states`
+
+`ai_processing_states` records readiness independently per source version and capability rather than treating one generic AI flag as authoritative.
+
+Conceptual capabilities include extraction, segmentation, embedding, semantic retrieval, related resources, summary, suggested tags, suggested metadata, duplicate flag, and moderation hint. Status values are unprocessed, queued, processing, ready, failed, stale, or disabled.
+
+Each row may store:
+
+* versioned configuration identity;
+* dependency/input fingerprint for selective refresh;
+* bounded attempt count and timestamps;
+* opaque run token for late-result rejection;
+* safe error code and short summary without full file, prompt, response, credential, or unrelated personal data.
+
+Stored readiness never replaces live account, permission, resource-status, file-availability, or source-fingerprint checks.
+
+#### A.7.4 `ai_chunks`
+
+`ai_chunks` stores ordered readable passages belonging to exactly one source version.
+
+Conceptual data includes chunk order, text, text hash, character count, segmentation configuration, and verified page/slide/heading/section/paragraph locator fields. When no reliable locator exists, the row records locator unavailability; it must never fabricate one.
+
+Chunks are derived content. They follow the source lifecycle, are excluded when stale/ineligible, are never inherited by replacement resources, and are deleted during Removed-resource cleanup.
+
+#### A.7.5 `ai_embeddings`
+
+`ai_embeddings` stores one normalized vector representation for a chunk and versioned embedding configuration.
+
+Conceptual data includes chunk reference, embedding configuration, model reference and optional digest, dimension, vector JSON/text representation, norm, vector hash, and generation timestamp.
+
+MariaDB does not perform vector search in the accepted v1.0 direction. PHP loads the bounded, current, ready, live-eligible vector set and computes cosine similarity. Any later native vector feature, second database, hosted vector service, or provider index requires new measured need and another explicit decision.
+
+#### A.7.6 Targeted `ai_outputs` source binding
+
+The existing current-value `ai_outputs` design remains separate from the four retrieval-derived-data tables.
+
+A later migration may add:
+
+* `source_version_id`;
+* `candidate_configuration_id`;
+* `prompt_template_version`.
+
+These fields bind active output to the exact source and generator configuration. The existing one-current-output-per-resource/type rule, draft/retained/invalidated lifecycle, human-review requirements, and replacement non-inheritance remain.
+
+`ai_outputs` must not store extracted text, chunks, embeddings, retrieval-result history, query vectors, inquiry answers, citations, chat messages, or cross-session memory.
+
+#### A.7.7 Transaction and lifecycle requirements
+
+Source-version changes and final derived-data writes require short transactions and current-state rechecks. A processor may perform expensive work outside a transaction, but it must recheck the run token, current source/version, resource status, file availability, and feature authorization before committing the result.
+
+Lifecycle behavior is:
+
+* file change: mark the old version stale, invalidate dependent output, and create a new current version;
+* Pending/Needs Correction: draft assistance only after validation/notice/acknowledgment; never general retrieval;
+* Approved: eligible only when current, ready, available, authorized, and live-revalidated;
+* Hidden/Restricted: exclude from new general retrieval/transmission;
+* Rejected/Withdrawn: invalidate and clean draft/derived data as required;
+* Replaced: no output, chunk, vector, locator, or citation identity inheritance;
+* Removed: delete content-bearing AI-derived rows before completion, preserving only the separately accepted minimal accountability record.
+
+#### A.7.8 Non-persistent inquiry/session data
+
+Retrieved candidates, query vectors, generated inquiry answers, citations, and active follow-up context remain request- or session-scoped. No inquiry-session, chat-message, permanent answer/citation, or cross-session-memory table is authorized.
+
+Generated inquiry remains unavailable until a later candidate passes every accepted grounding, exact-attribution, usefulness, insufficiency, safety, and latency criterion.
+
+---
+
+#### A.7.9 Accepted table additions
+
+The four later-migration target tables are:
+
+* `ai_source_versions` — source identity, extracted readable text, and current/stale state;
+* `ai_processing_states` — per-capability readiness/failure/configuration and late-result protection;
+* `ai_chunks` — version-bound passages and verified locators;
+* `ai_embeddings` — chunk-bound vector data and exact embedding identity.
+
+Together with the original 18 tables, these produce the accepted conceptual target of 22 tables after migration. They are derived-data structures, not new roles, modules, resource statuses, permissions, or autonomous AI authority.
+
+#### A.7.10 Executable migration evidence
+
+The reviewed executable package is:
+
+* `database/migrations/20260820_d043_ai_persistence_up.sql`;
+* `database/migrations/20260820_d043_ai_persistence_down.sql`;
+* `tests/database/run_d043_migration_disposable.php`;
+* `docs/ai-feasibility-spike/D043_MIGRATION_PLAN.md`.
+
+On 2026-08-20, the corrected disposable run passed 51/51 checks on MariaDB 10.4.32. It verified the exact 18-to-22 table set, required source/configuration binding, current-source uniqueness, locator and vector-shape checks, fail-closed legacy-output handling, cross-resource binding rejection, and exact 22-to-18 rollback without unrelated row loss. The test deleted its guarded disposable database and confirmed that the configured 18-table database and `database/schema.sql` hash were unchanged.
+
+The first harness attempt expected the wrong forward statement count and stopped after reporting 8 rather than 10. Cleanup succeeded. Correcting only the harness count to the actual 8 forward and 8 rollback statements did not change or weaken the SQL package.
+
+This evidence authorizes package review only. Updating the canonical schema state or applying SQL to the configured database still requires a separate explained approval, backup/restore confirmation, maintenance boundary, and post-migration verification.
