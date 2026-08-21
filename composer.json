@@ -1,0 +1,13 @@
+{
+    "name": "bpc-learnshare/local-lan-prototype",
+    "description": "Native PHP local/LAN academic resource repository prototype",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2",
+        "smalot/pdfparser": "^2.12.5"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

@@ -343,11 +343,28 @@ The first disposable harness attempt failed safely after the forward SQL because
 
 `tests/ai/run_d043_ai_persistence.php` passed 49/49 checks on MariaDB 10.4.32. It imported the current canonical schema into a randomly named guarded database, used only synthetic file/text/vector/output values, removed the disposable database and temporary storage, and confirmed the configured live database remained at 22 tables. It performed zero model/provider requests, zero live database writes, and added no route or UI. The earlier first attempt failed safely during synthetic lookup seeding because the test used a nonexistent column name; the disposable database was removed and only the seed was corrected to the accepted lookup schema.
 
+### 11.7 D043 guarded local processing checks
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-LOCAL-001 | P0 | Leave `AI_LOCAL_PROCESSING_ENABLED` disabled | Validation fails closed and writes no source | Passed — disposable integration |
+| AI-LOCAL-002 | P0 | Disable the live `ai_enabled` setting | Validation fails closed and writes no source | Passed — disposable integration |
+| AI-LOCAL-003 | P0 | Trigger as Student or disabled Moderator | Authorization rejected before persistence | Passed — disposable integration |
+| AI-LOCAL-004 | P0 | Validate an Approved available TXT resource | Accepted extraction/segmentation/embedding identities and exact runtime metadata returned; no content embedded | Passed — disposable integration |
+| AI-LOCAL-005 | P0 | Process one synthetic protected TXT resource | Extraction, bounded located chunks, complete 384-dimensional normalized vectors, and three ready states persisted | Passed — disposable integration |
+| AI-LOCAL-006 | P0 | Reprocess unchanged bytes | Current source reused; chunks/vectors replaced rather than duplicated | Passed — disposable integration |
+| AI-LOCAL-007 | P0 | Disable the active Admin during embedding | Final authorization recheck rejects vectors; safe failure state only | Passed — disposable integration |
+| AI-LOCAL-008 | P0 | Extract one accepted PDF, DOCX, PPTX, and TXT fixture | All four readable types produce nonempty bounded chunks with locators | Passed — 4/4 local regression |
+| AI-LOCAL-009 | P0 | Run one synthetic non-corpus Ollama adapter smoke | Exact 0.32.1 runtime/model digest; 384 finite normalized values; vector discarded | Passed — local-only smoke |
+| AI-LOCAL-010 | P0 | Verify evidence boundaries | Live database remains 22 tables and five AI tables unchanged; no output, query vector, route, UI, commit, or push | Passed — 47/47 disposable suite |
+
+`tests/ai/run_d043_local_processing.php` passed 47/47 checks using a random disposable MariaDB database, disposable protected storage, and a deterministic fake embedding adapter. `tests/ai/run_d043_local_extraction_regression.php` passed PDF/DOCX/PPTX/TXT 4/4 against accepted primary-readable fixtures. `tests/ai/run_d043_ollama_adapter_smoke.php` made one local-only synthetic request and discarded the vector. The first disposable local-processing attempt failed safely because the test referred to `vector_dimension` instead of the accepted `dimension` column; the database was removed, and only that assertion was corrected.
+
 ---
 
 ## 12. Integrated AI Prototype Tests
 
-Run only after the relevant adapters and routes are separately implemented. D043 storage and the provider-neutral persistence foundation are now available, but neither makes a user-facing AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
+Run only after the relevant routes are separately implemented. D043 storage, provider-neutral persistence, and the guarded local resource-processing CLI are now available, but none makes a user-facing AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|

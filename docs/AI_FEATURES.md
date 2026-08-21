@@ -3,7 +3,7 @@
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0 — D043 implementation baseline
 **Last Updated:** 2026-08-20
-**Status:** Accepted AI architecture/behavior planning through D043; 22-table persistence migration applied and verified; application integration pending
+**Status:** Accepted AI architecture/behavior planning through D043; guarded local extraction/segmentation/embedding CLI verified; retrieval and user-facing AI integration pending
 
 ---
 
@@ -168,7 +168,7 @@ D043 accepts the architecture direction. The exact migration package has passed 
 3. **Completed:** verify fail-closed handling for existing `ai_outputs` without fabricated source/configuration identity;
 4. **Completed:** back up and restore-verify the legacy database, apply the live 18-to-22 migration, verify preserved rows/constraints, and update the canonical schema;
 5. **Completed:** implement the provider-neutral SQL repository and guarded persistence processor for source versions, capability state, chunks, embeddings, and current outputs;
-6. **Partially completed:** disposable integration passed source freshness, run-token concurrency, complete-result, cleanup, eligibility, and AI-disabled fallback checks; live application hooks, retrieval regression, and final security/privacy integration remain;
+6. **Completed for the local processing boundary:** the provider-neutral persistence suite passed 49/49 checks; the guarded one-resource CLI passed 47/47 disposable checks; PDF/DOCX/PPTX/TXT extraction regression passed 4/4; and one synthetic Ollama adapter smoke produced a discarded 384-dimensional normalized vector. The environment and live database switches remain default-off, and active Moderator/Admin authorization is rechecked before processing/content transitions; a bounded non-content failure state may still be recorded safely;
 7. obtain owner browser acceptance for any user-visible AI surface.
 
-No provider/model selection or generated-inquiry integration is implied by completing the storage migration or persistence foundation.
+This checkpoint connects the already measured local embedding candidate only for guarded resource processing. It does not select a generation model, authorize generated inquiry, add semantic-search routing, or expose an AI UI.

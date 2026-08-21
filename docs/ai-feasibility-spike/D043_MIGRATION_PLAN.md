@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-20
 **Target:** MariaDB 10.4.32
-**Status:** Executable package, guarded live migration, canonical 22-table schema, and unrouted provider-neutral persistence foundation verified; adapter/route integration remains unauthorized
+**Status:** Executable package, guarded live migration, canonical 22-table schema, provider-neutral persistence, and default-off local processing CLI verified; retrieval/UI integration remains unauthorized
 
 ## 1. Purpose
 
@@ -152,8 +152,10 @@ Completing this migration does not:
 * add an AI route, UI, scheduler, or autonomous moderation authority;
 * authorize commit or push without a separate reviewed Git checkpoint.
 
-## 8. Completed Persistence Foundation and Next Approval Boundary
+## 8. Completed Persistence and Guarded Local Processing Foundations
 
 The separately approved provider-neutral persistence foundation is implemented through `AiPersistenceRepository` and `GuardedAiPersistenceProcessor`. `tests/ai/run_d043_ai_persistence.php` passed 49/49 checks for source versioning, readiness, complete chunk/embedding persistence, freshness, run-token rejection, output identity, cleanup, and AI-disabled fallback. The random disposable database and temporary storage were removed; the configured live database remained read-only at 22 tables.
 
-The next decision is whether to connect one already accepted local extraction/segmentation/embedding adapter to this foundation through a bounded CLI/admin-triggered path. That approval would still add no public AI route, select no generation provider/model, and enable no generated inquiry.
+The separately approved local-processing checkpoint now connects `EX-LOCAL-PHP-001`, `SEG-BLOCK-AWARE-CONTEXT-FIT-002`, and `EMB-OLLAMA-ALL-MINILM-001` through `scripts/ai/process_resource.php`. It handles exactly one resource, remains disabled by default, requires the live AI gate plus an active Moderator/Admin actor and exact apply confirmation, rechecks authorization before processing/content transitions, permits only a bounded non-content failure-state write after a late rejection, and stores no query vectors, transcripts, generated answers, or cross-session memory.
+
+Verification passed 47/47 disposable local-processing checks, 4/4 supported readable-file regression cases, the unchanged 49/49 persistence suite, and one local-only synthetic Ollama adapter smoke. The configured live database remained read-only at 22 tables with the five AI source/state/chunk/embedding/output tables unchanged. The next separate boundary is semantic retrieval and related-resource integration with live eligibility/freshness checks and metadata fallback; no public AI route or generation capability is authorized by this checkpoint.

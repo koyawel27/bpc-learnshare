@@ -72,7 +72,8 @@ final class GuardedAiPersistenceProcessor
 
     public function synchronizeCurrentSource(
         int $resourceId,
-        string $detectedMimeType
+        string $detectedMimeType,
+        ?callable $authorizationGuard = null
     ): int {
         $this->assertPositiveId($resourceId, 'resource');
         $detectedMimeType = $this->boundedText(
@@ -94,8 +95,10 @@ final class GuardedAiPersistenceProcessor
         return $this->transaction(function () use (
             $resourceId,
             $detectedMimeType,
-            $file
+            $file,
+            $authorizationGuard
         ): int {
+            $this->assertAuthorized($authorizationGuard);
             $this->assertFeatureEnabled();
             $resource = $this->repository->findResource($resourceId, true);
 
@@ -182,7 +185,8 @@ final class GuardedAiPersistenceProcessor
         int $sourceVersionId,
         string $capability,
         string $configurationId,
-        string $dependencyFingerprint
+        string $dependencyFingerprint,
+        ?callable $authorizationGuard = null
     ): string {
         $this->assertPositiveId($sourceVersionId, 'source version');
         $capability = $this->capability($capability);
@@ -200,8 +204,10 @@ final class GuardedAiPersistenceProcessor
             $configurationId,
             $dependencyFingerprint,
             $runToken,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $source = $this->lockCurrentEligibleSource(
                 $sourceVersionId,
                 $file
@@ -237,7 +243,8 @@ final class GuardedAiPersistenceProcessor
     public function startRun(
         int $sourceVersionId,
         string $capability,
-        string $runToken
+        string $runToken,
+        ?callable $authorizationGuard = null
     ): void {
         $capability = $this->capability($capability);
         $runToken = $this->runToken($runToken);
@@ -247,8 +254,10 @@ final class GuardedAiPersistenceProcessor
             $sourceVersionId,
             $capability,
             $runToken,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $this->lockCurrentEligibleSource($sourceVersionId, $file);
 
             if (
@@ -269,7 +278,8 @@ final class GuardedAiPersistenceProcessor
     public function completeExtraction(
         int $sourceVersionId,
         string $runToken,
-        string $extractedText
+        string $extractedText,
+        ?callable $authorizationGuard = null
     ): void {
         $runToken = $this->runToken($runToken);
 
@@ -291,8 +301,10 @@ final class GuardedAiPersistenceProcessor
             $runToken,
             $extractedText,
             $textHash,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $source = $this->lockCurrentEligibleSource(
                 $sourceVersionId,
                 $file
@@ -330,7 +342,8 @@ final class GuardedAiPersistenceProcessor
     public function completeSegmentation(
         int $sourceVersionId,
         string $runToken,
-        array $chunks
+        array $chunks,
+        ?callable $authorizationGuard = null
     ): void {
         $runToken = $this->runToken($runToken);
         $chunks = $this->normalizeChunks($chunks);
@@ -340,8 +353,10 @@ final class GuardedAiPersistenceProcessor
             $sourceVersionId,
             $runToken,
             $chunks,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $this->lockCurrentEligibleSource($sourceVersionId, $file);
             $state = $this->assertActiveRun(
                 $sourceVersionId,
@@ -370,7 +385,8 @@ final class GuardedAiPersistenceProcessor
     public function completeEmbedding(
         int $sourceVersionId,
         string $runToken,
-        array $embeddings
+        array $embeddings,
+        ?callable $authorizationGuard = null
     ): void {
         $runToken = $this->runToken($runToken);
         $normalized = $this->normalizeEmbeddings($embeddings);
@@ -380,8 +396,10 @@ final class GuardedAiPersistenceProcessor
             $sourceVersionId,
             $runToken,
             $normalized,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $this->lockCurrentEligibleSource($sourceVersionId, $file);
             $state = $this->assertActiveRun(
                 $sourceVersionId,
@@ -442,7 +460,8 @@ final class GuardedAiPersistenceProcessor
         string $runToken,
         string $content,
         string $lifecycleState,
-        string $promptTemplateVersion
+        string $promptTemplateVersion,
+        ?callable $authorizationGuard = null
     ): void {
         $capability = $this->capability($capability);
         $outputType = self::OUTPUT_CAPABILITIES[$capability] ?? null;
@@ -481,8 +500,10 @@ final class GuardedAiPersistenceProcessor
             $content,
             $lifecycleState,
             $promptTemplateVersion,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $source = $this->lockCurrentEligibleSource(
                 $sourceVersionId,
                 $file
@@ -512,7 +533,8 @@ final class GuardedAiPersistenceProcessor
         string $capability,
         string $runToken,
         string $errorCode,
-        string $errorSummary
+        string $errorSummary,
+        ?callable $authorizationGuard = null
     ): void {
         $capability = $this->capability($capability);
         $runToken = $this->runToken($runToken);
@@ -526,8 +548,10 @@ final class GuardedAiPersistenceProcessor
             $runToken,
             $errorCode,
             $errorSummary,
-            $file
+            $file,
+            $authorizationGuard
         ): void {
+            $this->assertAuthorized($authorizationGuard);
             $this->lockCurrentEligibleSource($sourceVersionId, $file);
 
             if (
@@ -1029,6 +1053,20 @@ final class GuardedAiPersistenceProcessor
             throw $this->failure(
                 'AI persistence is disabled or not configured.',
                 'ai_disabled'
+            );
+        }
+    }
+
+    private function assertAuthorized(?callable $authorizationGuard): void
+    {
+        if ($authorizationGuard === null) {
+            return;
+        }
+
+        if ($authorizationGuard() !== true) {
+            throw $this->failure(
+                'Active staff authorization is required for AI persistence.',
+                'processing_not_authorized'
             );
         }
     }

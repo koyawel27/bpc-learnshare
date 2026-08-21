@@ -19,6 +19,25 @@ final class AiPersistenceRepository
     }
 
     /** @return array<string, mixed>|null */
+    public function findAuthorizedProcessingActor(
+        int $accountId,
+        bool $lock = false
+    ): ?array {
+        $statement = $this->database->prepare(
+            "SELECT id, role, account_status
+             FROM accounts
+             WHERE id = :id
+               AND role IN ('moderator', 'admin')
+               AND account_status = 'active'
+             LIMIT 1" . ($lock ? ' FOR UPDATE' : '')
+        );
+        $statement->execute(['id' => $accountId]);
+        $row = $statement->fetch();
+
+        return is_array($row) ? $row : null;
+    }
+
+    /** @return array<string, mixed>|null */
     public function findResource(int $resourceId, bool $lock = false): ?array
     {
         $statement = $this->database->prepare(
