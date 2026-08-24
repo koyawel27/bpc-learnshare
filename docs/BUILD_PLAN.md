@@ -168,6 +168,10 @@ This validates the implementation boundary and representative local handling wit
 
 Only an active Student or Teacher/Instructor may create an ordinary upload. Role, status, taxonomy availability, and selected controlled values are rechecked server-side, including a transaction-time uploader check. Accepted files receive a cryptographically random storage filename outside `public/`, and the database row is created as `Pending`. If the database write fails, the moved file is removed.
 
+`tests/presentation/run_core_journey_acceptance.php` passed a 24-check read-only preflight and a separately approved 66-check local HTTP apply run on 2026-08-24. The accepted run exercised public Student registration and login, a reviewed TXT upload, Pending-only exclusion from discovery/detail/download, staff moderation and approval history, Approved-only metadata search with all five filters, resource details, byte-matching protected download, logout, and protected-route denial. It also requested AI-assisted search while every AI feature was disabled and confirmed that standard metadata results remained available without a provider request.
+
+Two earlier apply attempts were preserved as harness-correction evidence rather than application failures. The first mistook the echoed search-box value for a public result; the second passed every functional check but attempted cleanup before deleting the restrictive moderation-history child row. Exact targeted cleanup removed only the temporary rows and file. The final run used a result-link assertion and foreign-key-safe cleanup order, then restored all 22 table row counts and the protected-storage manifest. This proves the bounded presentation journey and AI-disabled continuity; it does not mark the remaining negative, role, status, or full-v1.0 cases as complete.
+
 The frontend should initially use server-rendered PHP, reusable HTML partials, CSS, and small vanilla-JavaScript enhancements. A single-page application or frontend framework is not required.
 
 ### 5.3 Upload-form usability review (proposed; not implemented)

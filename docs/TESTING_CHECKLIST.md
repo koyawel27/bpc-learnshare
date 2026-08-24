@@ -65,14 +65,14 @@ All final v1.0 requirements remain governed by the source documents even when th
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| ENV-001 | P0 | Run `git status -sb` before a checkpoint | Correct branch and understood working-tree state | Not run |
-| ENV-002 | P0 | Confirm PHP/XAMPP runtime | Required PHP extensions load without fatal error | Not run |
-| ENV-003 | P0 | Confirm MariaDB runtime and database connection | Application connects using local ignored configuration | Not run |
+| ENV-001 | P0 | Run `git status -sb` before a checkpoint | Correct branch and understood working-tree state | Passed for the core-journey checkpoint — clean synchronized `main` before harness creation |
+| ENV-002 | P0 | Confirm PHP/XAMPP runtime | Required PHP extensions load without fatal error | Passed — PHP 8.2.12 with cURL and Fileinfo |
+| ENV-003 | P0 | Confirm MariaDB runtime and database connection | Application connects using local ignored configuration | Passed — live local connection with 22 accepted tables |
 | ENV-004 | P0 | Import `database/schema.sql` into a clean test database | All 18 accepted tables are created | Not run |
 | ENV-005 | P0 | Inspect browser-accessible document root | Only intended `public/` content is exposed | Not run |
-| ENV-006 | P0 | Request a storage/config/internal path through the browser | Access is denied; no source, file, or secret is exposed | Not run |
+| ENV-006 | P0 | Request a storage/config/internal path through the browser | Access is denied; no source, file, or secret is exposed | Partial — generated protected resource URL returned 404; broader config/internal-path set remains |
 | ENV-007 | P0 | Run with missing/invalid database configuration | Safe error response; no credential or stack trace disclosure | Not run |
-| ENV-008 | P0 | Run `git diff --check` before commit | No whitespace-error output | Not run |
+| ENV-008 | P0 | Run `git diff --check` before commit | No whitespace-error output | Passed for the core-journey checkpoint |
 | ENV-009 | P0 | Inspect staged file list | Only checkpoint-approved files are staged | Not run |
 
 ---
@@ -81,15 +81,15 @@ All final v1.0 requirements remain governed by the source documents even when th
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| AUTH-001 | P0 | Register a Student with valid minimum data | Active Student account is created; password is hashed | Not run |
+| AUTH-001 | P0 | Register a Student with valid minimum data | Active Student account is created; password is hashed | Passed through the live core journey — registration and subsequent password login succeeded |
 | AUTH-002 | P0 | Attempt public registration as Teacher, Moderator, or Admin | Request is rejected | Not run |
 | AUTH-003 | P0 | Register duplicate student number/identifier | Safe validation error; no duplicate account | Not run |
 | AUTH-004 | P0 | Register with a password shorter than 8 characters | Request is rejected | Not run |
-| AUTH-005 | P0 | Log in with correct Active credentials | Session is created and ID is regenerated | Not run |
+| AUTH-005 | P0 | Log in with correct Active credentials | Session is created and ID is regenerated | Partial — Student and temporary Moderator authenticated through HTTP; explicit session-ID comparison remains |
 | AUTH-006 | P0 | Log in with wrong password, unknown identifier, and Disabled account | Same generic failure message; no session | Not run |
-| AUTH-007 | P0 | Access a protected route without a session | Redirect or access-denied response | Not run |
+| AUTH-007 | P0 | Access a protected route without a session | Redirect or access-denied response | Passed — repository redirected after logout |
 | AUTH-008 | P0 | Remain idle past 30 minutes | Session expires and protected requests fail | Not run |
-| AUTH-009 | P0 | Log out and reuse the prior session | Prior session is invalid | Not run |
+| AUTH-009 | P0 | Log out and reuse the prior session | Prior session is invalid | Passed for the live browser session — logout succeeded and the next protected request redirected |
 | AUTH-010 | P0 | Change/disable an account after login, then make a protected request | Live database role/status is enforced immediately | Not run |
 | AUTH-011 | P0 | Attempt login with SQL metacharacters | No injection; generic failure | Not run |
 | AUTH-012 | P1 | Create Teacher/Instructor, Moderator, and Admin accounts as Admin | Accounts are created with valid role and audit evidence | Not run |
@@ -118,7 +118,7 @@ All final v1.0 requirements remain governed by the source documents even when th
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
 | UPL-001 | P0 | Upload an allowed readable PDF with valid metadata as Student | One Pending resource and protected file are created | Not run |
-| UPL-002 | P0 | Upload an allowed DOCX/PPTX/TXT where supported | File passes the correct validation path | Partial — representative image-heavy PPTX accepted; DOCX/TXT HTTP cases remain |
+| UPL-002 | P0 | Upload an allowed DOCX/PPTX/TXT where supported | File passes the correct validation path | Partial — representative image-heavy PPTX and accepted TXT passed through HTTP; DOCX remains |
 | UPL-003 | P0 | Upload as Teacher/Instructor | Same Pending moderation path as Student | Not run |
 | UPL-004 | P0 | Attempt ordinary upload as Moderator/Admin | Request is rejected | Not run |
 | UPL-005 | P0 | Omit required metadata | Request is rejected; no resource/file remains | Not run |
@@ -143,9 +143,9 @@ All final v1.0 requirements remain governed by the source documents even when th
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| MOD-001 | P0 | Open Pending queue as Moderator/Admin | Eligible Pending resources are listed | Not run |
+| MOD-001 | P0 | Open Pending queue as Moderator/Admin | Eligible Pending resources are listed | Passed with a temporary active Moderator and one temporary Pending resource |
 | MOD-002 | P0 | Open Pending queue as ordinary user | Access is denied | Not run |
-| MOD-003 | P0 | Approve a Pending resource | Status becomes Approved with history/audit evidence | Not run |
+| MOD-003 | P0 | Approve a Pending resource | Status becomes Approved with history/audit evidence | Passed — one approval transition and one matching action-history row |
 | MOD-004 | P0 | Reject a Pending resource with required reason | Status becomes Rejected with history/audit evidence | Not run |
 | MOD-005 | P0 | Request correction with required note | Status becomes Needs Correction with history/audit evidence | Not run |
 | MOD-006 | P0 | Submit same/stale moderation decision twice | Second or stale action fails safely | Not run |
@@ -161,16 +161,18 @@ All final v1.0 requirements remain governed by the source documents even when th
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| RES-001 | P0 | Browse as an authenticated ordinary user | Only eligible Approved resources appear | Not run |
-| RES-002 | P0 | Search by title/topic/metadata | Relevant Approved resources appear | Not run |
-| RES-003 | P0 | Filter by course, subject, year level, type, and controlled tag | Each filter is enforced by current metadata | Not run |
-| RES-004 | P0 | Search while AI is disabled/unavailable | Metadata search remains functional | Not run |
-| RES-005 | P0 | Open Approved resource details | Escaped metadata and allowed actions appear | Not run |
-| RES-006 | P0 | View/download an Approved available resource | Controlled PHP endpoint serves the intended file | Not run |
-| RES-007 | P0 | Guess direct URL for Pending/Rejected/Hidden/Restricted/Removed/Replaced resource | Access is denied according to role/status rules | Not run |
+| RES-001 | P0 | Browse as an authenticated ordinary user | Only eligible Approved resources appear | Partial — bounded live journey excluded its Pending resource and displayed it after approval; other ineligible statuses remain |
+| RES-002 | P0 | Search by title/topic/metadata | Relevant Approved resources appear | Passed for the unique-title live journey case |
+| RES-003 | P0 | Filter by course, subject, year level, type, and controlled tag | Each filter is enforced by current metadata | Passed for one Approved resource with all five filters applied together |
+| RES-004 | P0 | Search while AI is disabled/unavailable | Metadata search remains functional | Passed — semantic request failed over to matching metadata results with all AI controls disabled |
+| RES-005 | P0 | Open Approved resource details | Escaped metadata and allowed actions appear | Passed for the temporary Approved resource; hostile-text escaping remains a separate negative case |
+| RES-006 | P0 | View/download an Approved available resource | Controlled PHP endpoint serves the intended file | Passed — attachment response bytes matched the accepted TXT fixture and download count incremented once |
+| RES-007 | P0 | Guess direct URL for Pending/Rejected/Hidden/Restricted/Removed/Replaced resource | Access is denied according to role/status rules | Partial — Pending detail/download returned 404; remaining ineligible statuses remain |
 | RES-008 | P0 | Request Approved resource whose `file_availability` is not `available` | File is not served | Not run |
 | RES-009 | P0 | Change resource status after obtaining an old link | Next request enforces the new live status | Not run |
 | RES-010 | P0 | Change filename/path parameters in download request | Server ignores unsafe client path and resolves stored metadata safely | Not run |
+
+`tests/presentation/run_core_journey_acceptance.php --mode=apply --approve=CORE-JOURNEY-LIVE-ACCEPTANCE` passed 66/66 checks on 2026-08-24 after a 24/24 read-only preflight. It completed the real local HTTP journey from Student registration through Pending upload, staff approval, Approved-only discovery, protected byte-matching download, AI-disabled metadata fallback, and logout. The first two apply attempts stopped on harness-only result-detection and cleanup-order defects. Both were reviewed transparently; exact temporary cleanup was confirmed, and only the harness was corrected. The final accepted run restored all 22 table row counts and the protected-storage manifest and left zero temporary accounts, resources, history rows, tag links, or files. No provider request, schema/register change, commit, or push occurred.
 
 ---
 
@@ -233,7 +235,7 @@ These checks extend the accepted feasibility package. Raw detailed evidence rema
 | AI-LIFE-003 | P0 | Change source version/file hash | Old derived data is stale and cannot be used as current | Passed at live Gate 5B control seam — 2026-08-13 |
 | AI-LIFE-004 | P0 | Make file unavailable while resource row remains | File and dependent AI behavior fail closed | Passed at live Gate 5B control seam — 2026-08-13 |
 | AI-FALL-001 | P0 | Stop/unreach Ollama during an AI action | AI feature reports unavailability; core workflow continues | Partial — unavailable-provider contract passed; real Ollama interruption not run |
-| AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Partial — live metadata search and protected-download lookup passed; upload/moderation HTTP regression remains |
+| AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Passed through the 66/66 core journey — registration, upload, moderation, browse, metadata fallback, details, and download continued with all AI controls disabled |
 | AI-FOLL-001 | P1 | Ask context-dependent follow-up in active session | Uses bounded session context and repository evidence | Not run |
 | AI-FOLL-002 | P1 | Start new session and refer to old conversation | No unauthorized permanent memory | Not run |
 | AI-REL-001 | P1 | Request related resources | Small relevant Approved-only set with live filters | Passed for bounded integration; broader offline reconciliation passed 44/44 at 100% precision, 72% recall, and 83.72% F1, but representative broader live quality remains unverified |
