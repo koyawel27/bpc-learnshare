@@ -739,10 +739,10 @@ The following remain open and must not be treated as already resolved:
 * **AI/retrieval architecture remains unresolved after the completed final evidence reconciliation.**
 
   * The Required-package evidence has been reconciled as **Partially feasible — alternative or mixed architecture required**, with 6 capabilities meeting criteria, 4 meeting with targeted changes, and 2 not meeting under the tested candidates.
-  * No provider, model, embedding implementation, vector-storage method, retrieval infrastructure, or schema expansion may be treated as decided until the later explicit architecture/schema decision is reviewed and accepted.
+  * D043 now decides the bounded provider-neutral MariaDB/PHP persistence and retrieval direction: four targeted derived-data tables, guarded local processing, and bounded PHP cosine. Provider/model selection, a no-result threshold, generated inquiry, and public AI routing/UI remain undecided or unauthorized.
   * Measured checkpoints now support readable extraction, corrected 102-chunk segmentation, complete local embedding, native PHP cosine correctness, and promising bounded standalone retrieval.
   * Synthetic local-generation preflight and bounded grounded comparison are complete for the tested Qwen and Llama candidates; neither candidate met the accepted grounded-answer usefulness criteria or is selected. The guarded Groq/GPT-OSS comparison met latency and usefulness but failed strict claim-support and source-attribution criteria; that external candidate is also unselected.
-  * The 21-case deterministic grounded-response control layer, 200-case model-independent session/lifecycle control checkpoint, bounded related-resource evaluations, ten-case isolated source-attribution presentation checkpoint, ten-case two-model natural-language follow-up comparison, 19-case Gate 5B lifecycle/fallback validation, and 18-case Gate 5C live relation-metadata/link validation are complete. The follow-up runs preserved their failed quality and latency findings; the earlier guarded regression remains bounded to frozen relation groups; and Gate 5C remains a four-resource live metadata-fallback proof rather than a final relation-rule selection. Production-session follow-up, processing-readiness/retrieval integration, persistent derived-data cleanup, and complete application fallback remain incomplete.
+  * The 21-case deterministic grounded-response control layer, 200-case model-independent session/lifecycle control checkpoint, bounded related-resource evaluations, ten-case isolated source-attribution presentation checkpoint, ten-case two-model natural-language follow-up comparison, 19-case Gate 5B lifecycle/fallback validation, 18-case Gate 5C live relation-metadata/link validation, and the audited six-query D043 live semantic-retrieval checkpoint are complete. The follow-up runs preserved their failed quality and latency findings; the live retrieval checkpoint preserved one top-one miss while reaching 6/6 top-two and locator matches; and Gate 5C remains a four-resource live metadata-fallback proof rather than a final relation-rule selection. Production-session follow-up, public retrieval routing/UI, persistent derived-data cleanup, and complete application fallback remain incomplete.
 
 * **Current hardware supports the measured local embedding and bounded retrieval checkpoints, but broader AI suitability remains unresolved.**
 
@@ -767,7 +767,7 @@ It is:
 * not a final architecture decision;
 * not a schema revision.
 
-The final reconciliation includes the completed extraction, corrected segmentation, embedding, PHP cosine, standalone retrieval, manual review, versioned ground truth, local and external generation comparisons, deterministic/live controls, related resources, source presentation, follow-up, and summary/suggestion evidence. It records a bounded partial-feasibility outcome rather than claiming every Required capability passed. D043 selects the provider-neutral MariaDB/PHP persistence and retrieval direction; no provider, model, database upgrade, second database, or executable schema migration has been selected.
+The final reconciliation includes the completed extraction, corrected segmentation, embedding, PHP cosine, standalone retrieval, manual review, versioned ground truth, local and external generation comparisons, deterministic/live controls, related resources, source presentation, follow-up, and summary/suggestion evidence. It records a bounded partial-feasibility outcome rather than claiming every Required capability passed. D043 selects the provider-neutral MariaDB/PHP persistence and retrieval direction, and its exact 18-to-22 migration is executed and verified. No provider, model, database upgrade, second database, generated inquiry, or public AI integration is selected.
 
 ### 12A.1 Purpose
 
@@ -918,7 +918,8 @@ Remaining order:
    * Added read-only candidate selection and bounded PHP cosine ranking for current Approved/available sources with ready extraction, segmentation, and embeddings.
    * Kept query vectors request-only, revalidated each source/file/candidate before return, collapsed repeated chunks to one resource result, and preserved the existing metadata search on disabled/unavailable/malformed AI paths.
    * `tests/ai/run_d043_semantic_retrieval.php` passed 43/43 disposable checks, including late requester-disable rejection, with zero real model requests, zero live database writes, and no route/UI.
-   * No no-result/evidence-sufficiency threshold, public route, related-resource application integration, or generation capability was introduced.
+   * A separately approved one-time evidence replay used the installed Ollama `all-minilm:latest` identity for six frozen synthetic queries against Resources 35–38. Its independent audit passed: expected resource top 1 was 5/6, top 2 was 6/6, expected locator was 6/6, tag filters were 2/2, database counts were unchanged, and both gates were restored off.
+   * The Resource 36-over-35 top-one miss remains preserved. No no-result/evidence-sufficiency threshold, public route, related-resource application integration, final candidate, or generation capability was introduced.
 
 9. **Consider optional summary/suggestion routing only after the storage/retrieval path passes.**
 

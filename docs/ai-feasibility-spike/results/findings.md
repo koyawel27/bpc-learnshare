@@ -1,6 +1,6 @@
 # AI Feasibility Spike — Findings
 
-**Status:** Final evidence reconciliation completed; measured capability findings are recorded, while application integration and the later architecture/schema decision remain pending
+**Status:** Final evidence reconciliation and the D043 architecture/storage decision are completed; guarded live semantic-retrieval evidence is registered, while public AI integration and provider/model selection remain pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 These findings distinguish original measurements, later reviewed interpretation, and versioned ground-truth correction. The bounded conclusion is recorded separately in `final_recommendation.md`; neither document is an architecture/schema decision.
@@ -14,7 +14,7 @@ These findings distinguish original measurements, later reviewed interpretation,
 - Embedding candidate: `EMB-OLLAMA-ALL-MINILM-001`, Ollama 0.32.1, `all-minilm:latest`, 384 dimensions.
 - Similarity method: `SIM-PHP-COSINE-001`.
 - Retrieval configuration: `RET-SEMANTIC-STANDALONE-001`.
-- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-14.
+- Test period covered by the registered checkpoints: 2026-07-27 through 2026-08-24.
 
 ## 2. Observed Results by Capability
 
@@ -40,6 +40,8 @@ Meets the completed technical checkpoints under the tested bounded corpus:
 - `TR-RET-SEMANTIC-001` completed 55/55 query runs. Median positive isolated query-to-results latency was 106.099 ms, and all positive runs completed within five seconds.
 
 These measurements support technical feasibility for the representative local/LAN corpus. They do not select permanent vector storage, final retrieval code, a database change, or production-scale concurrency behavior.
+
+`TR-RET-LIVE-D043-001` later exercised the guarded D043 backend against four controlled Approved live resources using six frozen synthetic local-only queries. Expected resources ranked first in 5/6 cases and within the first two in 6/6; expected passage locators matched in 6/6; both controlled-tag filter cases passed. Cold first-query latency was 2,028.125 ms and warm median latency was 83.722 ms. The security/session case ranked the related Resource 36 glossary first and expected Resource 35 module second; this miss remains preserved. The independently audited replay wrote no query vector or AI output, left all AI-table counts unchanged, restored both gates off, selected no no-result threshold or final candidate, and authorized no route or UI.
 
 ### 2.5 Semantic Search
 

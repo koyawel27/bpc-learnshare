@@ -378,6 +378,18 @@ The first disposable harness attempt failed safely after the forward SQL because
 
 `tests/ai/run_d043_semantic_retrieval.php` passed 43/43 checks on a random disposable MariaDB database and temporary protected storage. It used deterministic fake embeddings, made zero real model/provider requests, preserved the configured live 22-table database and all five AI table counts, and removed the disposable database/storage. This is a backend control checkpoint, not owner browser acceptance or proof that a no-result/evidence-sufficiency threshold exists.
 
+### 11.9 D043 guarded live semantic-retrieval evidence
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-RET-LIVE-001 | P0 | Execute six frozen synthetic local-only queries against the four controlled Approved processed resources | One request-only query vector per case; expected resources and locators remain reviewable | Passed — 6/6 executed; top 1 5/6, top 2 6/6, locator 6/6 |
+| AI-RET-LIVE-002 | P0 | Apply Security and Usability controlled-tag filters | Results stay inside the allowed live resource sets | Passed — 2/2 |
+| AI-RET-LIVE-003 | P0 | Disable the operator gate and submit an empty query | Metadata fallback remains available with zero embedding request | Passed |
+| AI-RET-LIVE-004 | P0 | Audit persistence and lifecycle boundaries | No query vector/output write; database counts unchanged; gates restored off | Passed |
+| AI-RET-LIVE-005 | P0 | Review decision boundaries | Preserve ranking miss; select no no-result threshold, final candidate, route, or UI | Passed |
+
+`TR-RET-LIVE-D043-001` records the exact evidence-capture replay at `run-20260824-072848Z`. The security/session query ranked Resource 36 first and expected Resource 35 second; the expected locator still matched. Cold first-query latency was 2,028.125 ms and warm median was 83.722 ms. This is an unrouted backend evidence checkpoint, not owner browser acceptance or authorization for user-facing semantic search.
+
 ---
 
 ## 12. Integrated AI Prototype Tests

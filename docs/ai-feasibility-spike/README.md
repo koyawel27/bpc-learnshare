@@ -1,7 +1,7 @@
 # AI Feasibility Spike — Evidence Package
 
 **Project:** BPC LearnShare  
-**Status:** Final evidence reconciliation completed — bounded outcome recorded as **Partially feasible — alternative or mixed architecture required**; application integration and the later architecture/schema decision remain pending
+**Status:** Final evidence reconciliation and the D043 architecture/storage decision completed — bounded outcome remains **Partially feasible — alternative or mixed architecture required**; public AI integration and provider/model selection remain pending
 **Canonical specification:** `docs/AI_FEASIBILITY_SPIKE.md`
 
 ## Purpose
@@ -36,7 +36,8 @@ Completed and registered checkpoints now cover:
 18. Gate 5C live related-resource metadata/link validation on four controlled Approved resources;
 19. Gate 5D external-candidate offline validation, harmless connectivity, guarded grounded execution, and manual quality review;
 20. Gate 5E versioned summary/controlled-suggestion execution, independent audit, and approved quality review; and
-21. final reconciliation of all 12 Required capabilities, tested candidates, limitations, schema impact, and downstream handoffs.
+21. final reconciliation of all 12 Required capabilities, tested candidates, limitations, schema impact, and downstream handoffs; and
+22. an independently audited six-query live semantic-retrieval checkpoint over four controlled Approved resources using the guarded D043 backend and the registered local embedding identity.
 
 Bounded repository-grounded answer construction, corpus-based insufficient-evidence behavior, prohibited-request behavior, and claim-to-source labeling were executed using six fixed cases per model. Both candidates completed every request, but each reached only 3/6 (50%) useful as-is or after a light edit against the accepted 80% requirement. Neither is accepted as the interactive local solution or as a reliable fallback.
 
@@ -44,7 +45,7 @@ The deterministic and live control checkpoints passed their bounded criteria, bu
 
 The external Groq/GPT-OSS grounded comparison met latency and usefulness but failed claim support at 88.89% against the 95% requirement and failed exact source attribution. The later Gate 5E configuration met every accepted summary and controlled-suggestion threshold, including 100% supported summaries, 90% directly usable Active tags, 85.71% supported limited metadata, and 100% light-edit usability. That capability-specific pass does not repair the grounded-inquiry failure or select the provider/model.
 
-The final recommendation therefore records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. Supported components may proceed only through a later architecture/schema decision. Generated repository inquiry remains unavailable until a future candidate passes. No provider, model, permanent retrieval method, storage design, database change, or application integration is selected by the evidence package.
+The final recommendation therefore records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. D043 later accepted the bounded provider-neutral MariaDB/PHP persistence and retrieval direction. The audited live retrieval checkpoint supports that implementation boundary but does not select a provider/model, a no-result threshold, public semantic-search routing/UI, or generated inquiry. Generated repository inquiry remains unavailable until a future candidate passes.
 
 ## File Map
 
@@ -82,7 +83,7 @@ Summarizes observed results after measurements exist. Do not write conclusions b
 
 ### `results/final_recommendation.md`
 
-Records the completed Section 25 evidence reconciliation, bounded outcome, capability results, candidate comparison, recommended direction, schema-impact classification, handoffs, and remaining risks. It is input to—not a replacement for—the later architecture/schema decision.
+Records the completed Section 25 evidence reconciliation, bounded outcome, capability results, candidate comparison, recommended direction, schema-impact classification, handoffs, and remaining risks. It provided the evidence input for D043; it does not itself select a provider/model or authorize application integration.
 
 ### `redacted-evidence/`
 
