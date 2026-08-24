@@ -6,7 +6,16 @@ use function BpcLearnShare\Support\e;
 
 /**
  * @var array<string, mixed> $resource
+ * @var array<string, mixed> $relatedResources
  */
+$relatedStatus = (string) ($relatedResources['status'] ?? 'unavailable');
+$relatedSuggestions = is_array($relatedResources['suggestions'] ?? null)
+    ? $relatedResources['suggestions']
+    : [];
+$relatedMessage = (string) (
+    $relatedResources['message']
+    ?? 'No useful related resource is currently available.'
+);
 $fileSize = (int) $resource['file_size'];
 $fileSizeLabel = $fileSize >= 1048576
     ? number_format($fileSize / 1048576, 2) . ' MB'
@@ -110,4 +119,46 @@ $fileSizeLabel = $fileSize >= 1048576
             </p>
         </aside>
     </div>
+
+    <section
+        class="status-card related-resources-panel"
+        aria-labelledby="related-resources-heading"
+    >
+        <div class="related-resources-heading">
+            <div>
+                <p class="eyebrow">Explore the repository</p>
+                <h2 id="related-resources-heading">Related resources</h2>
+                <p>
+                    Suggestions use shared resource tags and are checked again
+                    before they are displayed.
+                </p>
+            </div>
+            <a class="button-secondary button-link" href="/resources">
+                Search all resources
+            </a>
+        </div>
+
+        <?php if ($relatedStatus === 'available' && $relatedSuggestions !== []): ?>
+            <ul class="related-resource-list">
+                <?php foreach ($relatedSuggestions as $suggestion): ?>
+                    <li>
+                        <a
+                            class="related-resource-link"
+                            href="<?= e((string) ($suggestion['href'] ?? '/resources')) ?>"
+                        >
+                            <span class="related-resource-title">
+                                <?= e((string) ($suggestion['title'] ?? 'Approved resource')) ?>
+                            </span>
+                            <span class="related-resource-meta">
+                                <?= e((string) ($suggestion['file_type'] ?? 'FILE')) ?>
+                                · Approved resource
+                            </span>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p class="related-resource-empty"><?= e($relatedMessage) ?></p>
+        <?php endif; ?>
+    </section>
 </main>

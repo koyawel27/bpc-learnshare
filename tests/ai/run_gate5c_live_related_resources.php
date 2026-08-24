@@ -602,5 +602,5 @@ echo 'Protected files modified: 0' . PHP_EOL;
 echo 'Real model/provider requests: 0' . PHP_EOL;
 echo 'Retrieval or embedding reruns: 0' . PHP_EOL;
 echo 'Schema changes: 0' . PHP_EOL;
-echo 'User-facing AI route added: No' . PHP_EOL;
+echo 'Route/UI mutation performed by this regression: No' . PHP_EOL;
 echo 'Final relation rule, model, or architecture selected: No' . PHP_EOL;

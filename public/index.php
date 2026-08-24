@@ -3,10 +3,13 @@
 declare(strict_types=1);
 
 use BpcLearnShare\Ai\AiFeatureGate;
+use BpcLearnShare\Ai\DatabaseAiSourceEligibility;
+use BpcLearnShare\Ai\DatabaseRelatedResourceMetadata;
 use BpcLearnShare\Ai\GuardedSemanticRetrieval;
 use BpcLearnShare\Ai\LocalProcessingException;
 use BpcLearnShare\Ai\OllamaAllMiniLmEmbeddingAdapter;
 use BpcLearnShare\Ai\SemanticRetrievalRepository;
+use BpcLearnShare\Ai\SourceAttributionPresenter;
 use BpcLearnShare\Auth\AccountInput;
 use BpcLearnShare\Auth\AccountRepository;
 use BpcLearnShare\Auth\AuthService;
@@ -536,7 +539,7 @@ if ($isResourceDetail) {
         $rejectMethod(['GET']);
     }
 
-    $requireAccount();
+    $account = $requireAccount();
     $resourceId = (int) $resourceDetailMatch[1];
     $resource = $resourceDiscovery->openAvailableApproved($resourceId);
 
@@ -551,9 +554,41 @@ if ($isResourceDetail) {
         exit;
     }
 
+    $relatedResources = [
+        'status' => 'unavailable',
+        'message' =>
+            'Related resources are unavailable right now. '
+            . 'You can still browse or search the repository.',
+        'suggestions' => [],
+    ];
+
+    if (Environment::getBool('AI_RELATED_RESOURCES_ENABLED', false)) {
+        try {
+            $relatedFeatureGate = new AiFeatureGate($database);
+
+            if ($relatedFeatureGate->isEnabled()) {
+                $relatedResources = (new DatabaseRelatedResourceMetadata(
+                    $database,
+                    new DatabaseAiSourceEligibility(
+                        $database,
+                        $resourceStorageDirectory
+                    ),
+                    new SourceAttributionPresenter()
+                ))->suggest(
+                    (int) $account['id'],
+                    $resourceId,
+                    5
+                );
+            }
+        } catch (Throwable) {
+            error_log('Related-resource suggestions failed safely.');
+        }
+    }
+
     $renderPage('resource/show', [
         'title' => (string) $resource['title'],
         'resource' => $resource,
+        'relatedResources' => $relatedResources,
     ]);
     exit;
 }

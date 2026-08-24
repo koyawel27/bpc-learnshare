@@ -942,6 +942,84 @@ button:disabled {
     color: #66728a;
 }
 
+.related-resources-panel {
+    width: 100%;
+    margin-top: 1.25rem;
+}
+
+.related-resources-heading {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid #dce4f0;
+}
+
+.related-resources-heading h2 {
+    margin: 0.3rem 0 0.45rem;
+}
+
+.related-resources-heading p:not(.eyebrow) {
+    max-width: 44rem;
+    margin: 0;
+    color: #4b5872;
+    line-height: 1.6;
+}
+
+.related-resources-heading .button-link {
+    flex: 0 0 auto;
+}
+
+.related-resource-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.related-resource-list li + li {
+    border-top: 1px solid #e4e9f2;
+}
+
+.related-resource-link {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0.15rem;
+    color: #182239;
+    text-decoration: none;
+}
+
+.related-resource-link:hover .related-resource-title {
+    color: #285ea8;
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+}
+
+.related-resource-link:focus-visible {
+    border-radius: 0.35rem;
+    outline: 0.2rem solid rgba(40, 94, 168, 0.3);
+    outline-offset: 0.2rem;
+}
+
+.related-resource-title {
+    font-weight: 800;
+}
+
+.related-resource-meta {
+    flex: 0 0 auto;
+    color: #66728a;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.related-resource-empty {
+    margin: 1rem 0 0;
+    color: #59667f;
+    line-height: 1.6;
+}
+
 @media (max-width: 48rem) {
     .auth-shell,
     .upload-shell {
@@ -958,7 +1036,8 @@ button:disabled {
     .file-review-card,
     .repository-heading,
     .resource-results-heading,
-    .resource-card-footer {
+    .resource-card-footer,
+    .related-resources-heading {
         align-items: stretch;
         flex-direction: column;
     }
@@ -1002,6 +1081,12 @@ button:disabled {
     .resource-card-meta,
     .resource-detail-meta {
         grid-template-columns: 1fr;
+    }
+
+    .related-resource-link {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.35rem;
     }
 
     .form-card,
