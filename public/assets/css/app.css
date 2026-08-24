@@ -629,6 +629,65 @@ button:disabled {
     margin-bottom: 1rem;
 }
 
+.search-mode-fieldset {
+    padding: 0;
+    border: 0;
+    margin: 0 0 1.25rem;
+}
+
+.search-mode-fieldset legend {
+    margin-bottom: 0.55rem;
+    color: #1a2338;
+    font-weight: 700;
+}
+
+.search-mode-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.search-mode-option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.7rem;
+    align-items: start;
+    margin: 0;
+    padding: 0.9rem;
+    border: 1px solid #d8e0ec;
+    border-radius: 0.8rem;
+    background: #f8faff;
+    cursor: pointer;
+}
+
+.search-mode-option:has(input:checked) {
+    border-color: #7ea8df;
+    background: #eef5ff;
+}
+
+.search-mode-option input {
+    width: auto;
+    margin: 0.2rem 0 0;
+    accent-color: #285ea8;
+}
+
+.search-mode-option strong,
+.search-mode-option small {
+    display: block;
+}
+
+.search-mode-option small {
+    margin-top: 0.2rem;
+    color: #66728a;
+    font-size: 0.82rem;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.semantic-search-status {
+    margin-bottom: 1.5rem;
+}
+
 .resource-filter-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -714,6 +773,42 @@ button:disabled {
     line-height: 1.6;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+}
+
+.semantic-match-context {
+    margin-bottom: 1rem;
+    padding: 0.9rem 0 0.9rem 1rem;
+    border-left: 0.22rem solid #7ea8df;
+    background: #f6f9fe;
+}
+
+.semantic-match-context p {
+    margin: 0;
+}
+
+.semantic-match-label {
+    color: #285ea8;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.semantic-match-locator {
+    margin-top: 0.35rem !important;
+    color: #46536d;
+    font-size: 0.84rem;
+}
+
+.semantic-match-excerpt {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-top: 0.5rem !important;
+    color: #34415b;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
 }
 
 .resource-card-meta,
@@ -871,7 +966,8 @@ button:disabled {
     .moderation-review-grid,
     .compact-meta,
     .resource-detail-grid,
-    .resource-filter-grid {
+    .resource-filter-grid,
+    .search-mode-options {
         grid-template-columns: 1fr;
     }
 

@@ -10,6 +10,9 @@ use function BpcLearnShare\Support\e;
  * @var array<string, int|string> $filters
  * @var array<string, string> $errors
  * @var array<string, list<array{id: int, name: string}>> $taxonomy
+ * @var string $searchMode
+ * @var string $resultMode
+ * @var string|null $semanticStatusMessage
  */
 ?>
 <main class="repository-shell">
@@ -29,8 +32,8 @@ use function BpcLearnShare\Support\e;
     </section>
 
     <section class="form-card resource-filter-card" aria-labelledby="filter-heading">
-        <p class="eyebrow">Metadata search</p>
-        <h2 id="filter-heading">Search and filter</h2>
+        <p class="eyebrow">Repository search</p>
+        <h2 id="filter-heading">Choose how to search</h2>
 
         <?php if ($errors !== []): ?>
             <p class="alert alert-error">
@@ -39,7 +42,43 @@ use function BpcLearnShare\Support\e;
         <?php endif; ?>
 
         <form method="get" action="/resources">
-            <label for="q">Title, topic, or description</label>
+            <fieldset class="search-mode-fieldset">
+                <legend>Search method</legend>
+                <div class="search-mode-options">
+                    <label class="search-mode-option">
+                        <input
+                            type="radio"
+                            name="search_mode"
+                            value="metadata"
+                            <?= $searchMode === 'metadata' ? 'checked' : '' ?>
+                        >
+                        <span>
+                            <strong>Standard search</strong>
+                            <small>Matches titles, topics, and descriptions.</small>
+                        </span>
+                    </label>
+                    <label class="search-mode-option">
+                        <input
+                            type="radio"
+                            name="search_mode"
+                            value="semantic"
+                            <?= $searchMode === 'semantic' ? 'checked' : '' ?>
+                        >
+                        <span>
+                            <strong>AI-assisted meaning search</strong>
+                            <small>
+                                Experimental. Searches processed Approved
+                                resources and falls back safely if unavailable.
+                            </small>
+                        </span>
+                    </label>
+                </div>
+                <?php if (isset($errors['search_mode'])): ?>
+                    <p class="field-error"><?= e($errors['search_mode']) ?></p>
+                <?php endif; ?>
+            </fieldset>
+
+            <label for="q">Search words</label>
             <input
                 id="q"
                 name="q"
@@ -92,17 +131,31 @@ use function BpcLearnShare\Support\e;
         </form>
     </section>
 
+    <?php if ($semanticStatusMessage !== null): ?>
+        <p class="alert alert-info semantic-search-status" role="status">
+            <?= e($semanticStatusMessage) ?>
+        </p>
+    <?php endif; ?>
+
     <section aria-labelledby="results-heading">
         <div class="resource-results-heading">
             <div>
                 <p class="eyebrow">Current repository</p>
                 <h2 id="results-heading">
-                    <?= count($resources) ?> approved
-                    <?= count($resources) === 1 ? 'resource' : 'resources' ?>
+                    <?= count($resources) ?>
+                    <?php if ($resultMode === 'semantic'): ?>
+                        AI-assisted <?= count($resources) === 1 ? 'match' : 'matches' ?>
+                    <?php else: ?>
+                        approved <?= count($resources) === 1 ? 'resource' : 'resources' ?>
+                    <?php endif; ?>
                 </h2>
             </div>
             <p>
-                Results are limited to the newest 100 matching resources.
+                <?php if ($resultMode === 'semantic'): ?>
+                    Showing up to five meaning-based matches.
+                <?php else: ?>
+                    Results are limited to the newest 100 matching resources.
+                <?php endif; ?>
             </p>
         </div>
 
@@ -129,6 +182,21 @@ use function BpcLearnShare\Support\e;
                         <p class="resource-card-description">
                             <?= e((string) $resource['description']) ?>
                         </p>
+
+                        <?php if ($resultMode === 'semantic'): ?>
+                            <div class="semantic-match-context">
+                                <p class="semantic-match-label">AI-assisted match</p>
+                                <?php if ((string) ($resource['matched_locator'] ?? '') !== ''): ?>
+                                    <p class="semantic-match-locator">
+                                        Matched section:
+                                        <strong><?= e((string) $resource['matched_locator']) ?></strong>
+                                    </p>
+                                <?php endif; ?>
+                                <p class="semantic-match-excerpt">
+                                    <?= e((string) ($resource['matched_excerpt'] ?? '')) ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
 
                         <dl class="resource-card-meta">
                             <div>

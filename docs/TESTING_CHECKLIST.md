@@ -376,7 +376,7 @@ The first disposable harness attempt failed safely after the forward SQL because
 | AI-RET-009 | P0 | Make embedding preflight unavailable | Metadata search remains usable; registered query is not transmitted | Passed — disposable integration |
 | AI-RET-010 | P0 | Verify evidence boundaries | No AI-table write, query-vector persistence, live-database write, route, UI, generation, commit, or push | Passed — 43/43 disposable suite |
 
-`tests/ai/run_d043_semantic_retrieval.php` passed 43/43 checks on a random disposable MariaDB database and temporary protected storage. It used deterministic fake embeddings, made zero real model/provider requests, preserved the configured live 22-table database and all five AI table counts, and removed the disposable database/storage. This is a backend control checkpoint, not owner browser acceptance or proof that a no-result/evidence-sufficiency threshold exists.
+`tests/ai/run_d043_semantic_retrieval.php` passed 43/43 checks on a random disposable MariaDB database and temporary protected storage. It used deterministic fake embeddings, made zero real model/provider requests, preserved the configured live 22-table database and all five AI table counts, and removed the disposable database/storage. This backend suite alone does not prove owner browser acceptance or a no-result/evidence-sufficiency threshold; the separate owner browser result is recorded in 11.10.
 
 ### 11.9 D043 guarded live semantic-retrieval evidence
 
@@ -388,13 +388,30 @@ The first disposable harness attempt failed safely after the forward SQL because
 | AI-RET-LIVE-004 | P0 | Audit persistence and lifecycle boundaries | No query vector/output write; database counts unchanged; gates restored off | Passed |
 | AI-RET-LIVE-005 | P0 | Review decision boundaries | Preserve ranking miss; select no no-result threshold, final candidate, route, or UI | Passed |
 
-`TR-RET-LIVE-D043-001` records the exact evidence-capture replay at `run-20260824-072848Z`. The security/session query ranked Resource 36 first and expected Resource 35 second; the expected locator still matched. Cold first-query latency was 2,028.125 ms and warm median was 83.722 ms. This is an unrouted backend evidence checkpoint, not owner browser acceptance or authorization for user-facing semantic search.
+`TR-RET-LIVE-D043-001` records the exact evidence-capture replay at `run-20260824-072848Z`. The security/session query ranked Resource 36 first and expected Resource 35 second; the expected locator still matched. Cold first-query latency was 2,028.125 ms and warm median was 83.722 ms. This remains backend evidence rather than owner browser acceptance.
+
+### 11.10 D043 default-off semantic-search surface and owner-browser checks
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-RET-UI-001 | P0 | Open repository search with no `search_mode` | Standard metadata search remains selected | Passed — focused suite and owner browser |
+| AI-RET-UI-002 | P0 | Select AI-assisted meaning search while operator switch remains off | Metadata results remain available with a clear fallback message; no query embedding | Passed — 23/23 surface suite plus 43/43 backend regression and owner browser |
+| AI-RET-UI-003 | P0 | Inspect semantic result presentation contract | Escaped matched locator/excerpt may display; bounded excerpt ends on a complete word; no internal similarity score or answer-certainty claim | Passed — focused suite and owner browser |
+| AI-RET-UI-004 | P0 | Reject unsupported search method and late-disabled requester | Invalid choice returns validation error; late requester deauthorization logs out instead of returning results | Passed — input/source check plus backend regression |
+| AI-RET-UI-005 | P0 | Verify evidence boundaries | No persistent activation, query-vector/output write, DB/schema/register change, threshold change, final candidate, commit, or push | Passed |
+| AI-RET-UI-006 | P0 | Temporarily enable both gates and run the heuristic-evaluation meaning query | Expected Resource 38 ranks first with its matched locator and no internal score | Passed — owner browser |
+| AI-RET-UI-007 | P0 | Run the Security meaning query with the Security controlled-tag filter | Only Resources 35 and 36 are returned | Passed — owner browser |
+| AI-RET-UI-008 | P0 | Submit an empty AI-assisted query | Clear prompt guidance appears and standard metadata results remain available | Passed — owner browser |
+| AI-RET-UI-009 | P0 | Inspect the result surface at a 390-by-844 viewport | One-column layout remains usable with no horizontal overflow | Passed — owner browser |
+| AI-RET-UI-010 | P0 | Restore environment and database gates after acceptance | Default-off fallback returns; original environment hash, absent DB gate row, and five AI-table counts are preserved | Passed — exact restoration guard |
+
+`tests/ai/run_d043_semantic_search_surface.php` passed 23/23 checks. `tests/ai/run_d043_semantic_retrieval.php` remained 43/43 on a disposable database with zero real provider/model requests, zero live writes, and zero persisted query vectors. Owner browser acceptance used the installed `all-minilm:latest` model only during the approved one-time local activation. The environment gate and database gate were restored off, the original `.env` hash and five AI-table counts were preserved, and the public interface remains default-off.
 
 ---
 
 ## 12. Integrated AI Prototype Tests
 
-Run only after the relevant routes are separately implemented. D043 storage, provider-neutral persistence, guarded local resource processing, and guarded semantic-retrieval backend are now available, but none makes a user-facing AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
+The default-off semantic-search route and interface passed the bounded live owner-browser acceptance recorded above. This does not authorize permanent activation or generated inquiry; generated inquiry tests remain blocked by the absence of a passing generation candidate.
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
@@ -402,11 +419,11 @@ Run only after the relevant routes are separately implemented. D043 storage, pro
 | INT-AI-002 | P1 | Process image-only/unreadable boundary resource | Resource remains valid; content AI reports unavailable | Not run |
 | INT-AI-003 | P1 | Display AI summary | Clearly labelled non-authoritative and tied to current source | Not run |
 | INT-AI-004 | P1 | Display suggested controlled tags/metadata | Human review required; taxonomy not changed automatically | Not run |
-| INT-AI-005 | P1 | Semantic search from application UI | Approved-only results supplement metadata search | Not run |
+| INT-AI-005 | P1 | Semantic search from application UI | Approved-only results supplement metadata search | Passed — bounded temporary local owner-browser acceptance; gates restored off |
 | INT-AI-006 | P1 | Grounded inquiry from application UI | Supported answer with source attribution | Not run |
 | INT-AI-007 | P1 | Unsupported inquiry from application UI | Clear insufficiency response | Not run |
 | INT-AI-008 | P1 | Prohibited request from application UI | Safe refusal | Not run |
-| INT-AI-009 | P1 | Disable or stop AI runtime | Clear feature-specific fallback; core unaffected | Not run |
+| INT-AI-009 | P1 | Disable or stop AI runtime | Clear feature-specific fallback; core unaffected | Passed for semantic search — restored default-off browser fallback; broader capability fallback remains separate |
 | INT-AI-010 | P1 | Change source eligibility after AI output exists | Output/retrieval follows current lifecycle | Not run |
 
 ---

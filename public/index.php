@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+use BpcLearnShare\Ai\AiFeatureGate;
+use BpcLearnShare\Ai\GuardedSemanticRetrieval;
+use BpcLearnShare\Ai\LocalProcessingException;
+use BpcLearnShare\Ai\OllamaAllMiniLmEmbeddingAdapter;
+use BpcLearnShare\Ai\SemanticRetrievalRepository;
 use BpcLearnShare\Auth\AccountInput;
 use BpcLearnShare\Auth\AccountRepository;
 use BpcLearnShare\Auth\AuthService;
@@ -401,6 +406,7 @@ if ($path === '/resources') {
     $account = $requireAccount();
     $taxonomyOptions = $taxonomy->activeOptions();
     $filters = ResourceDiscoveryInput::normalize($_GET);
+    $searchMode = ResourceDiscoveryInput::searchMode($_GET);
     $errors = ResourceDiscoveryInput::validate($_GET);
 
     if ($errors === []) {
@@ -410,6 +416,96 @@ if ($path === '/resources') {
         );
     }
 
+    $resources = [];
+    $resultMode = 'metadata';
+    $semanticStatusMessage = null;
+
+    if ($errors === []) {
+        if ($searchMode === 'metadata') {
+            $resources = $resourceDiscovery->search($filters);
+        } else {
+            try {
+                $semanticRetrieval = new GuardedSemanticRetrieval(
+                    new SemanticRetrievalRepository($database),
+                    $resourceDiscovery,
+                    new AiFeatureGate($database),
+                    new OllamaAllMiniLmEmbeddingAdapter(
+                        Environment::get(
+                            'OLLAMA_API_BASE',
+                            'http://127.0.0.1:11434'
+                        ),
+                        Environment::get('OLLAMA_EXPECTED_VERSION', '0.32.1'),
+                        Environment::get(
+                            'OLLAMA_EMBEDDING_MODEL',
+                            'all-minilm:latest'
+                        ),
+                        Environment::get(
+                            'OLLAMA_EMBEDDING_MODEL_DIGEST',
+                            '1b226e2802dbb772b5fc32a58f103ca1804ef7501331012de126ab22f67475ef'
+                        ),
+                        Environment::getInt('OLLAMA_EMBEDDING_DIMENSION', 384),
+                        Environment::getInt(
+                            'OLLAMA_EMBEDDING_TIMEOUT_SECONDS',
+                            5
+                        )
+                    ),
+                    $resourceStorageDirectory,
+                    Environment::getBool(
+                        'AI_SEMANTIC_RETRIEVAL_ENABLED',
+                        false
+                    )
+                );
+                $outcome = $semanticRetrieval->search(
+                    $filters,
+                    (int) $account['id'],
+                    5
+                );
+                $resultMode = (string) $outcome['mode'];
+                $resources = $outcome['results'];
+
+                foreach ($resources as &$resource) {
+                    unset($resource['internal_similarity_score']);
+                }
+                unset($resource);
+
+                if ($resultMode === 'semantic') {
+                    $semanticStatusMessage =
+                        'AI-assisted meaning search ranked processed Approved resources. '
+                        . 'Review the matched passages before using them.';
+                } elseif ($outcome['fallback_reason'] === 'empty_query') {
+                    $semanticStatusMessage =
+                        'Enter search words to use AI-assisted meaning search. '
+                        . 'Standard metadata results are shown.';
+                } else {
+                    $semanticStatusMessage =
+                        'AI-assisted meaning search is unavailable right now. '
+                        . 'Standard metadata results are shown instead.';
+                }
+            } catch (LocalProcessingException $exception) {
+                if ($exception->reason === 'semantic_requester_not_authorized') {
+                    Session::logout();
+                    Session::flash('notice', 'Please sign in to continue.');
+                    redirect('/login');
+                }
+
+                $resources = $resourceDiscovery->search($filters);
+                $resultMode = 'metadata_fallback';
+                $semanticStatusMessage =
+                    'AI-assisted meaning search is unavailable right now. '
+                    . 'Standard metadata results are shown instead.';
+            } catch (Throwable) {
+                error_log(
+                    '[BPC LearnShare] Semantic search fell back safely.'
+                );
+                $resources = $resourceDiscovery->search($filters);
+                $resultMode = 'metadata_fallback';
+                $semanticStatusMessage =
+                    'AI-assisted meaning search is unavailable right now. '
+                    . 'Standard metadata results are shown instead.';
+            }
+        }
+    }
+
     if ($errors !== []) {
         http_response_code(422);
     }
@@ -417,12 +513,13 @@ if ($path === '/resources') {
     $renderPage('resource/index', [
         'title' => 'Approved resources',
         'account' => $account,
-        'resources' => $errors === []
-            ? $resourceDiscovery->search($filters)
-            : [],
+        'resources' => $resources,
         'filters' => $filters,
         'errors' => $errors,
         'taxonomy' => $taxonomyOptions,
+        'searchMode' => $searchMode,
+        'resultMode' => $resultMode,
+        'semanticStatusMessage' => $semanticStatusMessage,
     ]);
     exit;
 }

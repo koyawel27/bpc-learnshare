@@ -44,6 +44,14 @@ final class ResourceDiscoveryInput
         return $filters;
     }
 
+    /** @param array<string, mixed> $input */
+    public static function searchMode(array $input): string
+    {
+        return trim((string) ($input['search_mode'] ?? '')) === 'semantic'
+            ? 'semantic'
+            : 'metadata';
+    }
+
     /**
      * @param array<string, mixed> $input
      * @return array<string, string>
@@ -55,6 +63,12 @@ final class ResourceDiscoveryInput
 
         if (mb_strlen($query) > 100) {
             $errors['q'] = 'Search text must not exceed 100 characters.';
+        }
+
+        $searchMode = trim((string) ($input['search_mode'] ?? ''));
+
+        if (!in_array($searchMode, ['', 'metadata', 'semantic'], true)) {
+            $errors['search_mode'] = 'Choose a valid search method.';
         }
 
         foreach (self::FILTER_FIELDS as $field) {

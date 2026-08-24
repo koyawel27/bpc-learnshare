@@ -426,7 +426,18 @@ final class GuardedSemanticRetrieval
     {
         $tagNames = (string) ($candidate['tag_names'] ?? '');
         $text = preg_replace('/\s+/u', ' ', trim((string) $candidate['chunk_text']));
-        $excerpt = is_string($text) ? mb_substr($text, 0, 320) : '';
+        $excerpt = is_string($text) ? $text : '';
+
+        if (mb_strlen($excerpt) > 320) {
+            $excerpt = mb_substr($excerpt, 0, 320);
+            $wordBoundary = mb_strrpos($excerpt, ' ');
+
+            if ($wordBoundary !== false && $wordBoundary >= 240) {
+                $excerpt = mb_substr($excerpt, 0, $wordBoundary);
+            }
+
+            $excerpt = rtrim($excerpt, " \t\n\r\0\x0B,;:-") . '…';
+        }
 
         return [
             'id' => (int) $candidate['resource_id'],
