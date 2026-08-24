@@ -4921,7 +4921,7 @@ Regardless of the local result:
 Additional accepted implementation and verification items remain:
 
 * the exact MIME/content validation mechanism is not yet finalized;
-* the current 20 MB maximum upload size is an untested working default and must be tested against realistic scanned PDFs and image-heavy presentations;
+* the 20 MiB maximum upload boundary has been validated through the local HTTP path using representative scanned-PDF and image-heavy-PPTX derivatives; actual institution-provided samples may still support a later documented adjustment;
 * the exact protected public/private folder structure remains for `BUILD_PLAN.md`;
 * exact D040 database/filesystem sequencing remains for `BUILD_PLAN.md`;
 * exact cleanup-failure and retry behavior remains for `BUILD_PLAN.md`;
@@ -5569,9 +5569,9 @@ Verify:
 * script files are rejected;
 * installer files are rejected;
 * archive files are rejected;
-* realistic scanned PDFs are tested;
-* realistic image-heavy presentations are tested;
-* the 20 MB working limit is reviewed using actual samples;
+* representative scanned PDFs are tested;
+* representative image-heavy presentations are tested;
+* the validated 20 MiB working limit is reviewed later if actual institution-provided samples show a documented need;
 * technical upload validation is never presented as:
 
   * privacy verification;

@@ -498,7 +498,7 @@ Accepted controls include:
 * Randomized non-guessable stored filenames.
 * Protected file storage outside the public web root.
 * Controlled application file-serving rather than direct static file URLs.
-* Working v1.0 upload-size limit of **20 MB**, still requiring practical validation.
+* Working v1.0 upload-size limit of **20 MiB** (20,971,520 bytes), validated through the local HTTP upload path with exact-limit acceptance, one-byte-over rejection, an image-heavy PPTX derivative, protected storage, and exact cleanup/restoration checks.
 * Prepared statements for database queries.
 * Output escaping for XSS prevention.
 * Two audit ledgers:
@@ -691,12 +691,9 @@ The following verification checkpoint is complete:
   * PHP application logic must reject direct self-replacement and longer replacement cycles.
   * D037 remains controlling: database checks are defense-in-depth, and PHP validation is mandatory regardless of database enforcement.
 
+The representative local upload-limit checkpoint is now complete. The application accepted a boundary derivative of an accepted image-only PDF at exactly 20 MiB, accepted an image-heavy derivative of an accepted PPTX below the limit, and rejected an otherwise matching PDF one byte above it without creating a row. It preserved Pending status, exact sizes, randomized protected names, and non-public storage, then restored all 22 table counts and the protected-storage manifest. This validates the implementation boundary; continued sampling of actual institution-provided files may still justify a later documented adjustment.
+
 The following remain open and must not be treated as already resolved:
-
-* **The 20 MB file-size limit remains a working, unvalidated default.**
-
-  * Test it against realistic scanned PDFs, image-heavy presentations, and other representative files.
-  * Do not treat its presence in an accepted document as proof that it is appropriate.
 
 * **The operational distinction between `file_availability = 'deleted'` and `file_availability = 'invalidated'` remains implementation-level work.**
 
@@ -1317,13 +1314,13 @@ Completed verification:
 Known scheduled implementation remains:
 
 * broader live related-resource quality evidence after the repository contains enough independently reviewed Approved resources and content-justified tags; the completed 25-resource offline reconciliation must not be presented as a representative live score;
-* representative upload-limit and end-to-end presentation acceptance.
+* broader end-to-end presentation acceptance beyond the completed representative upload-limit checkpoint.
 
 Any older pre-D041/D042 wording that describes repository-grounded inquiry as optional or stretch scope is superseded by D041 and must be corrected during the scheduled targeted propagation pass.
 
 Important remaining items:
 
-* test the 20 MB upload limit against representative files;
+* complete the remaining end-to-end presentation cases; the representative 20 MiB upload-limit checkpoint is complete;
 * integrate and validate the audited source-attribution contract against live PHP/database state and protected resource links;
 * preserve the completed 25-resource Gate 5C relation-metadata reconciliation and defer representative live scoring until the repository contains enough independently reviewed Approved resources and content-justified tags;
 * verify the registered deterministic control rules against live PHP/database state and complete application fallback behavior;

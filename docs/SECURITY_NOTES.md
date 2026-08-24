@@ -793,13 +793,15 @@ Any failure rejects the upload. No resource record is created, and no file is mo
 
 ### 7.3 File Size Limit
 
-For v1.0, the working default maximum is **20 MB per file**.
+For v1.0, the validated local maximum is **20 MiB per file** (20,971,520 bytes). The user interface uses the simpler label “20 MB.”
 
 This is an implementation-level security default, not a schema change and not an Admin-managed setting. It should be implemented as a server-side configuration value or constant.
 
 The limit is intended to balance realistic academic files, such as image-heavy presentations and scanned handouts, against local storage limits and abusive oversized uploads.
 
-This value must be tested against realistic sample files before final defense. If testing shows that 20 MB is too low for common legitimate academic resources, `BUILD_PLAN.md` may adjust the implementation value, but the change should be recorded back into `SECURITY_NOTES.md` rather than changed silently during coding.
+The local HTTP acceptance checkpoint passed on 2026-08-24: a boundary derivative of an accepted image-only scanned-notes PDF was accepted at exactly 20 MiB; an accepted PPTX base augmented with synthetic scan images was accepted between 15 MiB and 20 MiB; and an otherwise matching PDF at 20 MiB plus one byte was rejected without creating a resource row. Both accepted files used randomized protected names outside `public/`, and the temporary account, rows, and files were removed with all 22 table counts and the protected-storage manifest restored exactly.
+
+This proves the configured boundary and representative local handling, not that every future real academic file will fit. If later sampling of actual BPC files shows that the limit is too low, `BUILD_PLAN.md` may propose an adjustment, but the change must be recorded here rather than made silently.
 
 ### 7.4 DOCX/PPTX Are ZIP-Based — Handling Without Allowing Archives
 
@@ -1624,9 +1626,9 @@ Each item is labeled as one of the following:
 | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------- |
 | No malware or antivirus scanning of uploaded files                                                                       | Deferred                          |
 | No content-hash-based duplicate detection at the storage layer                                                           | Deferred                          |
-| 20 MB working file-size limit is not yet tested against realistic scanned-PDF or image-heavy-PPTX samples                | Verify in Testing                 |
+| 20 MiB file-size boundary tested through local HTTP with representative PDF/PPTX derivatives and one-byte-over rejection | Verified — 2026-08-24             |
 | Exact MIME/content validation mechanism, such as PHP `finfo` or a narrowly justified helper library, is not yet selected | Open — resolve in `BUILD_PLAN.md` |
-| Uploaded files are never statically reachable through Apache/public URLs                                                 | Verify in Testing                 |
+| Uploaded files are never statically reachable through Apache/public URLs                                                 | Verified for upload-limit run     |
 
 ### 13.9 AI-Related Limitations
 
@@ -1852,7 +1854,7 @@ These decisions do not change v1.0 scope, roles, resource statuses, or report st
 * session ID is regenerated immediately after successful login;
 * session idle timeout is 30 minutes;
 * CSRF protection uses a single session-scoped token required on state-changing POST requests;
-* v1.0 working file-size limit is 20 MB per upload, pending realistic testing;
+* v1.0 file-size limit is 20 MiB per upload, validated through the representative local HTTP acceptance checkpoint;
 * risky failed upload-validation attempts are logged through a server-side application log, not the `audit_log` table.
 
 ### 15.4 Cross-Document and Schema Alignment Decisions
@@ -1892,7 +1894,6 @@ The following remain genuinely unresolved and must be settled during implementat
 * exact first Admin setup-script removal or disabling procedure, if a setup script is used;
 * exact MIME/content validation mechanism, such as PHP `finfo` or a narrowly justified helper library;
 * confirmation of the local MariaDB/MySQL version's CHECK-constraint support;
-* realistic file-size testing against actual scanned-PDF and image-heavy-PPTX samples to validate or revise the 20 MB default;
 * exact database access style, such as PDO or mysqli;
 * exact transaction syntax implementing the atomic groups required in Section 12;
 * exact implementation ordering and failure handling for D040 database updates, `resource_tags` cleanup, AI-output lifecycle updates, and physical file deletion/invalidation;

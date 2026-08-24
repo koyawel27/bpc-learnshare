@@ -118,19 +118,24 @@ All final v1.0 requirements remain governed by the source documents even when th
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
 | UPL-001 | P0 | Upload an allowed readable PDF with valid metadata as Student | One Pending resource and protected file are created | Not run |
-| UPL-002 | P0 | Upload an allowed DOCX/PPTX/TXT where supported | File passes the correct validation path | Not run |
+| UPL-002 | P0 | Upload an allowed DOCX/PPTX/TXT where supported | File passes the correct validation path | Partial — representative image-heavy PPTX accepted; DOCX/TXT HTTP cases remain |
 | UPL-003 | P0 | Upload as Teacher/Instructor | Same Pending moderation path as Student | Not run |
 | UPL-004 | P0 | Attempt ordinary upload as Moderator/Admin | Request is rejected | Not run |
 | UPL-005 | P0 | Omit required metadata | Request is rejected; no resource/file remains | Not run |
 | UPL-006 | P0 | Upload empty file | Request is rejected; no resource/file remains | Not run |
-| UPL-007 | P0 | Upload oversized file | Request is rejected; no resource/file remains | Not run |
+| UPL-007 | P0 | Upload oversized file | Request is rejected; no resource/file remains | Passed — PDF at 20 MiB + 1 byte rejected with no new resource row |
 | UPL-008 | P0 | Upload executable/script/installer/archive | Request is rejected | Not run |
 | UPL-009 | P0 | Rename a disallowed file to an allowed extension | MIME/content validation rejects it | Not run |
 | UPL-010 | P0 | Upload corrupt/truncated/encrypted boundary fixture | Accepted validation behavior matches the documented boundary | Not run |
-| UPL-011 | P0 | Inspect stored filename/path | Server-generated name; no traversal or original-name serving | Not run |
-| UPL-012 | P0 | Request stored file path directly | File is not statically reachable | Not run |
+| UPL-011 | P0 | Inspect stored filename/path | Server-generated name; no traversal or original-name serving | Passed for exact-limit PDF and image-heavy PPTX — randomized 64-hex protected names |
+| UPL-012 | P0 | Request stored file path directly | File is not statically reachable | Passed — direct protected-storage URL returned 404 |
 | UPL-013 | P0 | Cause database failure after validation | No orphaned accepted file or partial resource remains | Not run |
 | UPL-014 | P1 | Acknowledge Pending-file AI notice and request assistance | AI begins only after basic validation and acknowledgment | Not run |
+| UPL-015 | P0 | Upload an accepted PDF derivative at exactly 20 MiB | One Pending resource and exact-size protected file are created | Passed — 20,971,520 bytes accepted through local HTTP |
+| UPL-016 | P1 | Upload a representative image-heavy PPTX below 20 MiB | Valid package is accepted without size drift | Passed — accepted PPTX base with synthetic scan images between 15 and 20 MiB |
+| UPL-017 | P0 | Complete and clean the live upload acceptance run | Test rows/files are removed; database and storage return to baseline | Passed — temporary Student and two resources removed; 22 table counts and storage manifest restored exactly |
+
+`tests/upload/run_upload_limit_acceptance.php --mode=apply --approve=UPLOAD-LIMIT-LIVE-ACCEPTANCE` passed 45/45 checks on 2026-08-24 after a 17/17 read-only preflight. The first apply attempt stopped after registration because the harness expected HTTP 302 while the application correctly uses 303; emergency cleanup removed the temporary Student, and no file upload had started. Only the harness expectation was corrected. The accepted run then completed the exact-limit PDF, image-heavy PPTX, one-byte-oversized rejection, protected-path, Pending-state, exact-size, and full cleanup checks. No AI/model request, schema/register change, commit, or push occurred.
 
 ---
 
