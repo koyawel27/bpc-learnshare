@@ -2,8 +2,8 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0 — D043 implementation baseline
-**Last Updated:** 2026-08-20
-**Status:** Accepted AI architecture/behavior planning through D043; guarded local extraction/segmentation/embedding CLI verified; retrieval and user-facing AI integration pending
+**Last Updated:** 2026-08-24
+**Status:** Accepted AI architecture/behavior planning through D043; guarded local processing and unrouted semantic-retrieval backend verified; user-facing AI integration pending
 
 ---
 
@@ -108,6 +108,10 @@ Semantic search supplements ordinary metadata search. It uses only current, read
 
 When semantic processing is unavailable, the UI must preserve ordinary metadata search/filtering and explain the AI-only limitation in non-technical language.
 
+The backend-only `GuardedSemanticRetrieval` checkpoint now implements this boundary without adding a route or UI. It requires an Active authenticated account, the default-off `AI_SEMANTIC_RETRIEVAL_ENABLED` operator switch, the live `system_settings.ai_enabled` gate, the exact accepted embedding identity, ready extraction/segmentation/embedding states, a current source version, and an unchanged protected source file. It applies the existing course, subject, year-level, resource-type, and tag filters, collapses repeated chunks to one best passage per resource, and revalidates the requester and each candidate immediately before return. Query vectors are request-only and are not persisted. A disabled/unavailable/malformed semantic path returns existing Approved-only metadata results instead of breaking repository search; a requester who becomes Disabled is rejected rather than given fallback results.
+
+This verifies backend retrieval controls only. It does not select a no-result threshold, claim evidence sufficiency, add related-resource behavior, expose similarity scores to users, or authorize generated inquiry.
+
 ### 6.4 Related resources
 
 Related resources are computed request-time from current eligible candidates using content similarity plus conservative metadata guards. Every returned resource/link is live-revalidated. No behavioral learner profile or permanently trusted recommendation list is created.
@@ -169,6 +173,7 @@ D043 accepts the architecture direction. The exact migration package has passed 
 4. **Completed:** back up and restore-verify the legacy database, apply the live 18-to-22 migration, verify preserved rows/constraints, and update the canonical schema;
 5. **Completed:** implement the provider-neutral SQL repository and guarded persistence processor for source versions, capability state, chunks, embeddings, and current outputs;
 6. **Completed for the local processing boundary:** the provider-neutral persistence suite passed 49/49 checks; the guarded one-resource CLI passed 47/47 disposable checks; PDF/DOCX/PPTX/TXT extraction regression passed 4/4; and one synthetic Ollama adapter smoke produced a discarded 384-dimensional normalized vector. The environment and live database switches remain default-off, and active Moderator/Admin authorization is rechecked before processing/content transitions; a bounded non-content failure state may still be recorded safely;
-7. obtain owner browser acceptance for any user-visible AI surface.
+7. **Completed for the backend semantic-retrieval boundary:** `tests/ai/run_d043_semantic_retrieval.php` passed 43/43 disposable checks for operator/live switches, initial and late Active-account authorization, current Approved/available/ready sources, metadata filters, one-result-per-resource ranking, hidden/stale exclusion, malformed-vector and missing-file fallback, zero query-vector persistence, and live-database isolation. It made zero real provider/model requests and added no route or UI;
+8. obtain owner browser acceptance for any later user-visible AI surface.
 
-This checkpoint connects the already measured local embedding candidate only for guarded resource processing. It does not select a generation model, authorize generated inquiry, add semantic-search routing, or expose an AI UI.
+The local embedding candidate is now connected to guarded resource processing and an unrouted semantic-retrieval service. This does not select a generation model, authorize generated inquiry, add semantic-search routing/UI, or complete related-resource application integration.

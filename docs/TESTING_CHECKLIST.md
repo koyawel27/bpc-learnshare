@@ -360,11 +360,29 @@ The first disposable harness attempt failed safely after the forward SQL because
 
 `tests/ai/run_d043_local_processing.php` passed 47/47 checks using a random disposable MariaDB database, disposable protected storage, and a deterministic fake embedding adapter. `tests/ai/run_d043_local_extraction_regression.php` passed PDF/DOCX/PPTX/TXT 4/4 against accepted primary-readable fixtures. `tests/ai/run_d043_ollama_adapter_smoke.php` made one local-only synthetic request and discarded the vector. The first disposable local-processing attempt failed safely because the test referred to `vector_dimension` instead of the accepted `dimension` column; the database was removed, and only that assertion was corrected.
 
+### 11.8 D043 guarded semantic-retrieval backend checks
+
+| ID | Priority | Test | Expected result | Status |
+|---|---|---|---|---|
+| AI-RET-001 | P0 | Leave `AI_SEMANTIC_RETRIEVAL_ENABLED` off | Existing Approved-only metadata search remains available; no query embedding | Passed — disposable integration |
+| AI-RET-002 | P0 | Disable live `system_settings.ai_enabled` | Metadata fallback remains available; no query embedding | Passed — disposable integration |
+| AI-RET-003 | P0 | Search as disabled account | Reject before fallback or model transmission | Passed — disposable integration |
+| AI-RET-003A | P0 | Disable requester after query embedding but before result return | Final account recheck rejects results rather than falling back | Passed — disposable integration |
+| AI-RET-004 | P0 | Search as Active Student/Teacher | One bounded query vector ranks only eligible ready resources | Passed — disposable integration |
+| AI-RET-005 | P0 | Apply course and controlled-tag filters | Semantic candidates remain inside selected metadata scope | Passed — disposable integration |
+| AI-RET-006 | P0 | Include multiple chunks per resource | Return one best passage per resource | Passed — disposable integration |
+| AI-RET-007 | P0 | Hide a processed resource or mark embedding stale | Candidate is excluded through live status/readiness checks | Passed — disposable integration |
+| AI-RET-008 | P0 | Corrupt a stored vector or remove protected source file | Semantic path fails safely to metadata without exposing raw error | Passed — disposable integration |
+| AI-RET-009 | P0 | Make embedding preflight unavailable | Metadata search remains usable; registered query is not transmitted | Passed — disposable integration |
+| AI-RET-010 | P0 | Verify evidence boundaries | No AI-table write, query-vector persistence, live-database write, route, UI, generation, commit, or push | Passed — 43/43 disposable suite |
+
+`tests/ai/run_d043_semantic_retrieval.php` passed 43/43 checks on a random disposable MariaDB database and temporary protected storage. It used deterministic fake embeddings, made zero real model/provider requests, preserved the configured live 22-table database and all five AI table counts, and removed the disposable database/storage. This is a backend control checkpoint, not owner browser acceptance or proof that a no-result/evidence-sufficiency threshold exists.
+
 ---
 
 ## 12. Integrated AI Prototype Tests
 
-Run only after the relevant routes are separately implemented. D043 storage, provider-neutral persistence, and the guarded local resource-processing CLI are now available, but none makes a user-facing AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
+Run only after the relevant routes are separately implemented. D043 storage, provider-neutral persistence, guarded local resource processing, and guarded semantic-retrieval backend are now available, but none makes a user-facing AI feature operational. Generated inquiry tests remain blocked by the absence of a passing generation candidate.
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|

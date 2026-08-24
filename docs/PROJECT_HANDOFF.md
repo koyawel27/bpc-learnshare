@@ -59,16 +59,16 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `PROJECT_BRIEF.md`   | Accepted and aligned through D042. Reflects the required minimum v1.0 AI package and the Planned/Deferred AI tiers.                                                                                                                                                                                                                                                                                                                      |
 | `USER_ROLES.md`      | Accepted and aligned through D042. Preserves exactly four roles and defines general AI-assisted search/inquiry access without expanding role authority.                                                                                                                                                                                                                                                                                  |
 | `WORKFLOWS.md`       | Accepted and aligned through D043. D043 resolves the retrieval-persistence direction while preserving live eligibility, lifecycle, fallback, and session-only inquiry-context rules. |
-| `DATABASE_DESIGN.md` | Accepted direction through D043. It defines `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, keeps `ai_outputs` separate, and records the disposable and guarded live/canonical migration results. Provider-neutral persistence and the default-off local processing CLI are implemented; routed retrieval remains pending. |
+| `DATABASE_DESIGN.md` | Accepted direction through D043. It defines `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, keeps `ai_outputs` separate, and records the disposable and guarded live/canonical migration results. Provider-neutral persistence, default-off local processing, and the unrouted semantic-retrieval backend are implemented; public retrieval remains pending. |
 | `DECISIONS.md`       | Complete through **D043**. D043 accepts targeted MariaDB derived-data persistence and bounded PHP cosine without selecting a provider/model or enabling generated inquiry. |
 | `schema.sql`         | Accepted and verified current 22-table SQL baseline on MariaDB 10.4.32. The guarded live migration preserved all original rows, and the canonical fresh-import/migration/rollback verifier passed 60/60 checks. |
 | `AI_FEASIBILITY_SPIKE.md` | Complete and accepted. Final reconciliation remains **Partially feasible — alternative or mixed architecture required**, with Moderate confidence and 6/4/2/0 capability results. D043 uses that evidence without rewriting it. |
-| `AI_FEATURES.md`     | Accepted D043 AI behavior/architecture baseline. Storage, provider-neutral persistence, and guarded local resource processing are complete; generation selection, generated inquiry, and routed application retrieval remain pending. |
+| `AI_FEATURES.md`     | Accepted D043 AI behavior/architecture baseline. Storage, provider-neutral persistence, guarded local processing, and the unrouted guarded semantic-retrieval backend are complete; generation selection, generated inquiry, and public application retrieval remain pending. |
 | `SECURITY_NOTES.md`  | Accepted through the D043 targeted propagation, including derived-data protection, live revalidation, late-result rejection, secret/log rules, and migration-security testing. |
 | `DATA_PRIVACY.md`    | Accepted through the D043 targeted propagation, including local derived-data minimization, lifecycle cleanup, session-only inquiry context, and provider payload boundaries. |
 | `PROJECT_HANDOFF.md` | This updated version. It records the verified 22-table D043 storage state while preserving the separate application-integration boundary. |
 
-**Completed:** restore-verified backup, exact D043 live migration, canonical 22-table schema update, revised 60-check disposable verification, provider-neutral persistence, and the default-off one-resource local extraction/segmentation/embedding CLI. **Not yet implemented:** routed semantic retrieval/related-resource integration and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
+**Completed:** restore-verified backup, exact D043 live migration, canonical 22-table schema update, revised 60-check disposable verification, provider-neutral persistence, the default-off one-resource local extraction/segmentation/embedding CLI, and an unrouted/default-off semantic-retrieval backend verified by 43/43 disposable checks. **Not yet implemented:** public semantic-search routing/UI, related-resource application integration, and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
 
 `AI_FEASIBILITY_SPIKE.md` is complete and accepted. Final reconciliation covers all 12 Required capabilities and records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. D043 now accepts the smallest persistent architecture direction supported by that evidence. It still does not select a provider/model, repair the grounded-answer failure, or authorize generated inquiry/application integration.
 
@@ -913,10 +913,12 @@ Remaining order:
    * Added a one-resource CLI with a default-off environment switch, live `ai_enabled` gate, exact apply confirmation, Approved/available file checks, protected-path/MIME checks, exact Ollama runtime/model/digest checks, and active Moderator/Admin revalidation before processing/content transitions. A bounded non-content failure state may still be recorded after a late rejection.
    * The 47/47 disposable integration, 4/4 supported-file regression, existing 49/49 persistence regression, and one discarded-vector Ollama smoke all passed. The live database remained read-only at 22 tables with all five AI content/state tables unchanged.
 
-8. **Next: integrate semantic search and related resources behind live revalidation and metadata fallback.**
+8. **Completed for the backend semantic-retrieval boundary; public integration remains separate.**
 
-   * Keep the non-AI repository fully usable.
-   * Preserve both successful and failed feasibility evidence; do not change thresholds to manufacture a pass.
+   * Added read-only candidate selection and bounded PHP cosine ranking for current Approved/available sources with ready extraction, segmentation, and embeddings.
+   * Kept query vectors request-only, revalidated each source/file/candidate before return, collapsed repeated chunks to one resource result, and preserved the existing metadata search on disabled/unavailable/malformed AI paths.
+   * `tests/ai/run_d043_semantic_retrieval.php` passed 43/43 disposable checks, including late requester-disable rejection, with zero real model requests, zero live database writes, and no route/UI.
+   * No no-result/evidence-sufficiency threshold, public route, related-resource application integration, or generation capability was introduced.
 
 9. **Consider optional summary/suggestion routing only after the storage/retrieval path passes.**
 
@@ -1312,8 +1314,8 @@ Completed verification:
 
 Known scheduled implementation remains:
 
-* source-version/state/chunk/embedding repositories and bounded processor;
-* routed semantic retrieval/related-resource integration and complete lifecycle/fallback regression.
+* separately reviewed public semantic-search routing/UI and owner browser acceptance;
+* related-resource application integration and broader lifecycle/fallback regression.
 
 Any older pre-D041/D042 wording that describes repository-grounded inquiry as optional or stretch scope is superseded by D041 and must be corrected during the scheduled targeted propagation pass.
 
@@ -1326,7 +1328,7 @@ Important remaining items:
 * evaluate the observed external-provider dependence, quota, cost, privacy, interruption, and fallback limitations before any candidate or architecture decision;
 * select the simplest workable AI architecture only after the complete evidence package is reviewed.
 
-The bounded related-resource evaluation, safe no-result controls, source-attribution presentation, follow-up comparison, lifecycle/fallback validation, external grounded comparison, summary/suggestion evaluation, final evidence reconciliation, D043 live/canonical migration verification, provider-neutral persistence, and guarded local resource processing are complete. The reconciled outcome remains **Partially feasible — alternative or mixed architecture required**. No generation provider/model, generated inquiry, or application AI UI is selected. The next implementation gate is routed semantic retrieval and related resources with live eligibility/freshness revalidation and metadata fallback.
+The bounded related-resource evaluation, safe no-result controls, source-attribution presentation, follow-up comparison, lifecycle/fallback validation, external grounded comparison, summary/suggestion evaluation, final evidence reconciliation, D043 live/canonical migration verification, provider-neutral persistence, guarded local resource processing, and backend guarded semantic retrieval are complete. The reconciled outcome remains **Partially feasible — alternative or mixed architecture required**. No generation provider/model, generated inquiry, or application AI UI is selected. The next gate is separately reviewed public semantic-search integration/browser acceptance or related-resource application integration; neither is authorized by this backend checkpoint.
 
 The registered 200-case session/lifecycle checkpoint establishes deterministic control behavior only. Gate 5B separately passed its bounded live PHP/MariaDB status, staleness, file, account, final-revalidation, and fallback control-seam checks. Production-session natural-language follow-up, persistent derived-data cleanup, real-provider interruption behavior, and complete application fallback remain separate integration-stage requirements.
 
