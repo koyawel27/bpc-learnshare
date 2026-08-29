@@ -4,7 +4,7 @@
 
 This document is the privacy reference for BPC LearnShare v1.0. It aligns the already-confirmed v1.0 design — roles, resource statuses, workflows, database design, accepted schema, and security controls — with general principles of the Philippine Data Privacy Act (Republic Act No. 10173), at a level appropriate for a local/LAN BS Information Systems capstone MVP, not a production campus deployment.
 
-This document does not itself introduce new roles, resource statuses, report statuses, database tables, fields, modules, workflows, or AI features. The four confirmed v1.0 roles (Student, Teacher/Instructor, Moderator, Admin), nine confirmed resource statuses, and four report statuses remain unchanged. The separately approved D043 migration established the verified provider-neutral 22-table persistence baseline.
+This document does not itself introduce new roles, resource statuses, report statuses, database tables, fields, modules, workflows, or AI features. The four confirmed v1.0 roles (Student, Teacher/Instructor, Moderator, Admin), nine confirmed resource statuses, and four report statuses remain unchanged. The separately approved D043 migration established the verified provider-neutral 22-table persistence baseline. D044 preserves that table count and authorizes only a later, separately reviewed additive `accounts.must_change_password` direction.
 
 This document consolidates privacy-relevant rules already established in `PROJECT_BRIEF.md`, `DECISIONS.md`, `USER_ROLES.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `schema.sql`, and `SECURITY_NOTES.md`. It explains their significance from a data-privacy standpoint rather than redefining them as new workflow, database, security, or AI requirements.
 
@@ -36,7 +36,7 @@ Specifically, this document:
 * **Does not change the AI-output lifecycle.** AI outputs remain tied to one resource, are not inherited by replacements, and follow the accepted draft, retained, and invalidated lifecycle.
 * **Does not change the Removed-resource minimization rule.** D040 requires exact removal-time replacement of title, description, topic, and original filename, deletion of associated `resource_tags`, preservation of required accountability relationships, and continued Admin-only access. The retained record is minimized but not anonymized. This rule does not apply to Withdrawn resources.
 * **Does not change the audit-log or resource-action-history content rules.** The two-ledger model and safe-summary-only content boundary remain defined by `SECURITY_NOTES.md`. This document explains their privacy significance without redefining their implementation mechanics.
-* **Does not change the schema.** Any privacy requirement that would need a new table, column, field, status, or automated retention mechanism must be identified as a scope or source-alignment issue before being adopted.
+* **Does not change the schema.** D044's later `must_change_password` column still requires its separate migration, rollback, `schema.sql`, live-execution, and testing gates. Any other privacy requirement that would need a new table, column, field, status, or automated retention mechanism must be identified as a scope or source-alignment issue before being adopted.
 
 If a privacy expectation conflicts with a confirmed decision, workflow, database rule, or accepted schema definition, the conflict must be flagged and resolved through the project’s established planning process. It must not be resolved by silently changing this document’s description or by quietly overriding an upstream source.
 
@@ -75,6 +75,7 @@ It addresses:
 
 * BPC LearnShare’s privacy role relative to Bulacan Polytechnic College and any authorized deploying office, without asserting a settled legal controller determination;
 * the categories of personal, academic, operational, and derived data handled through the accepted v1.0 design;
+* the privacy boundaries for institution-provisioned accounts, Account Identifiers, temporary credentials, and mandatory password change;
 * the practical purpose of each data category, tied to confirmed workflows;
 * data minimization and personal/profile information intentionally not collected in v1.0;
 * privacy risks in uploaded academic content, including information about classmates, teachers, or other people who may be named, described, or pictured in uploaded files;
@@ -97,9 +98,9 @@ Under D041–D042, repository-grounded inquiry is a defining completed-capstone 
 | Document               | Relationship to This Document                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `PROJECT_BRIEF.md`     | Source of the project goal, scope, local/LAN deployment direction, AI boundaries, and original privacy discussion in Section 14. This document expands the privacy discussion without replacing or contradicting the brief.                                                                                                                                                   |
-| `DECISIONS.md`         | Source of the accepted decisions treated as fixed privacy inputs, including account/access decisions D005–D007; AI decisions D013–D018 and D028; resource lifecycle decisions D020, D022, D027, and D040; image-upload implications in D025; report and notification decisions D029 and D031; file/AI/polymorphic validation decisions D034–D036; and the D039 audit-log extension. D040 defines exact Removed-resource minimization, controlled-tag-association deletion, retained accountability relationships, and the distinction from Withdrawn retention. |
+| `DECISIONS.md`         | Source of the accepted decisions treated as fixed privacy inputs, including D044's institution-provisioned account model and its amendments to D005–D007; AI decisions D013–D018 and D028; resource lifecycle decisions D020, D022, D027, and D040; image-upload implications in D025; report and notification decisions D029 and D031; file/AI/polymorphic validation decisions D034–D036; and the D039 audit-log extension. D040 defines exact Removed-resource minimization, controlled-tag-association deletion, retained accountability relationships, and the distinction from Withdrawn retention. |
 | `USER_ROLES.md`        | Source of the four-role permission model, ownership boundaries, staff authority, status-based visibility expectations, and AI-related permissions. This document explains their privacy significance without redefining them.                                                                                                                                                 |
-| `WORKFLOWS.md`         | Source of the confirmed operational behavior for registration, upload, moderation, resource visibility, reporting, withdrawal, replacement, AI notice and acknowledgment, AI output lifecycle, notifications, and historical handling.                                                                                                                                        |
+| `WORKFLOWS.md`         | Source of the confirmed operational behavior for Admin account provisioning, mandatory password change, public-registration removal, upload, moderation, resource visibility, reporting, withdrawal, replacement, AI notice and acknowledgment, AI output lifecycle, notifications, and historical handling.                                                                    |
 | `DATABASE_DESIGN.md`   | Source of the conceptual data inventory and data-minimization direction. Section 3 and Appendix A identify the required data areas and table purposes; Sections 14 and 18.5 inform AI-output lifecycle and retained-accountability discussion.                                                                                                                                |
 | `schema.sql`           | Source of the currently verified 22-table implementation baseline. D043 added four provider-neutral AI-derived-data tables through a separately reviewed, backup-protected, and verified migration; application AI integration remains separately gated. |
 | `SECURITY_NOTES.md`    | Source of the implementation-facing controls that enforce privacy-relevant boundaries, especially object/view restrictions, controlled file serving, audit-log safety, polymorphic target validation, AI security boundaries, and known v1.0 limitations. This document explains why those controls matter for privacy without re-deriving them.                              |
@@ -120,7 +121,7 @@ This section distinguishes what BPC LearnShare v1.0 *does* as a piece of softwar
 
 ### 2.2 Application-Level Behavior Versus Institutional Responsibility
 
-BPC LearnShare v1.0 implements privacy-relevant behavior at the application level: login-required access, role-based visibility, status-gated resource exposure, the AI-processing notice-and-acknowledgment gate, minimal Student registration data, safe-summary audit logging, and the D040 Removed-resource minimization rule. These are confirmed, source-of-truth behaviors already defined in `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `schema.sql`, and `SECURITY_NOTES.md`, and this document explains their privacy significance.
+BPC LearnShare v1.0 implements privacy-relevant behavior at the application level: login-required access, institution-provisioned ordinary accounts, role-based visibility, status-gated resource exposure, the AI-processing notice-and-acknowledgment gate, minimal account data, safe-summary audit logging, and the D040 Removed-resource minimization rule. These are confirmed, source-of-truth behaviors already defined in `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `schema.sql`, and `SECURITY_NOTES.md`, and this document explains their privacy significance.
 
 These behaviors support privacy-conscious application operation but do not, by themselves, establish institutional privacy compliance. For any real academic deployment, Bulacan Polytechnic College or the authorized deploying office would still need to determine and formally establish matters such as the appropriate basis for handling personal and other privacy-relevant data processed through the system, official privacy-notice content and delivery, arrangements with any external AI provider, retention and disposal policy beyond the technical lifecycle rules described in this document, incident and breach procedures, and institutional privacy accountability, as applicable.
 
@@ -171,21 +172,23 @@ It describes what the system handles and notes where privacy relevance is appare
 
 All four v1.0 roles — Student, Teacher/Instructor, Moderator, and Admin — share a single `accounts` table and the same account-level data fields. No role has additional profile fields in the accepted schema.
 
-The account data stored for every account, regardless of role, is:
+The current account data stored for every account, regardless of role, is:
 
-* a **username**, used as the login identifier and provided during Student self-registration or Admin account provisioning;
+* an institution-issued **Account Identifier**, stored in the existing physical `accounts.username` column and globally unique across all four roles;
 * a **password hash** generated through PHP's `password_hash()` function — the plaintext password is not stored;
-* a **display name**, provided during Student self-registration or Admin account provisioning;
+* a **display name** supplied from authorized institutional records during Admin provisioning;
 * one **role** value: Student, Teacher/Instructor, Moderator, or Admin;
 * one **account status** value: Active or Disabled;
 * account creation and last-updated timestamps.
 
+After the separately reviewed D044 migration is approved and applied, `accounts` also stores the boolean-like `must_change_password` state. Existing accounts and the controlled first Admin are initialized at `0`; newly provisioned or reset accounts are explicitly written as `1` until the user establishes a private password. This initialization is not a permanent exemption: a later Admin-assisted reset of the first Admin by another authenticated Active Admin sets the affected account to `1`.
+
 Two points are important for privacy accuracy:
 
-* **The accepted design does not use account data as proof of official institutional identity.** Student usernames and display names are self-provided during public registration. Teacher/Instructor, Moderator, and Admin accounts are Admin-provisioned, but the accepted design still contains no roster integration, institutional-email verification, identity-verification field, or external institutional identity-validation mechanism. A username or display name must therefore not be treated by the application as independent proof of a person's official institutional identity.
-* **No email address, student number, course/program, year level, or section is collected as account data.** These fields do not exist in the accepted `accounts` table and are not required by the Student self-registration workflow in `WORKFLOWS.md` Section 5 or the Admin account-provisioning workflow in `WORKFLOWS.md` Section 6. If such a field is ever added, it would require a new decision and a schema change; it is not part of v1.0.
+* **Authorized institutional records are the account source, but LearnShare does not independently perform full institutional identity verification.** Except for the controlled D019 first-Admin setup, an authenticated Active Admin manually provisions Student, Teacher/Instructor, Moderator, and additional Admin accounts from records supplied by MIS personnel or other authorized institutional staff. MIS remains an external organizational authority, not a LearnShare role. Because full MIS integration, SSO, institutional-email verification, and automated roster synchronization are deferred, an Account Identifier or display name must not be described as proof produced independently by LearnShare.
+* **No email address, student number, course/program, year level, or section is collected as an account-profile field.** These fields do not exist in the accepted `accounts` table. If such a field is ever added, it requires another decision and schema change; it is not part of v1.0.
 
-Teacher/Instructor, Moderator, and Admin accounts use the same accepted account fields as Student accounts. Their difference is the Admin-provisioned account workflow and assigned role, not the collection of additional profile fields.
+All four roles use the same accepted account fields. Their differences are their assigned role and permissions, not additional profile data. The controlled first Admin is a setup exception only; it does not become a fifth account type.
 
 ### 3.3 Academic Resource Metadata and Uploaded File Content
 
@@ -233,7 +236,7 @@ The following accepted tables store moderation, reporting, and accountability da
 * **`reports`** — the reported resource, the reporting account, a controlled reason category, an optional free-text comment, report status, and, where applicable, escalating and resolving actor references, a resolution note, and relevant timestamps.
 * **`open_report_tracking`** — a temporary tracking record containing the reporter account, resource, and report references needed to enforce one unresolved report per user/resource. The record remains while the report is Open or Escalated and is deleted when the report becomes Dismissed or Actioned.
 * **`resource_action_history`** — an append-only ledger of moderation and resource-status actions: the affected resource, acting account or `NULL` for an accepted system-triggered action, action type, status before and after, an optional note, an optional related-report reference, and a timestamp.
-* **`audit_log`** — a separate append-only ledger for accepted administrative and system-level actions, including account creation, account disabling or re-enabling, role changes, Admin-assisted password resets, taxonomy management, and system-setting changes. It stores the acting account, action type, target type and identifier, an optional note, and a timestamp.
+* **`audit_log`** — a separate append-only ledger for accepted administrative and system-level actions, including account creation, account disabling or re-enabling, role changes, Admin-assisted password resets, taxonomy management, and system-setting changes. It stores the acting account, action type, target type and identifier, an optional note, and a timestamp. Account provisioning/reset and the required audit row must succeed or fail together; temporary credentials and password hashes are excluded from audit notes.
 
 These are operational and accountability records generated through user, staff, or system activity rather than profile data supplied solely by the uploader or resource subject.
 
@@ -300,7 +303,7 @@ These are operational and technical records rather than uploaded academic conten
 
 The categories above can also be grouped according to how they come to exist in the system:
 
-* **Account and authentication data provided during registration or account provisioning** — username, password hash, display name, role, account status, and account timestamps. Student username and display-name values are self-provided, while Teacher/Instructor, Moderator, and Admin accounts are Admin-provisioned. The accepted design does not use these fields as independent proof of official institutional identity.
+* **Account and authentication data created during authorized provisioning or controlled first-Admin setup** — Account Identifier stored in `username`, password hash, display name, role, account status, account timestamps, and, after the separately approved migration, mandatory-change state. Except for the D019 first-Admin exception, ordinary accounts originate from authorized institutional records and are created by an authenticated Active Admin.
 * **Uploaded academic content that may incidentally contain information about other people** — resource title, description, topic, original filename, and uploaded file content. This content originates from the uploader and is not limited to information about the uploader alone.
 * **Operational and accountability records created through user, staff, or system activity** — reports, open-report tracking, resource action history, audit logs, open-replacement tracking, bookmarks, Helpful marks, activity counters, and notifications. These exist because of platform use and workflow activity rather than as additional account-profile fields.
 * **AI-generated derived output** — content produced through AI processing of an eligible resource, existing only when AI is enabled and the applicable eligibility conditions are satisfied.
@@ -326,12 +329,12 @@ A practical purpose also does not, by itself, justify collecting more data than 
 
 Account data identified in Section 3.2 supports four practical purposes:
 
-* **authentication** — the username identifies the account during login, while the stored password hash supports secure password verification;
+* **authentication** — the Account Identifier stored in `username` identifies the account during login, while the stored password hash supports secure password verification;
 * **user-facing account identification** — the display name helps identify an account within appropriate interface and staff workflow contexts;
-* **authorization** — role and account status support current server-side permission and access checks;
+* **authorization** — role, account status, and, after migration, mandatory-change state support current server-side permission and access checks;
 * **account administration and accountability** — role, account status, timestamps, and related audit records support accepted Admin account-management actions and accountability.
 
-The username and display name are not treated as verified institutional identity for any of these purposes. They identify an account within BPC LearnShare but do not independently prove the account holder's official identity or institutional status. This limitation is a design characteristic carried forward from Section 3, not a new identity-verification requirement.
+The Account Identifier and display name come from authorized institutional records but are not described as independent technical identity verification performed by LearnShare. The application has no full MIS integration, SSO, institutional-email verification, or automated roster synchronization in v1.0.
 
 The stored password hash is used only for accepted authentication and password-management functions. It is not displayed as user-facing information, used as profile data, or treated as a recoverable version of the original password.
 
@@ -453,28 +456,28 @@ It is a student-project privacy-planning reference, not a compliance certificati
 
 Apart from its internal account record identifier, the accepted `accounts` table stores only:
 
-* username;
+* Account Identifier in the physical `username` column;
 * password hash;
 * display name;
 * role;
 * account status;
 * account creation and last-updated timestamps.
 
-No additional account-profile field is included in v1.0.
+The separately approved D044 migration may later add only `must_change_password`, which is workflow state rather than expanded profile information. No additional account-profile field is included in v1.0.
 
-The Student self-registration workflow requires only the accepted account information above. Teacher/Instructor, Moderator, and Admin accounts use the same account fields but are created or assigned through the Admin-provisioning workflow.
+Except for the controlled first Admin, all ordinary Student, Teacher/Instructor, Moderator, and additional Admin accounts use the same minimal fields and are created through manual Admin provisioning from authorized institutional records.
 
 No email address, student number, course/program, year level, section, phone number, address, birth date, gender, profile photo, biography, or identity-verification status is stored as part of an account profile.
 
 Course/program and year-level data do exist elsewhere in the accepted design, but only as controlled academic taxonomy and resource-organization metadata. They describe uploaded resources, not the personal academic profile of the account holder.
 
-Avoiding additional profile fields reduces the amount of personal information held by the application, but it also creates an accepted tradeoff. The system has no roster integration, institutional-email verification, identity-verification field, or external institutional identity source through which it can independently verify a self-registered Student's official institutional identity.
+Avoiding additional profile fields reduces the amount of personal information held by the application. D044 addresses the earlier public-registration membership weakness by making authorized institutional records the account source and an authenticated Active Admin the in-application provisioner.
 
-Student username and display-name values are self-provided. Teacher/Instructor, Moderator, and Admin accounts are created or assigned through the controlled Admin-provisioning workflow, but the application still has no separate technical mechanism that independently verifies the account holder against an institutional identity source.
+This organizational source control is not the same as an automated identity-verification integration. Full MIS integration, SSO, institutional-email verification, and automated roster synchronization remain deferred. MIS is an external authority, not a fifth LearnShare role.
 
-This is an accepted v1.0 tradeoff between minimal profile collection and identity assurance. It is not an open requirement for institutional-email collection, student-number validation, roster integration, or a new identity-verification feature.
+This is an accepted v1.0 tradeoff between minimal profile collection and technical integration. It is not an open requirement to collect institutional email or student number, or to add an identity-verification module.
 
-Plaintext passwords are not retained. The application stores only the password hash required for accepted authentication and password-management behavior. The hash is not a recoverable copy of the original password and is not used as profile information. Detailed password hashing and verification mechanics remain defined in `SECURITY_NOTES.md`.
+Plaintext passwords and temporary credentials are not retained. The application stores only the password hash required for accepted authentication and password-management behavior. A temporary credential may be displayed once after successful provisioning/reset and communicated outside LearnShare, but it and the hash must never be written to logs, audit notes, or permanent display records. Detailed password mechanics remain defined in `SECURITY_NOTES.md`.
 
 Two related storage and scope choices are also preserved:
 
@@ -989,13 +992,14 @@ This section explains the privacy significance of those already-confirmed contro
 
 ### 7.2 Login-Required Access Is the Baseline Control
 
-Under D005, BPC LearnShare v1.0 has no public, logged-out resource catalog.
+Under D005 as amended by D044, BPC LearnShare v1.0 has no public, logged-out resource catalog or public account creation.
 
 Unauthenticated visitors may access only:
 
 * the login page;
-* the Student registration page;
 * basic public information pages, if included.
+
+`GET /register` redirects to login with a neutral message that accounts are institution-issued. `POST /register` is rejected before account creation and produces no account, session, role assignment, audit row, or other state change.
 
 Unauthenticated visitors may not:
 
@@ -1010,7 +1014,7 @@ Unauthenticated visitors may not:
 * access protected file-serving routes;
 * use AI-assisted resource features.
 
-Protected access requires a currently authenticated and Active account.
+Protected access requires a currently authenticated and Active account. Every protected request must also recheck current role and `must_change_password`; while the flag is `1`, only password change and logout are available.
 
 This login boundary reduces broad public exposure of academic content and account-linked system activity, but authentication alone does not grant access to every resource, file, report, AI output, or administrative record. The system must still apply the role-, ownership-, status-, object-, and availability-based checks relevant to the requested action.
 
@@ -2558,7 +2562,7 @@ Neither ledger may store:
 
 * plaintext passwords;
 * password hashes;
-* temporary passwords;
+* temporary credentials;
 * session identifiers;
 * CSRF tokens;
 * database credentials;
@@ -2903,11 +2907,13 @@ This section does not introduce:
 
 The accepted v1.0 account lifecycle supports:
 
-* account creation;
+* controlled first-Admin setup;
+* authorized manual Admin provisioning;
 * account disabling;
 * account re-enabling;
 * role changes;
-* Admin-assisted password reset.
+* Admin-assisted password reset;
+* mandatory password change for newly provisioned or reset accounts after the approved migration.
 
 There is no accepted self-service account-deletion workflow.
 
@@ -4262,11 +4268,11 @@ These institutional responsibilities are not converted into new v1.0 application
 
 ### 13.3 Identity and Account Limitations
 
-Student self-registration uses the accepted minimal account dataset.
+Except for the controlled D019 first Admin, ordinary Student, Teacher/Instructor, Moderator, and additional Admin accounts originate from authorized institutional records and are provisioned manually by an authenticated Active Admin.
 
-Username and display name identify an account inside BPC LearnShare but are not independent proof of official institutional identity.
+The institution-issued Account Identifier stored in `accounts.username` and the display name identify an account inside BPC LearnShare. They do not represent independent technical identity verification performed by the application.
 
-Teacher/Instructor, Moderator, and Admin accounts are Admin-provisioned.
+MIS personnel or other authorized institutional staff may supply the source records, but MIS is not a LearnShare role.
 
 However, Admin provisioning is not the same as independent institutional identity verification.
 
@@ -4274,19 +4280,17 @@ BPC LearnShare v1.0 has no:
 
 * institutional-email verification;
 * student-number validation;
-* roster integration;
+* full MIS or roster integration;
 * roster synchronization;
-* external institutional identity source;
+* automated synchronization with an external institutional identity source;
 * identity-verification status;
 * expanded personal academic profile.
 
-Minimal account collection reduces the amount of personal information stored by the application.
+Minimal account collection reduces the amount of personal information stored by the application, while authorized record origin addresses the earlier public-registration membership-verification weakness.
 
-The tradeoff is lower identity assurance.
+The remaining tradeoff is the absence of automated technical integration and verification.
 
-The application cannot independently prove that a self-registered Student is the official institutional person suggested by the account's username or display name.
-
-The application also has no separate technical identity-verification mechanism for Admin-provisioned roles.
+The application relies on the authenticated Active Admin and the external institutional process that supplied the authorized record. It does not independently query MIS, SSO, email-domain, or roster systems to prove that source record.
 
 There is no self-service account-deletion lifecycle.
 
@@ -4303,7 +4307,7 @@ These limitations do not create a new v1.0 requirement for:
 
 * institutional email;
 * student-number collection;
-* roster integration;
+* full MIS or roster integration;
 * identity verification;
 * self-service account deletion;
 * automatic account anonymization.
@@ -5316,6 +5320,23 @@ If a one-time script is used, define:
 
 Do not introduce public Admin registration.
 
+#### Institution-provisioned accounts and credential handling
+
+Implement manual Admin provisioning as the required v1.0 minimum. Except for the controlled first Admin, every Student, Teacher/Instructor, Moderator, and additional Admin account must originate from authorized institutional records and be provisioned by an authenticated Active Admin.
+
+Preserve:
+
+* Account Identifier as the user-facing term while retaining the physical `accounts.username` column and global uniqueness across all four roles;
+* one-time temporary-credential display only after successful provisioning/reset;
+* password-hash-only storage and exclusion of temporary credentials/hashes from logs and audit notes;
+* explicit `must_change_password = 1` for newly provisioned or reset accounts after the separately approved migration;
+* migration-time `0` initialization for existing accounts and the controlled first Admin, without exempting the first Admin from a later Admin-assisted reset that sets the affected account to `1`;
+* live account, status, role, and mandatory-change revalidation on every protected request;
+* atomic account provisioning/reset and audit insertion;
+* neutral `GET /register` redirect and fail-closed `POST /register` rejection.
+
+Do not add CSV/batch import, full MIS integration, SSO, institutional-email verification, or a fifth role. MIS remains an external institutional authority.
+
 #### Protected file storage
 
 Define the exact:
@@ -5491,7 +5512,7 @@ Logs must not store:
 
 * passwords;
 * password hashes;
-* temporary passwords;
+* temporary credentials;
 * session identifiers;
 * CSRF tokens;
 * database credentials;
@@ -5512,11 +5533,19 @@ Do not silently add public-internet production hardening to the v1.0 build plan.
 Verify:
 
 * unauthenticated visitors can reach only the accepted public surfaces;
-* Student registration remains available according to D006;
+* `GET /register` redirects neutrally to login and `POST /register` creates no state;
+* only an authenticated Active Admin provisions ordinary accounts or performs ordinary reset;
+* all four ordinary roles use globally unique Account Identifiers stored in `accounts.username`;
+* provisioned/reset accounts receive `must_change_password = 1`, including the first Admin when reset by another authenticated Active Admin, while existing accounts and the controlled first Admin are initialized at `0` during migration;
+* flagged accounts can access only password change and logout;
+* successful mandatory change stores a new hash, clears the flag, and regenerates the session identifier;
+* provisioning/reset and required audit insertion succeed or fail together;
+* temporary credentials and password hashes never appear in logs, audit notes, errors, or permanent display records;
 * unauthenticated users cannot access protected resource or AI functions;
 * current account existence is checked;
 * current account status is checked;
 * current role is checked;
+* current mandatory-change state is checked on every protected request;
 * a Disabled account with an already-open session fails on its next protected request;
 * ownership checks apply where required;
 * Student/Teacher, Moderator, and Admin permissions remain separated;
@@ -5732,7 +5761,7 @@ Verify:
 
   * passwords;
   * password hashes;
-  * temporary passwords;
+  * temporary credentials;
   * session identifiers;
   * CSRF tokens;
   * database credentials;
@@ -5754,6 +5783,7 @@ After the `BUILD_PLAN.md` method is selected, verify:
 * public Admin registration does not exist;
 * any one-time setup script cannot be reused after successful setup;
 * the setup script is removed or disabled as required by the build plan.
+* the controlled first Admin is initialized at `must_change_password = 0` when the D044 migration is applied, without a permanent exemption from a later Admin-assisted reset that sets the flag to `1`.
 
 #### Schema and compatibility
 
@@ -5764,6 +5794,8 @@ Verify:
 * actual CHECK-constraint support and enforcement;
 * PHP validation remains effective regardless of CHECK behavior;
 * the current accepted schema creates exactly 22 tables, while the D043 rollback restores the historical 18-table baseline;
+* the separately reviewed D044 migration adds only `accounts.must_change_password` and preserves the 22-table count;
+* the D044 rollback stops when any account remains flagged with `must_change_password = 1`;
 * D039 action and target enums are present;
 * D039 action/target CHECK behavior is present where supported;
 * D040 schema comments and application behavior remain aligned;
@@ -5840,9 +5872,9 @@ Their deferral does not mean that they would be unnecessary for a future product
 
 ### 15.1 Document Status
 
-`DATA_PRIVACY.md` is complete for BPC LearnShare v1.0 privacy planning once all accepted Sections 1–15 and their applied corrections are merged into the repository copy.
+`DATA_PRIVACY.md` is complete for BPC LearnShare v1.0 privacy planning through D044 once all accepted Sections 1–15 and their applied corrections are merged into the repository copy.
 
-The document is aligned with the accepted source-of-truth documents through D043, with D043-specific derived-data rules recorded in Section 15.8.
+The document is aligned with the accepted source-of-truth documents through D044, with D043-specific derived-data rules recorded in Section 15.8 and D044 account/privacy rules recorded in Section 15.9.
 
 It is a student-project privacy-planning reference for a local/LAN academic MVP prepared for a BS Information Systems capstone.
 
@@ -5866,7 +5898,7 @@ Those carry-forward items do not make `DATA_PRIVACY.md` incomplete. They are int
 This document was written against and remains aligned with:
 
 * `PROJECT_BRIEF.md`;
-* `DECISIONS.md`, through D043;
+* `DECISIONS.md`, through D044;
 * `USER_ROLES.md`;
 * `WORKFLOWS.md`;
 * `DATABASE_DESIGN.md`;
@@ -5930,7 +5962,7 @@ D040 introduces:
 * no new column;
 * no additional resource status.
 
-The currently implemented and verified schema is exactly 22 tables. D043 added `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings` through a separately approved migration with backup/restore, rollback, forward-migration, legacy-row-preservation, and empty-new-table verification. This structural completion does not authorize application processing, a provider/model, or generated inquiry.
+The currently implemented and verified schema is exactly 22 tables. D043 added `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings` through a separately approved migration with backup/restore, rollback, forward-migration, legacy-row-preservation, and empty-new-table verification. This structural completion does not authorize application processing, a provider/model, or generated inquiry. D044 preserves the table count and authorizes only a later, separately reviewed additive account flag; this privacy propagation does not apply that change.
 
 No D041 is required solely because of this document.
 
@@ -5952,6 +5984,8 @@ They must be implemented through the existing accepted structures unless a later
 At a high level, `DATA_PRIVACY.md` confirms the following v1.0 privacy-planning outcomes:
 
 * The account dataset remains intentionally minimal, with a known identity-assurance tradeoff.
+* Ordinary account origin is limited to authorized institutional records and authenticated Active Admin provisioning, with the controlled D019 first Admin as the exception.
+* Temporary credentials are one-time communication values, never retained or logged in plaintext; newly provisioned/reset users must establish a private password before other protected access after the approved migration.
 
 * Uploaded academic content may contain information about classmates, teachers, authors, presenters, or other people.
 
@@ -6056,6 +6090,7 @@ They are intentionally assigned to the later documents and verification stages t
 | `v1.0-planning` | `2026-07-11` | Created and aligned `DATA_PRIVACY.md` Sections 1–15 with accepted sources through D040, including two-ledger privacy rules, AI notice and external-transmission boundaries, AI-output lifecycle privacy, D040 Removed-resource minimization, retention limitations, and downstream carry-forward requirements. | Complete for v1.0 planning — pending final whole-document consistency validation |
 | `v1.1-d043` | `2026-08-20` | Propagated D041–D043 inquiry scope and targeted local persistence: derived extracted text/chunks/vectors as protected data, source-version freshness, live eligibility, late-result rejection, provider payload/log minimization, Removed cleanup, session-only inquiry context, and the distinction between the 22-table target and historical 18-table rollback baseline. | Complete for D043 privacy propagation |
 | `v1.2-d043-storage` | `2026-08-20` | Reconciled the separately approved and verified D043 storage gate. The current schema/live database contain 22 tables; application AI processing, provider/model selection, and generated inquiry remain separately gated. | Complete for structural storage reconciliation |
+| `v1.3-d044` | `2026-08-28` | Propagated institution-provisioned account origin, Account Identifier terminology, public-registration removal, temporary-credential minimization, mandatory-password-change privacy, atomic audit boundaries, deferred integrations, and the separately gated additive account flag. | Complete for D044 privacy propagation; migration and implementation remain separate |
 
 ### 15.7 Final Boundary
 
@@ -6109,6 +6144,22 @@ Privacy controls are:
 Any optional external summary/suggestion adapter requires separately reviewed provider terms, retention/ZDR, quota, security, and authorization; clear applicable notice; payload minimization; secret protection; and a working non-AI path. Provider/model selection remains unresolved.
 
 The exact migration was executed only after separate approval and passed backup/restore, deletion/rollback, forward-migration, legacy-row-preservation, and empty-new-table checks. Future migration or backfill changes must receive the same separate review and must not be inferred from D043 alone.
+
+### 15.9 D044 Institution-Provisioned Account Privacy Propagation
+
+D044 replaces public Student self-registration after prototype evaluation exposed an institutional-membership verification weakness. Except for the controlled D019 first-Admin setup, ordinary Student, Teacher/Instructor, Moderator, and additional Admin accounts originate from authorized institutional records and are provisioned by an authenticated Active Admin. MIS personnel may supply those records externally, but MIS is not a LearnShare role and no full MIS integration is implied.
+
+The privacy consequences are:
+
+* the user-facing Account Identifier remains stored in the existing physical `accounts.username` field and is globally unique across all four roles;
+* manual Admin provisioning is the v1.0 minimum, while CSV/batch import, full MIS integration, SSO, and institutional-email verification remain deferred;
+* temporary credentials may be displayed once after successful provisioning/reset and communicated outside LearnShare, but neither credentials nor password hashes may be retained in plaintext, logs, audit notes, errors, or permanent display records;
+* provisioning/reset and the required audit row succeed or fail together, and audit content remains a safe summary rather than credential material;
+* after the separately approved migration, newly provisioned/reset accounts are explicitly flagged `1`, including the first Admin when reset by another authenticated Active Admin; existing accounts and the controlled first Admin are initialized at `0` during migration, and every protected request rechecks the live flag;
+* a flagged account may access only password change and logout, limiting exposure until the user establishes a private password;
+* `GET /register` provides only a neutral redirect and `POST /register` creates no account or related state.
+
+The verified schema remains 22 tables. The later D044 migration may add only `must_change_password TINYINT(1) NOT NULL DEFAULT 0` to `accounts`. Before rollback removes that column, the process must count flagged accounts and stop if any remain. Removing the flag while temporary-password accounts exist would erase the only persistent control preventing ordinary protected access and is therefore prohibited.
 
 ---
 

@@ -2,10 +2,10 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0
-**Last Updated:** 2026-08-20
+**Last Updated:** 2026-08-29
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Purpose:** Reflect the current accepted planning, AI-scope, verified schema, security, privacy, and feasibility-spike state — including the accepted `AI_FEASIBILITY_SPIKE.md` specification and the completed MariaDB 10.4.32 schema-compatibility verification — so a new Claude or GPT conversation can continue into the clean hardware baseline and measured spike execution without reopening settled decisions or re-deriving context from old chat history. This document summarizes accepted decisions, completed verification, and current work; it does not itself introduce new decisions.
+**Purpose:** Reflect the current accepted planning, account-policy, AI-scope, verified schema, security, privacy, and feasibility-spike state through D044 so a new Claude or GPT conversation can continue without reopening settled decisions or re-deriving context from old chat history. This document distinguishes accepted target documentation from current pre-D044 application/database behavior and remaining implementation gates; it does not itself introduce new decisions.
 
 ---
 
@@ -56,19 +56,19 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 
 | File                 | Status                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PROJECT_BRIEF.md`   | Accepted and aligned through D042. Reflects the required minimum v1.0 AI package and the Planned/Deferred AI tiers.                                                                                                                                                                                                                                                                                                                      |
-| `USER_ROLES.md`      | Accepted and aligned through D042. Preserves exactly four roles and defines general AI-assisted search/inquiry access without expanding role authority.                                                                                                                                                                                                                                                                                  |
-| `WORKFLOWS.md`       | Accepted and aligned through D043. D043 resolves the retrieval-persistence direction while preserving live eligibility, lifecycle, fallback, and session-only inquiry-context rules. |
-| `DATABASE_DESIGN.md` | Accepted direction through D043. It defines `ai_source_versions`, `ai_processing_states`, `ai_chunks`, and `ai_embeddings`, keeps `ai_outputs` separate, and records the disposable and guarded live/canonical migration results. Provider-neutral persistence, default-off local processing, the guarded semantic-retrieval backend, and the browser-accepted default-off public search surface are implemented. The one-time activation was restored without changing the accepted database baseline. |
-| `DECISIONS.md`       | Complete through **D043**. D043 accepts targeted MariaDB derived-data persistence and bounded PHP cosine without selecting a provider/model or enabling generated inquiry. |
-| `schema.sql`         | Accepted and verified current 22-table SQL baseline on MariaDB 10.4.32. The guarded live migration preserved all original rows, and the canonical fresh-import/migration/rollback verifier passed 60/60 checks. |
+| `PROJECT_BRIEF.md`   | Accepted and aligned through D044. Reflects institution-provisioned ordinary accounts, public-registration removal, temporary credentials, mandatory password change, and the required AI package without changing unrelated scope. |
+| `USER_ROLES.md`      | Accepted and aligned through D044. Preserves exactly four roles; only an authenticated Active Admin provisions ordinary accounts, with D019 limited to first-Admin bootstrap. |
+| `WORKFLOWS.md`       | Accepted and aligned through D044. Defines Admin provisioning, temporary login, mandatory change, Admin reset, live flag enforcement, and fail-closed public-registration removal while preserving D043 AI lifecycle rules. |
+| `DATABASE_DESIGN.md` | Accepted conceptual direction through D044. It preserves the verified 22-table D043 baseline and authorizes only a later separately gated additive `accounts.must_change_password` migration; current `schema.sql` and the live database do not yet include that column. |
+| `DECISIONS.md`       | Complete through **D044**. D044 supersedes D006, amends D005 and D007, preserves D019/D039/D043, and establishes institution-provisioned accounts plus mandatory password change without adding a role or table. |
+| `schema.sql`         | Accepted and verified current 22-table D043 SQL baseline on MariaDB 10.4.32. It remains pre-D044 and does not yet contain `accounts.must_change_password`; migration and canonical-schema changes remain separately gated. |
 | `AI_FEASIBILITY_SPIKE.md` | Complete and accepted. Final reconciliation remains **Partially feasible — alternative or mixed architecture required**, with Moderate confidence and 6/4/2/0 capability results. D043 uses that evidence without rewriting it. |
 | `AI_FEATURES.md`     | Accepted D043 AI behavior/architecture baseline. Storage, provider-neutral persistence, guarded local processing, the guarded semantic-retrieval backend, and browser acceptance of the default-off public search surface are complete; generation selection and generated inquiry remain pending. |
-| `SECURITY_NOTES.md`  | Accepted through the D043 targeted propagation, including derived-data protection, live revalidation, late-result rejection, secret/log rules, and migration-security testing. |
-| `DATA_PRIVACY.md`    | Accepted through the D043 targeted propagation, including local derived-data minimization, lifecycle cleanup, session-only inquiry context, and provider payload boundaries. |
-| `PROJECT_HANDOFF.md` | This updated version. It records the verified 22-table D043 storage state while preserving the separate application-integration boundary. |
+| `SECURITY_NOTES.md`  | Accepted through D044. Adds account-origin, one-time-credential, live mandatory-change, atomic-audit, first-Admin reset, sole-Admin recovery, and rollback guards while preserving D043 controls. |
+| `DATA_PRIVACY.md`    | Accepted through D044. Adds institution-record, credential-minimization, mandatory-change, audit, first-Admin reset, and rollback privacy boundaries while preserving D043 lifecycle rules. |
+| `PROJECT_HANDOFF.md` | This D044-propagated version. It records the accepted target separately from the still pre-D044 application and schema behavior. |
 
-**Completed:** restore-verified backup, exact D043 live migration, canonical 22-table schema update, revised 60-check disposable verification, provider-neutral persistence, the default-off one-resource local extraction/segmentation/embedding CLI, a guarded semantic-retrieval backend verified by 43/43 disposable checks, a public search surface verified by 23/23 focused checks and owner browser acceptance, a default-off related-resource detail surface verified by 28/28 focused checks, the preserved 18/18 Gate 5C live regression, owner browser acceptance in feature-off and temporarily enabled states, and the 66/66 AI-disabled core presentation journey. **Still pending:** the remaining negative/status presentation cases, complete provider-interruption/application fallback, and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
+**Completed:** accepted D044 target-document propagation, restore-verified D043 migration, canonical 22-table schema, provider-neutral persistence, guarded local processing/retrieval, default-off semantic-search and related-resource surfaces, their recorded browser acceptances, and the historical 66/66 AI-disabled core journey. **Still pending:** the D044 versioned migration/rollback, `schema.sql` update, live database execution, Admin-provisioning and mandatory-change application work, sole-Admin recovery decision, D044 test implementation/rerun, remaining negative/status presentation cases, complete provider-interruption/application fallback, and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
 
 `AI_FEASIBILITY_SPIKE.md` is complete and accepted. Final reconciliation covers all 12 Required capabilities and records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. D043 now accepts the smallest persistent architecture direction supported by that evidence. It still does not select a provider/model, repair the grounded-answer failure, or authorize generated inquiry/application integration.
 
@@ -79,8 +79,9 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 **In scope for v1.0:**
 
 * login-required access;
-* Student self-registration;
-* Admin-provisioned Teacher/Instructor, Moderator, and Admin accounts;
+* institution-provisioned Student, Teacher/Instructor, Moderator, and additional Admin accounts created by an authenticated Active Admin from authorized institutional records, except for the controlled D019 first-Admin bootstrap;
+* Account Identifier stored in the existing `accounts.username` field and globally unique across all four roles;
+* temporary credentials and mandatory first-login password change after the separately approved D044 migration/application gates;
 * ordinary uploads by Students and Teachers/Instructors only;
 * file validation and protected file storage;
 * mandatory moderation before normal visibility;
@@ -131,13 +132,19 @@ Exactly four v1.0 roles exist:
 
 Rules:
 
-* Only Students self-register (D006).
-* Teacher/Instructor, Moderator, and Admin accounts are provisioned by an existing Admin (D007).
-* The first Admin account is created through setup, seed, or manual bootstrap only — never through a public page or permanently reachable setup endpoint (D019, `SECURITY_NOTES.md` §3.9 and §8.5).
+* D044 supersedes D006: no role self-registers or selects a public role.
+* Except for D019 bootstrap, every Student, Teacher/Instructor, Moderator, and additional Admin account originates from authorized institutional records and is provisioned manually by an authenticated Active Admin. MIS is an external record authority, not a fifth LearnShare role. CSV/batch import, full MIS integration, SSO, and institutional-email verification are deferred.
+* The first Admin account is created through the controlled non-public D019 command-line bootstrap only. Once created, it is an ordinary Admin account; no `is_first_admin` field or permanent special account type exists.
+* `GET /register` redirects neutrally to login with an institution-issued-account message. `POST /register` fails closed and creates no account, session, role assignment, or audit row.
+* Every provisioning or reset operation uses a different cryptographically unpredictable temporary credential, stores only its hash, displays it once after successful commit, and communicates it privately outside LearnShare. Credentials and hashes never belong in URLs, logs, audit notes, errors, browser-persistent storage, or permanent display records.
+* After the separately gated migration, newly provisioned and Admin-reset accounts are explicitly written with `must_change_password = 1`; existing accounts and the bootstrap first Admin initialize at `0` during migration.
+* The first Admin has no permanent reset exemption. Another authenticated Active Admin may reset it through the normal atomic audited workflow, setting it to `1`. Controlled local maintenance applies only when no other authenticated Active Admin exists; the exact accountable sole-Admin procedure remains an implementation decision because the current bootstrap helper refuses to run after an Admin exists and the accepted audit schema requires an actor.
+* Every protected request rechecks live account existence, Active/Disabled status, current role, and `must_change_password`. A flagged account may access only password change and logout. Successful mandatory change stores a new private hash, clears the flag, and regenerates the session identifier.
+* Provisioning/reset and the required audit row succeed or fail together. A D044 rollback must stop while any account remains flagged `1`.
 * Only Student and Teacher/Instructor accounts may initiate ordinary resource uploads (D008).
 * Moderator and Admin accounts do not upload as ordinary contributors (D010). This is enforced in application logic because a foreign key cannot prove the current role of an uploader (`DATABASE_DESIGN.md` §7.2 and §18.3; `SECURITY_NOTES.md` §4.8).
 * Teacher/Instructor uploads pass through the same moderation queue as Student uploads. There is no trusted-uploader or automatic-approval bypass in v1.0 (D009).
-* Role and account status must be checked live and server-side on every protected request. They must not be trusted only from cached session values (`SECURITY_NOTES.md` §3.5 and §4.3).
+* Role, account status, and mandatory-change state must be checked live and server-side on every protected request. They must not be trusted only from cached session values (`SECURITY_NOTES.md` §3.5 and §4.3).
 * Disabled accounts cannot log in.
 * Disabling an account does not automatically change the status of resources previously uploaded by that account.
 * Password recovery is Admin-assisted only. There is no self-service recovery, reset-token table, or email-based reset flow in v1.0 (`DATABASE_DESIGN.md` §4.5; `SECURITY_NOTES.md` §3.10).
@@ -483,10 +490,13 @@ Accepted controls include:
 * Password handling through `password_hash()` and `password_verify()`.
 * Working minimum password length of eight characters.
 * No forced composition rules in v1.0.
+* Manual Admin provisioning for all four roles from authorized institutional records, with only the controlled D019 first-Admin bootstrap outside that workflow.
+* A different cryptographically unpredictable temporary credential for each provisioning/reset, one-time post-commit display, private out-of-band communication, and no plaintext credential/hash in URLs, logs, audits, errors, browser-persistent storage, or permanent displays.
+* `must_change_password = 1` for every newly provisioned or Admin-reset account after the approved migration; migration-time `0` initialization for existing accounts and the first Admin is not a permanent reset exemption.
 * Session ID regeneration immediately after successful login.
 * Thirty-minute inactivity timeout.
 * Native PHP sessions; no database-backed session table is required.
-* Server-side RBAC and live revalidation of role and account status on every protected request.
+* Server-side RBAC and live revalidation of account existence, role, status, and mandatory-change flag on every protected request. A flagged account may access only password change and logout.
 * Live resource-status checks.
 * Live `file_availability` checks before serving files.
 * No trust in cached session role/status values as the sole authorization source.
@@ -507,6 +517,8 @@ Accepted controls include:
   * `audit_log` for Admin/system-level actions.
 * Application-level append-only handling for audit data.
 * Safe-summary-only audit content.
+* Atomic account provisioning/reset and required audit insertion.
+* Neutral `GET /register` redirection and fail-closed `POST /register` rejection with no account-related state.
 * No passwords, password hashes, API keys, session IDs, CSRF tokens, full files, full extracted content, or full AI output in audit logs.
 * Application validation for polymorphic `notifications.target_id` and `audit_log.target_id` references because no direct foreign key can enforce them (D036).
 * Mandatory PHP-side validation regardless of local CHECK-constraint enforcement (D037).
@@ -515,6 +527,8 @@ Accepted controls include:
 * Security testing seeds in `SECURITY_NOTES.md` §14.
 
 `SECURITY_NOTES.md` now carries the targeted D043 AI persistence, retrieval, external-payload, lifecycle, and fallback controls. Its earlier security principles remain controlling.
+
+Its accepted D044 propagation separately carries institution-record account origin, temporary credentials, mandatory password change, live flag enforcement, first-Admin normal reset, sole-Admin recovery boundaries, atomic auditing, and fail-closed rollback. These are accepted target requirements, not evidence that the still pre-D044 application/schema currently implements them.
 
 The D043 propagation covers, where necessary:
 
@@ -542,9 +556,9 @@ These boundaries remain consistent with D017.
 
 ---
 
-## 9. Current Decision Log Status Through D043
+## 9. Current Decision Log Status Through D044
 
-`DECISIONS.md` contains accepted decisions **D001–D043**.
+`DECISIONS.md` contains accepted decisions **D001–D044**.
 
 Do not reopen an accepted decision unless the current source documents directly contradict each other.
 
@@ -561,6 +575,7 @@ Most recent decisions:
 * **D041** — Required v1.0 AI deliverable with a runtime-independent non-AI core. The minimum AI package defined by D042 is required in the completed capstone. Repository-grounded inquiry becomes a defining v1.0 capability rather than an optional stretch feature. D041 supersedes D016 and clarifies, but does not remove, D004, D013, D014, D015, or D018.
 * **D042** — Defines the Required, Planned, and Deferred v1.0 AI capability tiers; establishes the feasibility-gated candidate hybrid direction; keeps providers and models replaceable; and defers schema expansion until after the feasibility spike and an explicit later architecture/schema decision.
 * **D043** — Accepts targeted MariaDB persistence through four named AI-derived-data tables, bounded PHP cosine with metadata fallback/live revalidation, source-bound current `ai_outputs`, no permanent inquiry/chat history, no provider/model selection, and generated inquiry unavailable until a later candidate passes. The separately reviewed migration/rollback package has now been applied and verified, establishing the current 22-table SQL baseline.
+* **D044** — Supersedes D006 and removes public Student registration; amends D005/D007 so all ordinary accounts are institution-provisioned by an authenticated Active Admin; preserves D019 first-Admin bootstrap, D039 auditing, D043, the four roles, and the 22-table baseline; and requires temporary credentials, mandatory password change, live flag revalidation, atomic provisioning/reset audits, and separately gated migration/application/testing work.
 
 ---
 
@@ -614,6 +629,8 @@ D039 did not add a table. It extended enum values on the existing `audit_log` ta
 D040 did not add a table or column. It uses existing `resources` columns, removes existing `resource_tags` junction rows during removal, and defines application-level lifecycle behavior.
 
 D041–D042 did not themselves change the historical 18-table count. D043 and its separately approved migration package later established the verified 22-table baseline.
+
+D044 preserves the 22-table count. The accepted target adds only `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0` through a later versioned migration and subsequent canonical-schema gate. The current live database and `database/schema.sql` remain pre-D044 and do not yet contain that column. Existing accounts and the bootstrap first Admin will initialize at `0`; later provisioning/reset explicitly writes `1`, including a first-Admin reset by another Active Admin. Rollback must stop while any flagged row exists.
 
 The current baseline contains dedicated structures for:
 
@@ -691,9 +708,9 @@ The following verification checkpoint is complete:
   * PHP application logic must reject direct self-replacement and longer replacement cycles.
   * D037 remains controlling: database checks are defense-in-depth, and PHP validation is mandatory regardless of database enforcement.
 
-The representative local upload-limit checkpoint is now complete. The application accepted a boundary derivative of an accepted image-only PDF at exactly 20 MiB, accepted an image-heavy derivative of an accepted PPTX below the limit, and rejected an otherwise matching PDF one byte above it without creating a row. It preserved Pending status, exact sizes, randomized protected names, and non-public storage, then restored all 22 table counts and the protected-storage manifest. This validates the implementation boundary; continued sampling of actual institution-provided files may still justify a later documented adjustment.
+The representative local upload-limit checkpoint is now complete. The application accepted a boundary derivative of an accepted image-only PDF at exactly 20 MiB, accepted an image-heavy derivative of an accepted PPTX below the limit, and rejected an otherwise matching PDF one byte above it without creating a row. It preserved Pending status, exact sizes, randomized protected names, and non-public storage, then restored all 22 table counts and the protected-storage manifest. Its registration-based fixture setup **Passed under the pre-D044 baseline; superseded by D044.** The upload/storage evidence remains valid, but a D044 rerun must use a provisioned Student fixture.
 
-The bounded core presentation journey is also complete. `tests/presentation/run_core_journey_acceptance.php` passed 66/66 live local HTTP checks after a 24/24 read-only preflight. With every AI control disabled, one temporary Student registered, signed in, uploaded an accepted TXT resource, and could not discover, open, or download it while Pending. A temporary Moderator authenticated through the real login and moderation routes, approved it, and produced one matching action-history row. The Student then found it through title plus all five metadata filters, received metadata fallback from an unavailable AI-assisted search request, opened its details, downloaded byte-identical protected content, and lost protected access after logout. The final accepted run removed all temporary rows/files and restored all 22 table row counts and the protected-storage manifest. This proves one representative core journey, not every remaining negative, role, status, or full-v1.0 case.
+The bounded core presentation journey is also complete. `tests/presentation/run_core_journey_acceptance.php` passed 66/66 live local HTTP checks after a 24/24 read-only preflight. With every AI control disabled, one temporary Student registered, signed in, uploaded an accepted TXT resource, and could not discover, open, or download it while Pending. A temporary Moderator authenticated through the real login and moderation routes, approved it, and produced one matching action-history row. The Student then found it through title plus all five metadata filters, received metadata fallback from an unavailable AI-assisted search request, opened its details, downloaded byte-identical protected content, and lost protected access after logout. **Passed under the pre-D044 baseline; superseded by D044.** The upload, moderation, discovery, file-serving, fallback, logout, restoration, and cleanup evidence remains valid, but public registration does not prove the D044 account journey. The final accepted run removed all temporary rows/files and restored all 22 table row counts and the protected-storage manifest.
 
 The following remain open and must not be treated as already resolved:
 
@@ -706,10 +723,18 @@ The following remain open and must not be treated as already resolved:
 
   * Resolve in `BUILD_PLAN.md`.
 
-* **The exact first-Admin bootstrap method remains open.**
+* **D044 migration, application, and testing remain separately gated.**
 
-  * Seed, controlled setup script, or manual procedure must be selected later.
-  * Any setup script must not remain as a permanently reachable public endpoint.
+  * The current 22-table schema/application remains pre-D044: public Student registration exists and `accounts.must_change_password` does not.
+  * Required later gates are the versioned migration/rollback, `schema.sql` update, live database execution, PHP provisioning/reset/mandatory-change/public-registration-removal work, test implementation, live rerun, and independent review.
+  * No new D044 test is Passed yet.
+
+* **The exact accountable sole-Admin recovery procedure remains open.**
+
+  * The controlled first-Admin bootstrap helper is implemented and non-public, but intentionally refuses after an Admin exists.
+  * Normal first-Admin reset is not exceptional when another authenticated Active Admin exists; it uses the ordinary atomic audited reset and sets the flag to `1`.
+  * Only when no other authenticated Active Admin exists may controlled local maintenance recover the sole Admin.
+  * Because the current audit schema requires an actor account, the exact maintenance command and truthful audit treatment require explicit design before implementation; do not invent a field, role, table, public endpoint, or false actor.
 
 * **The exact MIME/content validation mechanism remains open.**
 
@@ -846,23 +871,23 @@ Current interpretation:
 * old mobile GPU support and real Windows runtime behavior must be measured rather than assumed;
 * hardware is not yet confirmed sufficient for the final AI architecture.
 
-The planned clean-baseline checkpoint appears in Section 13.
+The earlier clean-hardware and clean-baseline planning is retained here as historical context. It is not the current next task; Sections 15 and 16 now direct the read-only D044 implementation preflight.
 
 ---
 
 ## 13. Current Documentation and Verification Order
 
-**D043 continuation note — 2026-08-20:** The historical sequence below records how the project reached the decision. Architecture review, D041–D043 propagation, migration/rollback review, restore-verified backup, guarded live migration, canonical schema update, and post-migration verification are complete. The next active gate is bounded repository/processor integration; storage completion alone does not enable AI features.
+**D043–D044 continuation note — 2026-08-29:** The historical sequence below records the completed D043 architecture/storage path. D044 target documentation is now accepted, but its migration, canonical-schema, live-database, application, and testing gates remain separate. D044 does not reopen D043 or enable an AI feature.
 
 Completed checkpoints:
 
-1. **Accepted the current planning baseline through D043.**
+1. **Accepted the current planning baseline through D044.**
 
 2. **Completed and accepted `AI_FEASIBILITY_SPIKE.md`.**
 
    * Sections 1–26 are complete.
    * Required capability coverage, measurements, mandatory guardrails, pre-run criteria, evidence rules, and architecture/schema handoff are accepted.
-   * The spike is partially executed; completed and remaining checkpoints are recorded below.
+   * The historical execution sequence and final evidence reconciliation are recorded below.
 
 3. **Executed and verified the historical 18-table `schema.sql` baseline in the actual XAMPP/MariaDB environment.**
 
@@ -981,111 +1006,45 @@ Any older D016-based optional inquiry wording is superseded by D041 and must be 
 
 ## 15. Guidance for the Next Claude Conversation
 
-Use this only when a fresh Claude conversation is needed during the clean-baseline or spike-execution phase:
+Use this when beginning the D044 implementation-design phase after the complete documentation patch is independently accepted and committed:
 
 ```text
-I am continuing the BPC LearnShare capstone project in a fresh Claude conversation.
+I am continuing the BPC LearnShare capstone project. Read the latest accepted source documents through D044 and inspect the repository before recommending any implementation.
 
-Read the latest project files first and treat them as source of truth:
+Current accepted state:
 
-1. PROJECT_HANDOFF.md (this version)
-2. PROJECT_BRIEF.md (accepted and aligned through D042)
-3. USER_ROLES.md (accepted and aligned through D042)
-4. WORKFLOWS.md (accepted and aligned through D042)
-5. DATABASE_DESIGN.md (accepted and executable 22-table baseline through D043)
-6. DECISIONS.md (through D043)
-7. schema.sql (verified current 22-table MariaDB 10.4.32 baseline; D043 source/version/state/chunk/embedding persistence applied)
-8. SECURITY_NOTES.md (accepted and propagated through D043)
-9. DATA_PRIVACY.md (accepted and propagated through D043)
-10. AI_FEASIBILITY_SPIKE.md (accepted complete pre-run specification, Sections 1–26)
+- Decisions are accepted through D044, and the D044 documentation direction is accepted subject to the final correction review.
+- The current application and database remain pre-D044. Public Student registration still exists in the implementation.
+- The verified current schema contains 22 tables and does not yet contain `accounts.must_change_password`.
+- No D044 migration, canonical-schema update, application implementation, live database operation, or D044 test has been completed.
+- The exact accountable sole-Admin recovery procedure remains unresolved.
+- Existing D043 AI evidence and architecture boundaries remain accepted and unchanged.
 
-Current verified state:
+Immediate task:
 
-- AI_FEASIBILITY_SPIKE.md is complete and accepted; the spike is partially executed, and the current completed and pending checkpoints are recorded in the controlling status sections below.
-- The canonical schema was verified on MariaDB 10.4.32.
-- All 22 tables import successfully from the canonical schema.
-- The remaining 13 CHECK constraints are recognized and enforced.
-- chk_resources_no_self_replace was removed because MariaDB 10.4.32 rejects a CHECK that compares against the AUTO_INCREMENT resources.id column.
-- PHP must enforce direct self-replacement and longer replacement-cycle prevention under D037.
-- D043 selects and now persists the provider-neutral MariaDB/PHP storage direction. No final provider, model, database upgrade, second database, or generated-inquiry implementation has been selected.
+Perform a read-only D044 implementation preflight. Inspect the existing account schema, authentication routes, registration implementation, first-Admin CLI helper, account-management code, `audit_log` constraints, migration conventions, and relevant test-harness structure. Confirm the exact affected files; propose the smallest ordered implementation gates; preview the versioned up/down migration and fail-closed rollback verification; present defensible sole-Admin recovery options with truthful audit treatment; and identify unresolved choices or blockers before implementation.
 
-Current task:
+During this initial preflight, do not modify files, apply migrations, change the live database, execute `tests/security/`, or implement D044.
 
-Help review the clean hardware/runtime baseline and then support execution of the accepted feasibility spike exactly as specified.
-
-Do not rewrite AI_FEASIBILITY_SPIKE.md.
-Do not select an architecture before measurements are complete.
-Do not add a table or column.
-Do not modify DATABASE_DESIGN.md or schema.sql during the spike.
-Do not turn the spike into the full AI implementation.
-Do not treat optional local generation as a required pass condition.
-Do not reopen D001–D042 unless the source files directly conflict.
-
-For the immediate turn, return only:
-
-1. Source-and-version check.
-2. Clean-baseline evidence check for llmfit system and nvidia-smi outputs supplied by the user.
-3. Any actual blocker before execution.
-4. The smallest next execution step from the accepted AI_FEASIBILITY_SPIKE.md.
-
-Do not invent measurements and do not claim that the spike has passed before evidence exists.
+Enforce these boundaries: exactly four roles; MIS remains external; no public registration; D019 bootstrap is the only account-creation exception; 22 tables remain; only the separately approved `accounts.must_change_password` column may be added; every provisioning/reset uses a unique unpredictable temporary credential; provisioning/reset and audit insertion are atomic; mandatory-change state is rechecked live; another Active Admin may reset the first Admin normally; local maintenance applies only to the sole-Admin case; no D044 behavior is described as implemented or Passed without verified evidence; and D001–D044 are not reopened without a direct source conflict.
 ```
 
 ---
 
 ## 16. Guidance for the Next GPT Review Conversation
 
-Use this to open a separate GPT review conversation during the clean-baseline or spike-execution phase:
+Use this for an independent review of the read-only D044 implementation preflight:
 
 ```text
-You are acting as a critical planning, architecture, security, AI-feasibility, measurement, and documentation reviewer for the BPC LearnShare capstone project.
+Act as the critical architecture, security, migration, testing, and documentation reviewer for BPC LearnShare. Read the accepted sources through D044 and inspect the repository before evaluating the preflight.
 
-Read the latest source files first:
+The accepted target replaces public Student registration with institution-provisioned accounts, but the current application/database remain pre-D044. The verified schema has 22 tables and no `accounts.must_change_password` column. No D044 migration, schema update, application change, live database operation, or D044 test is complete. Sole-Admin recovery remains unresolved. Preserve all accepted D043 AI evidence and architecture boundaries unchanged.
 
-- PROJECT_HANDOFF.md
-- PROJECT_BRIEF.md
-- DECISIONS.md through D043
-- USER_ROLES.md
-- WORKFLOWS.md
-- DATABASE_DESIGN.md
-- schema.sql
-- SECURITY_NOTES.md
-- DATA_PRIVACY.md
-- AI_FEASIBILITY_SPIKE.md
+Review only the proposed read-only D044 implementation preflight: exact affected files, ordered gates, versioned up/down migration, fail-closed rollback, application enforcement, test impact, and defensible sole-Admin recovery options with truthful auditing. Flag every unresolved choice before implementation.
 
-Current verified state:
+Enforce exactly four roles, external MIS authority, no public registration, the D019-only bootstrap exception, the unchanged 22-table count, only the separately approved `accounts.must_change_password` column, unique unpredictable temporary credentials, atomic provisioning/reset plus audit insertion, live mandatory-change enforcement, normal first-Admin reset by another Active Admin, and local maintenance only for the sole-Admin case. Do not describe D044 as implemented or Passed without evidence, and do not reopen D001–D044 without a direct source conflict.
 
-- AI_FEASIBILITY_SPIKE.md Sections 1–26 are complete and accepted.
-- The spike is partially executed through extraction, corrected segmentation, complete local embedding, PHP cosine validation, standalone retrieval, manual relevance review, audited versioned ground-truth evaluation, bounded local and external grounded-generation comparisons, deterministic grounded-response/session/lifecycle controls, bounded related-resource evaluations, isolated source-attribution presentation, and the two-model natural-language follow-up comparison. Gate 5A passed 18/18 model-independent checks, Gate 5B passed 19/19 rollback-based lifecycle/fallback checks, Gate 5C passed 18/18 live relation-metadata/link checks, and Gate 5D completed one guarded external six-case comparison on 2026-08-13.
-- The bounded retrieval candidate achieved 100% resource top-five, 96% corrected passage top-five, practical isolated latency, 100% metadata fallback, and 100% explicit-filter correctness under the tested corpus.
-- The automatic predeclared-misleading criterion remains not met at 25%; manual review provides separate interpretation and does not erase that historical result.
-- Two synthetic local-generation preflights and two fixed six-case grounded comparisons are recorded. Llama 3.2 3B and Qwen3.5 4B each reached only 50% usefulness against the accepted 80% requirement; neither is selected as the interactive local solution or a reliable fallback. The later natural-language follow-up comparison completed ten cases per model: Llama interpreted 10/10 references but produced only 8/10 grounded correct answers, including one critical RBAC error, while Qwen produced 8/10 grounded correct answers and 8/10 correct context interpretations with two unnecessary clarification outcomes. Both missed the 15-second median target, so both follow-up runs are registered as failed and neither candidate is selected. The grounded-response control layer passed 21/21 cases, the deterministic session/lifecycle checkpoint passed 200/200 cases, the unguarded related-resource configuration met its two scored positive-case thresholds at 80% expected-resource top-five coverage and 73.33% human-reviewed top-three usefulness, and the metadata-guarded configuration passed one safe no-result case plus a five-case positive regression at 100% expected-resource display and 100% reviewed top-three usefulness. Isolated source-attribution presentation passed 10/10 cases. Gate 5C then passed 18/18 live shared-active-tag fallback checks at 4/4 expected-peer top-five coverage and 4/4 reviewed top-three usefulness on four controlled resources, with protected links and rollback-tested lifecycle exclusion. The D043 provider-neutral persistence suite passed 49/49 disposable checks, followed by 47/47 guarded local-processing checks and 4/4 readable-file regression cases. Final evidence reconciliation is complete and records the partial-feasibility outcome. Routed retrieval integration, production-session follow-up, and complete application fallback remain pending as integration-stage work.
-- MariaDB 10.4.32 successfully imports the verified 22-table canonical schema; the D043 rollback restores the exact historical 18-table baseline.
-- The remaining 13 CHECK constraints are recognized and enforced.
-- The incompatible direct self-replacement CHECK was removed; PHP must prevent direct self-replacement and longer cycles under D037.
-- D043 selects a provider-neutral MariaDB/PHP persistence and retrieval direction; its exact executable migration/database upgrade, provider-neutral persistence, and default-off local extraction/segmentation/embedding CLI are complete. A generation provider/model, second database, retrieval route, and generated-inquiry integration remain unselected or unauthorized.
-
-Your job:
-
-1. Review clean-baseline and spike evidence against the accepted specification.
-2. Distinguish measured fact, interpretation, limitation, and recommendation.
-3. Flag missing, invalid, incomparable, or post-hoc measurements.
-4. Enforce the accepted pre-run criteria and mandatory guardrails.
-5. Preserve Required, Planned, and Deferred AI tiers.
-6. Prevent architecture lock-in before the complete evidence package is reviewed.
-7. Give a clear verdict for each checkpoint: Accept / Accept with fixes / Reject and rerun.
-8. Apply only targeted documentation corrections when a real inconsistency exists.
-9. Keep the work bounded to a local/LAN BSIS capstone MVP.
-
-Constraints:
-
-- Do not invent measurements.
-- Do not treat one successful sample as proof of feasibility.
-- Do not add a table or schema column during the spike.
-- Do not modify DATABASE_DESIGN.md or schema.sql before the later explicit architecture/schema decision.
-- Do not select Groq, Ollama, Hugging Face, Supabase, pgvector, MariaDB 11.7+, or any model/provider merely because it is mentioned as a candidate.
-- Do not turn the project into an LMS, unrestricted AI tutor, chatbot-first product, production campus platform, or enterprise AI platform.
-- Do not reopen D001–D042 unless current source files directly conflict.
+For this initial review, do not modify files, run or apply migrations, change the live database, execute `tests/security/`, or implement D044.
 ```
 
 ---
@@ -1095,7 +1054,7 @@ Constraints:
 * Source files are authoritative.
 * Conversational summaries and prior-chat memory are secondary to the latest accepted files.
 * Read the actual current files at the beginning of each new planning or implementation phase.
-* Do not reopen D001–D042 unless the source documents directly contradict one another.
+* Do not reopen D001–D044 unless the source documents directly contradict one another.
 * Do not silently reinterpret an accepted decision because a newer draft uses different wording.
 * Do not introduce a new:
 
@@ -1272,33 +1231,34 @@ Test only what is necessary to choose a feasible v1.0 architecture.
 
 BPC LearnShare v1.0 currently has:
 
-* `PROJECT_BRIEF.md` — accepted and aligned through D042; D043 changes no project role/scope anchor;
-* `USER_ROLES.md` — accepted and aligned through D042; D043 changes no permission or role;
-* `WORKFLOWS.md` — accepted and aligned through D043;
-* `DATABASE_DESIGN.md` — accepted conceptual direction through D043 with four targeted derived-data tables;
-* `DECISIONS.md` — accepted through D043;
-* `schema.sql` — accepted and verified current 22-table MariaDB 10.4.32 baseline after the guarded D043 migration;
-* `SECURITY_NOTES.md` — complete and accepted through D043 targeted propagation;
-* `DATA_PRIVACY.md` — complete and accepted through D043 targeted propagation;
+* `PROJECT_BRIEF.md` — accepted and aligned through D044;
+* `USER_ROLES.md` — accepted and aligned through D044 while preserving exactly four roles;
+* `WORKFLOWS.md` — accepted and aligned through D044;
+* `DATABASE_DESIGN.md` — accepted conceptual direction through D044 with the verified 22-table D043 baseline preserved;
+* `DECISIONS.md` — accepted through D044;
+* `schema.sql` — accepted and verified current pre-D044 22-table MariaDB 10.4.32 baseline after the guarded D043 migration; the D044 flag is not yet present;
+* `SECURITY_NOTES.md` — complete and accepted through D044 targeted propagation;
+* `DATA_PRIVACY.md` — complete and accepted through D044 targeted propagation;
 * `AI_FEATURES.md` — drafted as the D043 AI behavior/architecture baseline;
 * `AI_FEASIBILITY_SPIKE.md` — complete and accepted pre-run specification, Sections 1–26;
 * this updated `PROJECT_HANDOFF.md`.
 
-D041–D043 have been propagated into the affected current planning documents, including:
+D041–D043 remain reflected in the AI feasibility and architecture documents. D044 was propagated only through the applicable account-policy, workflow, database-direction, security, privacy, build, testing, and handoff documents:
 
+* `DECISIONS.md`;
 * `PROJECT_BRIEF.md`;
 * `USER_ROLES.md`;
 * `WORKFLOWS.md`;
-* `AI_FEASIBILITY_SPIKE.md` and its final recommendation;
 * `DATABASE_DESIGN.md`;
-* `AI_FEATURES.md`;
 * `SECURITY_NOTES.md`;
 * `DATA_PRIVACY.md`;
 * `BUILD_PLAN.md`;
 * `TESTING_CHECKLIST.md`;
 * this handoff.
 
-No unresolved source conflict blocks the clean-hardware baseline or the accepted spike-execution sequence.
+`AI_FEASIBILITY_SPIKE.md` remains unchanged because D044 does not alter its recorded evidence. `AI_FEATURES.md` likewise remains governed by D041–D043 rather than being a D044 propagation target.
+
+No unresolved source conflict blocks the next D044 implementation-design gates. The exact accountable sole-Admin recovery procedure remains one explicit implementation decision, not a source contradiction.
 
 Completed verification:
 
@@ -1315,6 +1275,7 @@ Completed verification:
 
 Known scheduled implementation remains:
 
+* D044 versioned migration/rollback review, canonical `schema.sql` update, live database execution, Admin provisioning/reset/mandatory-change implementation, public-registration removal, sole-Admin recovery resolution, and independently reviewed D044 test reruns;
 * broader live related-resource quality evidence after the repository contains enough independently reviewed Approved resources and content-justified tags; the completed 25-resource offline reconciliation must not be presented as a representative live score;
 * remaining negative, role, status, and environment presentation acceptance beyond the completed upload-limit and 66/66 core-journey checkpoints.
 
@@ -1322,6 +1283,7 @@ Any older pre-D041/D042 wording that describes repository-grounded inquiry as op
 
 Important remaining items:
 
+* replace the current pre-D044 public-registration opening with Admin provisioning, one-time temporary login, mandatory password change, and the same upload-to-Approved journey; preserve the old result only as historical evidence labelled **Passed under the pre-D044 baseline; superseded by D044.**;
 * complete the remaining negative and alternate-role/status presentation cases; the representative 20 MiB upload-limit and 66/66 core-journey checkpoints are complete;
 * integrate and validate the audited source-attribution contract against live PHP/database state and protected resource links;
 * preserve the completed 25-resource Gate 5C relation-metadata reconciliation and defer representative live scoring until the repository contains enough independently reviewed Approved resources and content-justified tags;

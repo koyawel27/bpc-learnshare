@@ -4,7 +4,7 @@
 
 This document is the security reference for BPC LearnShare v1.0. It states the security controls that must be enforced, where they must be enforced, and what practical risks they reduce for a local machine or small campus LAN deployment demonstrated on XAMPP.
 
-This document does not introduce new roles, resource statuses, report statuses, or workflow authority. Its original Sections 1–15 were written against the verified 18-table D033 baseline. D043 later added four named AI-derived-data tables through a separately approved, restore-verified, guarded migration. The current `schema.sql` and configured database are now the verified 22-table baseline. The D043 propagation in Section 15.8 controls those additions.
+This document does not introduce new roles, resource statuses, report statuses, or workflow authority. Its original Sections 1–15 were written against the verified 18-table D033 baseline. D043 later added four named AI-derived-data tables through a separately approved, restore-verified, guarded migration. The current `schema.sql` and configured database are now the verified 22-table baseline. D044 preserves that table count and authorizes only a later, separately reviewed additive `accounts.must_change_password` direction. The D043 and D044 propagations in Sections 15.8–15.9 control those additions and boundaries.
 
 This document also resolves a small number of implementation-level security mechanics that earlier documents intentionally left open, including:
 
@@ -41,7 +41,7 @@ Specifically, this document:
 * **Does not change any confirmed permission, workflow transition, or access rule.** Where this document restates a rule from `USER_ROLES.md`, `WORKFLOWS.md`, or `DATABASE_DESIGN.md`, it must match the original rule exactly.
 * **Does not change the AI eligibility model.** Status-based AI eligibility (D014), the non-authoritative AI rule (D013, D015), and the notice-acknowledgment gate remain unchanged.
 * **Does not change the `file_availability` model.** The three states (`available`, `deleted`, `invalidated`) and the dual-gate serving rule from D034 remain as confirmed.
-* **Does not itself execute a schema change.** The D043 migration was completed through its own approved gate. Any unrelated security column/table still requires its appropriate review and decision gate.
+* **Does not itself execute a schema change.** The D043 migration was completed through its own approved gate. The D044 `must_change_password` migration, rollback, `schema.sql` update, live execution, and testing remain separate approval gates.
 
 If a proposed security control conflicts with a confirmed decision, the conflict must be flagged and resolved through the project's established process, not resolved by quietly treating this document as more authoritative.
 
@@ -65,9 +65,10 @@ It covers:
 
 * authentication and session handling;
 * password storage and handling;
+* institution-provisioned accounts, temporary credentials, and mandatory password change;
 * Admin-assisted password reset;
 * first Admin bootstrap security;
-* server-side authorization on every protected action, including live role, account-status, resource-status, and file-availability checks;
+* server-side authorization on every protected action, including live account existence, role, account-status, mandatory-change, resource-status, and file-availability checks;
 * direct URL and direct POST rejection for unauthorized actions;
 * object- and view-level restriction, including draft AI output visibility and Moderator/Admin log visibility;
 * input validation, SQL injection prevention, XSS prevention, and CSRF protection;
@@ -184,7 +185,7 @@ Sections 3 and 4 establish the authentication and authorization baseline. Later 
 
 ### 3.1 Login Workflow and Server-Side Checks
 
-Login follows the confirmed workflow: the system checks that the submitted identifier matches an account, verifies the submitted password against the stored password hash, and confirms that the account status is Active before creating a session.
+Login follows the confirmed workflow: the system checks that the submitted Account Identifier matches the physical `accounts.username` field, verifies the submitted password against the stored password hash, and confirms that the account status is Active before creating a session. After authentication, it also loads the current `must_change_password` state before deciding which protected path is available.
 
 All login checks happen server-side. None may be skipped because a client-side form already looked valid.
 
@@ -192,23 +193,23 @@ All login checks happen server-side. None may be skipped because a client-side f
 
 Passwords are stored only as hashes produced by PHP's native `password_hash()` function and verified using `password_verify()`.
 
-No plaintext password, reversible-encrypted password, or password hint is ever stored. This applies uniformly to Student self-registration and Admin-provisioned Teacher/Instructor, Moderator, and Admin accounts.
+No plaintext password, temporary credential, reversible-encrypted password, or password hint is ever stored. This applies uniformly to the controlled first Admin and to Admin-provisioned Student, Teacher/Instructor, Moderator, and additional Admin accounts. Temporary credentials are stored only through `password_hash()` and may never be written to application logs, audit notes, errors, or permanent display records.
 
 ### 3.3 Minimum Password Rule for v1.0
 
-The upload and registration workflows require a minimum password requirement but do not define the exact value. This document resolves that implementation-level security detail.
+The account-provisioning, mandatory-change, and password-reset workflows require a minimum password rule but do not change its accepted value. This document resolves that implementation-level security detail.
 
 For v1.0, the minimum password length is **8 characters**, with no forced composition rules such as mandatory uppercase letters, numbers, or symbols.
 
-This is a practical baseline appropriate for a student-facing academic MVP. It avoids very weak passwords while keeping registration simple. Stronger password rules may be considered in a future pilot or production version.
+This is a practical baseline appropriate for a student-facing academic MVP. It avoids very weak passwords while keeping provisioning and password change simple. Stronger password rules may be considered in a future pilot or production version.
 
 ### 3.4 Generic Login Failure Messages
 
 An invalid identifier, an incorrect password, and a Disabled account must all produce the same generic login failure message.
 
-The system must not reveal which condition caused the failure. This reduces account enumeration and prevents a visitor from learning whether a given username exists or whether an account has been disabled.
+The system must not reveal which condition caused the failure. This reduces account enumeration and prevents a visitor from learning whether a given Account Identifier exists or whether an account has been disabled.
 
-The same non-disclosure principle applies to Student registration. A duplicate-identifier rejection must not reveal whether the existing account is a Student, Teacher/Instructor, Moderator, or Admin account.
+The same non-disclosure principle applies to Admin provisioning where error detail is not needed for the authorized workflow. A duplicate-identifier rejection must not reveal the existing account's role in user-facing or logged output.
 
 ### 3.5 Session Creation After Successful Login
 
@@ -216,7 +217,7 @@ A session is created only after the login checks pass. The session must be tied 
 
 No database-backed session table is required for v1.0. PHP's native server-side session handling is sufficient for the confirmed local/LAN MVP scope.
 
-Authorization-relevant fields must not be trusted from the session as static values. The session may cache the account ID and may use role information for UI routing convenience, but role and account status must be re-verified from the database on protected actions.
+Authorization-relevant fields must not be trusted from the session as static values. The session may cache the account ID and may use role information for UI routing convenience, but account existence, role, account status, and `must_change_password` must be re-verified from the database on every protected request.
 
 This is necessary because role changes and account disabling must affect permissions immediately at the application level. A stale role value cached at login time must not continue to authorize actions after the account's role or status changes.
 
@@ -254,7 +255,8 @@ The first Admin setup must follow these rules:
 2. There must be no permanently reachable setup endpoint for creating Admin accounts.
 3. If a setup script or seed file is used, it must not remain deployed as a live request-accessible page after setup is complete.
 4. If a placeholder, seed, or default password is used during setup, it must be changed before the system is used for demonstration or defense.
-5. After the first Admin account exists, every subsequent Teacher/Instructor, Moderator, and Admin account must go through the normal Admin-provisioning workflow.
+5. The first Admin's bootstrap-established password is initialized at `must_change_password = 0` when the D044 migration is applied. This is not a permanent reset exemption; a later Admin-assisted reset by another authenticated Active Admin sets the flag to `1`.
+6. After the first Admin account exists, every ordinary Student, Teacher/Instructor, Moderator, and additional Admin account must go through the normal Admin-provisioning workflow.
 
 Exact seed mechanics belong in `BUILD_PLAN.md`. The security rule is that no default or public Admin-creation path survives into normal use.
 
@@ -262,7 +264,7 @@ Exact seed mechanics belong in `BUILD_PLAN.md`. The security rule is that no def
 
 BPC LearnShare v1.0 has no self-service password recovery.
 
-Password reset for ordinary accounts is Admin-assisted. An Admin may reset the password of a Student, Teacher/Instructor, Moderator, or another Admin through account management, subject to role and audit rules.
+Password reset for ordinary accounts is Admin-assisted and restricted to an authenticated Active Admin. The operation must validate and hash a temporary credential, replace the target password hash, explicitly set `must_change_password = 1`, and write the required `password_reset` audit row in one transaction.
 
 The following are not part of v1.0:
 
@@ -271,17 +273,31 @@ The following are not part of v1.0:
 * email-based reset flow;
 * public "forgot password" workflow.
 
-Admin-assisted password reset only requires updating the account's password hash and recording the administrative action in the audit log.
+The temporary credential may be displayed once after successful commit and communicated outside LearnShare. It and the resulting password hash must never be logged. If either the account update or audit insert fails, neither change may remain.
 
-First-Admin recovery, if the credential is lost, is a local database/setup maintenance concern. It belongs in `BUILD_PLAN.md`, not in the runtime security model.
+The first Admin is not permanently exempt from the ordinary Admin-assisted reset workflow. If another authenticated Active Admin exists, that Admin may reset the first Admin through the same audited workflow used for other accounts. Only recovery of the sole remaining Admin account, when no other authenticated Active Admin is available, is a controlled local setup/database-maintenance concern. The exact sole-Admin recovery procedure belongs in `BUILD_PLAN.md`.
 
-### 3.11 Known v1.0 Limitations — Authentication and Sessions
+### 3.11 Mandatory Password Change and Live Revalidation
+
+After authentication, an account with `must_change_password = 1` may access only the mandatory password-change flow and logout. Dashboard, repository, upload, moderation, administration, AI-assisted features, and every other protected function must redirect or fail closed.
+
+A successful mandatory change validates the new password and confirmation, stores only the new hash, sets `must_change_password = 0`, and regenerates the session identifier. Invalid input changes neither the current hash nor the flag.
+
+Every protected request reloads account existence, Active/Disabled status, current role, and `must_change_password`. Therefore, an already-authenticated user whose password is reset is redirected on the next protected request rather than retaining access from stale session state.
+
+### 3.12 Public Registration Removal
+
+Public account creation is unavailable for every role. `GET /register` redirects to login with a neutral message that accounts are institution-issued. `POST /register` is rejected before account creation and produces no account, session, role assignment, audit row, or other state change.
+
+Manual Admin provisioning is the required v1.0 minimum. CSV/batch provisioning, full MIS integration, SSO, and institutional-email verification remain deferred. MIS is an external institutional authority, not a LearnShare role.
+
+### 3.13 Known v1.0 Limitations — Authentication and Sessions
 
 The following are accepted v1.0 limitations:
 
 * **No login-attempt lockout, rate limiting, or CAPTCHA.** The accepted `accounts` table has no failed-attempt counter or lockout column. Adding persistent lockout tracking would be a schema/workflow change and must be raised as a scope question before implementation.
 * **No two-factor authentication.**
-* **No email verification** for Student self-registration.
+* **No institutional-email verification, SSO, full MIS integration, or automated roster synchronization.** Account origin is controlled through authorized institutional records and manual Admin provisioning rather than a technical integration.
 * **No self-service password recovery.**
 * **No admin-visible active-session list and no forced-session-termination feature.** If an account is Disabled or its role is changed while a session is already open, the next protected request must fail or be re-authorized according to the current account status and role. However, v1.0 does not include a separate tool for viewing or forcibly ending active sessions.
 * **Session security relies on PHP's native session handling**, not a custom or database-backed session store. This is sufficient for the confirmed v1.0 scope, but lighter than a production deployment would typically use.
@@ -318,15 +334,16 @@ A hidden "Approve" button does not stop a Student from submitting the underlying
 
 ### 4.3 Live Role and Account-Status Checks
 
-For every protected action, the system must confirm from the database that:
+For every protected request, the system must confirm from the database that:
 
 1. the account still exists;
 2. the account status is currently Active;
 3. the account's current role permits the requested action.
+4. `must_change_password = 0`, unless the request is password change or logout.
 
-This prevents stale session data from authorizing actions after an Admin disables an account or changes its role.
+This prevents stale session data from authorizing actions after an Admin disables an account, changes its role, or resets its password.
 
-The session may identify the account, but the current account status and role must be checked again for authorization-sensitive actions.
+The session may identify the account, but current existence, status, role, and mandatory-change state must be checked again on every protected request.
 
 ### 4.4 Live Resource-Status Checks
 
@@ -374,6 +391,8 @@ This includes requests submitted through:
 * an AJAX/API call.
 
 For example, a Moderator or Admin attempting to upload as an ordinary contributor must be rejected server-side even if they craft the request manually. A Student attempting to call a moderation endpoint directly must also be rejected server-side.
+
+The public-registration boundary is also enforced directly: `POST /register` must fail closed and create no state even when submitted manually, while `GET /register` performs only the neutral redirect defined by D044.
 
 ### 4.7 Fail-Closed Behavior
 
@@ -581,13 +600,14 @@ Every required field defined by the confirmed workflows must be checked for pres
 At minimum, this includes:
 
 * title, description, topic, course, subject, year level, and resource type on upload;
-* username, password, and display name on registration or account creation;
+* Account Identifier, temporary credential, display name, and allowed role on Admin account provisioning;
+* new password and confirmation on mandatory password change;
 * reason category on report submission;
 * note/reason on actions that require one, such as Reject, Request Correction, Hide, Restrict, Remove, and report resolution where required.
 
 Length limits must be enforced in application code to match the column definitions in `schema.sql`. For example:
 
-* `username` must not exceed the schema length;
+* the Account Identifier stored in `username` must not exceed the schema length;
 * `title` must not exceed the schema length;
 * `topic` must not exceed the schema length;
 * display names, taxonomy names, and stored labels must respect their schema-defined lengths.
@@ -628,7 +648,7 @@ No user input may be concatenated directly into a SQL string. This includes valu
 Prepared statements are required for:
 
 * login;
-* registration;
+* account provisioning and mandatory password change;
 * account management;
 * resource upload and metadata editing;
 * search/filtering;
@@ -667,8 +687,9 @@ A CSRF token must be required and validated on every state-changing request.
 
 This includes:
 
-* Student registration;
 * login and logout where implemented as POST actions;
+* account provisioning;
+* mandatory password change;
 * upload;
 * resubmission;
 * withdrawal;
@@ -722,7 +743,8 @@ A client-provided filename, extension, MIME type, or size value may be displayed
 Validation and logging code must prevent the following from being written to logs or unrelated tables in readable form:
 
 * plaintext passwords;
-* temporary passwords after use;
+* temporary credentials at any point;
+* password hashes;
 * AI API keys;
 * database credentials;
 * full uploaded file contents;
@@ -1063,6 +1085,8 @@ Examples:
 * a replacement approval commits the replacement status change, original resource status change, open-replacement tracking update, and related history entries together;
 * an account-status change commits together with its `audit_log` entry;
 * a role change commits together with its `audit_log` entry;
+* account provisioning commits the new account and `account_created` audit row together;
+* Admin-assisted reset commits the new password hash, `must_change_password = 1`, and `password_reset` audit row together;
 * a system-setting change commits together with its `audit_log` entry.
 
 An action must not succeed while its accountability record silently fails to write. A log entry must also not be written for an action that did not actually complete.
@@ -1083,7 +1107,7 @@ The following must never be stored in `resource_action_history`, `audit_log`, or
 
 * plaintext passwords;
 * password hashes;
-* temporary passwords after use;
+* temporary credentials;
 * session IDs;
 * CSRF tokens;
 * AI API keys;
@@ -1515,7 +1539,8 @@ Every `audit_log` write must commit with the administrative action it describes.
 
 This includes the D039-covered audit actions:
 
-* Admin-assisted password reset must commit the updated password hash together with an `audit_log` entry using `action_type = 'password_reset'` and `target_type = 'account'`;
+* account provisioning must commit the account row with `must_change_password = 1` together with an `audit_log` entry using `action_type = 'account_created'` and `target_type = 'account'`;
+* Admin-assisted password reset must commit the updated password hash and `must_change_password = 1` together with an `audit_log` entry using `action_type = 'password_reset'` and `target_type = 'account'`;
 * taxonomy add/edit/deactivate/reactivate actions must commit the lookup-table change together with the matching audit entry using the correct taxonomy action type and target type.
 
 An action must never be allowed to succeed while its required audit or action-history entry silently fails to write.
@@ -1576,9 +1601,9 @@ Each item is labeled as one of the following:
 | No CAPTCHA                                                                                                                                          | Accepted          |
 | No general rate-limiting requirement for v1.0                                                                                                       | Deferred          |
 | No two-factor authentication                                                                                                                        | Accepted          |
-| No email verification for Student self-registration                                                                                                 | Accepted          |
+| No institutional-email verification, SSO, full MIS integration, or automated roster synchronization                                                | Deferred          |
 | No self-service password recovery, reset-token table, or email-based reset flow                                                                     | Accepted          |
-| No forced session termination on account disable or role change; an already-open session fails on its next protected request through live re-checks | Accepted          |
+| No forced session termination on account disable, role change, or reset; an already-open session is re-evaluated on its next protected request      | Accepted          |
 | No Admin-visible active-session list or forced-logout tool                                                                                          | Accepted          |
 | Session ID regeneration occurs after every successful login                                                                                         | Verify in Testing |
 | 30-minute idle timeout is practical for actual moderator/admin use                                                                                  | Verify in Testing |
@@ -1647,7 +1672,7 @@ Each item is labeled as one of the following:
 | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | No optimistic-locking version column                                                                                                                      | Accepted                          |
 | No automatic retry on conflicting actions                                                                                                                 | Accepted                          |
-| Replacement approval, report resolution, Withdrawn handling, Removed handling, password reset, and taxonomy actions commit as complete logical operations | Verify in Testing                 |
+| Replacement approval, report resolution, Withdrawn handling, Removed handling, account provisioning/reset, and taxonomy actions commit as complete logical operations | Verify in Testing                 |
 | Transaction syntax and database-access pattern are not yet chosen                                                                                         | Open — resolve in `BUILD_PLAN.md` |
 
 ### 13.11 How `BUILD_PLAN.md` and `TESTING_CHECKLIST.md` Should Use This Register
@@ -1670,6 +1695,10 @@ This is a seed list for `TESTING_CHECKLIST.md`. It names categories and represen
 
 * Valid login succeeds.
 * Wrong password, unknown identifier, and Disabled-account login all produce the same generic failure message.
+* `GET /register` redirects to login with a neutral institution-issued-account message.
+* `POST /register` is rejected and creates no account or other state.
+* Temporary-credential login routes a flagged account only to password change or logout.
+* A successful mandatory change stores a new hash, clears the flag, and regenerates the session ID.
 * Session ID changes immediately after successful login.
 * A session idle past 30 minutes is rejected on the next protected request.
 * Logout destroys the session server-side.
@@ -1686,19 +1715,25 @@ This is a seed list for `TESTING_CHECKLIST.md`. It names categories and represen
 
 ### 14.3 Account Provisioning
 
-* Non-Admin users cannot access account creation, role-change, disable/re-enable, or Admin-assisted password reset actions.
+* Only an authenticated Active Admin can provision ordinary accounts, change roles, disable/re-enable accounts, or perform Admin-assisted password reset.
+* Admin can provision Student, Teacher/Instructor, Moderator, and additional Admin accounts only.
 * Role values outside the four allowed roles are rejected server-side.
 * Account status values outside Active/Disabled are rejected server-side.
+* Account Identifiers are globally unique across all four roles and stored in the physical `accounts.username` field.
+* Newly provisioned accounts are written with `must_change_password = 1` and an `account_created` audit row in one transaction.
+* Temporary credentials may be displayed once after commit but are not logged or retained in plaintext.
 * Disabling an account blocks later login.
 * A Disabled account with an already-open session fails on its next protected action.
 
 ### 14.4 Admin-Assisted Password Reset
 
 * Admin-assisted password reset updates the target account's password hash.
+* Admin-assisted password reset sets `must_change_password = 1`.
 * Admin-assisted password reset writes an `audit_log` entry using `action_type = 'password_reset'` and `target_type = 'account'`.
 * Password reset and audit entry are committed together.
 * A password reset attempted by a non-Admin account is rejected before any write occurs.
-* Plaintext or temporary passwords are not stored in logs.
+* An already-authenticated reset account is redirected on its next protected request.
+* Plaintext temporary credentials and password hashes are not stored in logs or audit notes.
 
 ### 14.5 Taxonomy Audit Logging
 
@@ -1737,7 +1772,7 @@ This is a seed list for `TESTING_CHECKLIST.md`. It names categories and represen
 * Every state-changing POST is rejected when the CSRF token is missing.
 * Every state-changing POST is rejected when the CSRF token is incorrect.
 * Read-only requests function without a CSRF token.
-* CSRF checks apply to upload, withdrawal, moderation, reports, bookmarks, Helpful marks, account management, taxonomy management, system settings, and Admin-assisted password reset.
+* CSRF checks apply to upload, withdrawal, moderation, reports, bookmarks, Helpful marks, account provisioning, mandatory password change, account management, taxonomy management, system settings, and Admin-assisted password reset.
 
 ### 14.9 SQL Injection and Prepared Statements
 
@@ -1823,7 +1858,7 @@ This is a seed list for `TESTING_CHECKLIST.md`. It names categories and represen
 
 ### 15.1 Document Status
 
-`SECURITY_NOTES.md` is complete through Sections 1–15 plus the D043 propagation in Section 15.8 for BPC LearnShare v1.0.
+`SECURITY_NOTES.md` is complete through Sections 1–15 plus the D043 and D044 propagations in Sections 15.8–15.9 for BPC LearnShare v1.0.
 
 It defines the security requirements, security boundaries, implementation-security decisions, known limitations, and testing carry-forward items that `BUILD_PLAN.md` and `TESTING_CHECKLIST.md` must account for.
 
@@ -1837,7 +1872,7 @@ This document was written against, and remains consistent with:
 * `USER_ROLES.md`
 * `WORKFLOWS.md`
 * `DATABASE_DESIGN.md`
-* `DECISIONS.md` through D043
+* `DECISIONS.md` through D044
 * `schema.sql` with the D039-patched `audit_log` table, D040 application-level removal-behavior documentation, and the separately approved and verified D043 22-table persistence baseline
 * `PROJECT_HANDOFF.md`
 
@@ -1892,6 +1927,7 @@ The following remain genuinely unresolved and must be settled during implementat
 * exact folder structure implementing the public/private document-root separation;
 * exact first Admin bootstrap method;
 * exact first Admin setup-script removal or disabling procedure, if a setup script is used;
+* exact sole-Admin recovery procedure when no other authenticated Active Admin is available;
 * exact MIME/content validation mechanism, such as PHP `finfo` or a narrowly justified helper library;
 * confirmation of the local MariaDB/MySQL version's CHECK-constraint support;
 * exact database access style, such as PDO or mysqli;
@@ -1910,6 +1946,7 @@ The CHECK-constraint version check must be completed before `BUILD_PLAN.md` trea
 | Draft 1.2 | 2026-07-10 | Integrated D040 Removed-resource minimization: exact descriptive-field placeholders, `resource_tags` deletion, retained-but-not-anonymized accountability data, distinction from Withdrawn handling, coordinated database/filesystem lifecycle guidance, risk-register coverage, and dedicated security-testing seeds. No new table, column, role, status, module, workflow, or AI feature introduced. |
 | Draft 1.3 | 2026-08-20 | Propagated D041–D043 before migration execution: required-capability inquiry framing with current generated-inquiry unavailability; targeted source-version/state/chunk/embedding persistence; live eligibility/freshness revalidation; late-result rejection; local/provider secret and payload boundaries; and explicit separation between the then-accepted 22-table target and then-unmodified 18-table SQL baseline. |
 | Draft 1.4 | 2026-08-20 | Reconciled the completed D043 storage gate: restore-verified backup, live 18-to-22 migration, canonical 22-table schema, disposable rollback/forward verification, preserved legacy rows, and empty derived-data tables. Application AI integration remains separately gated. |
+| Draft 1.5 | 2026-08-28 | Propagated D044 institution-provisioned accounts, public-registration removal, Account Identifier terminology, temporary credentials, mandatory password change, live flag revalidation, atomic provisioning/reset audit writes, and the separately gated additive account-column direction. |
 
 ### 15.7 Relationship to Other Source-of-Truth Documents
 
@@ -1941,6 +1978,23 @@ Required controls include:
 Retrieved sets, query vectors, generated answers, citations, and follow-up context remain request/session-scoped. No permanent inquiry/chat history is introduced.
 
 The exact migration must be tested on a disposable MariaDB 10.4.32 database, including rollback, foreign keys, CHECK behavior, existing-row backfill, and expected 22-table count, before live execution is approved.
+
+### 15.9 D044 Institution-Provisioned Account Security Propagation
+
+D044 removes public Student self-registration because prototype evaluation exposed an institutional-membership verification weakness. Except for the controlled D019 first-Admin setup, ordinary Student, Teacher/Instructor, Moderator, and additional Admin accounts originate from authorized institutional records and are provisioned by an authenticated Active Admin. MIS may be the external institutional source of records but is not a LearnShare role.
+
+The security requirements are:
+
+* use Account Identifier in user-facing surfaces while retaining the physical `accounts.username` column and its global uniqueness across all four roles;
+* keep manual Admin provisioning as the v1.0 minimum; defer CSV/batch import, full MIS integration, SSO, and institutional-email verification;
+* display a temporary credential at most once after successful provisioning or reset, store only its hash, and never write the credential or hash to logs, audit notes, errors, or permanent display records;
+* set `must_change_password = 1` explicitly for newly provisioned or reset accounts after the approved migration, including the first Admin when reset by another authenticated Active Admin; existing accounts and the controlled first Admin are initialized at `0` when the migration is applied, not permanently exempted from later reset handling;
+* allow a flagged account to access only password change and logout;
+* recheck live account existence, status, role, and mandatory-change state on every protected request, including the next request of an already-authenticated account that was reset;
+* commit provisioning/reset and the corresponding `audit_log` row atomically;
+* redirect `GET /register` neutrally and reject `POST /register` before any state change.
+
+The verified schema remains 22 tables. D044 authorizes only a later, separately reviewed `must_change_password TINYINT(1) NOT NULL DEFAULT 0` addition to `accounts`; this documentation patch does not implement it. Before a later rollback drops that column, the rollback must count rows with `must_change_password = 1` and stop if any exist. Dropping the flag while temporary-password accounts remain is prohibited.
 
 ---
 

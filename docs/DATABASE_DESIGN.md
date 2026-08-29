@@ -2,16 +2,16 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0 — Conceptual Database Design
-**Last Updated:** 2026-08-20
+**Last Updated:** 2026-08-28
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted conceptual database-design direction through D043; executable 22-table schema and live migration verified
+**Status:** Draft v1.0 — accepted conceptual database-design direction through D044; verified 22-table baseline preserved; D044 column migration remains separately gated
 
 ---
 
 ## 1. Purpose and Scope
 
-This document translates the confirmed decisions in `DECISIONS.md` through D043 and the confirmed workflows in `WORKFLOWS.md` — particularly Section 22, Workflow-to-Database Implications — into the conceptual database design for BPC LearnShare v1.0.
+This document translates the confirmed decisions in `DECISIONS.md` through D044 and the confirmed workflows in `WORKFLOWS.md` — particularly Section 22, Workflow-to-Database Implications — into the conceptual database design for BPC LearnShare v1.0.
 
 **This document defines:**
 
@@ -22,7 +22,7 @@ This document translates the confirmed decisions in `DECISIONS.md` through D043 
 **This document does not yet define, and will not until explicitly noted:**
 
 * Executable SQL `CREATE TABLE` or migration statements.
-* Final SQL data types, lengths, CHECK syntax, backfill steps, or rollback commands. D043 now defines the accepted conceptual names and responsibilities of the four AI-derived-data tables and targeted `ai_outputs` identity fields.
+* Final SQL data types, lengths, CHECK syntax, backfill steps, or rollback commands, except where an accepted decision records one bounded later direction. D043 defines the conceptual names and responsibilities of the four AI-derived-data tables and targeted `ai_outputs` identity fields; D044 records only the separately gated `must_change_password TINYINT(1) NOT NULL DEFAULT 0` direction.
 * Indexes, foreign key syntax, or engine-level tuning.
 
 Those come in a later drafting pass, once the data areas and relationships in this document are reviewed and accepted. A high-level design note is included in a section only where the section cannot be meaningfully understood without one, such as stating that status must be a single field rather than a set of booleans. This is a design principle, not a full schema.
@@ -64,8 +64,8 @@ This is a checklist-level inventory, not a table definition. Naming a data area 
 
 | Data Area                                 | One-line Description                                                                           | Primary Source                                                 | Expanded In |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
-| Accounts & Roles                          | User accounts, one role value, and Active/Disabled account status                              | `WORKFLOWS.md` Section 22.1, D006–D008, D019                   | Section 4   |
-| Account Identifier & Registration Data    | Login identifier model and minimum account/profile data                                        | `WORKFLOWS.md` Section 5.3                                     | Section 5   |
+| Accounts & Roles                          | User accounts, one role value, Active/Disabled status, and mandatory-password-change state      | `WORKFLOWS.md` Sections 5 and 22.1, D007, D019, D044           | Section 4   |
+| Account Identifier & Provisioning Data    | Institution-issued login identifier and minimum Admin-provisioned account data                  | `WORKFLOWS.md` Section 5, D044                                 | Section 5   |
 | Academic Taxonomy and Resource Metadata   | Courses/programs, subjects, year levels, topic, resource types, and controlled tags            | `PROJECT_BRIEF.md` Section 5, `USER_ROLES.md` Sections 3 and 7 | Section 6   |
 | Resources                                 | Central resource record and academic metadata                                                  | `WORKFLOWS.md` Sections 8 and 22.2                             | Section 7   |
 | File Storage Metadata                     | Original filename, stored filename/reference, file type, and file size                         | `WORKFLOWS.md` Sections 9 and 22.2                             | Section 8   |
@@ -112,73 +112,83 @@ A Disabled account cannot log in, but disabling an account must not automaticall
 
 ### 4.3 First Admin setup
 
-The first Admin account is created during setup only, outside the normal in-app account provisioning workflow.
+The first Admin account is created during setup only, outside the normal in-app account provisioning workflow, under the controlled D019 exception.
 
-There is no need for an `is_first_admin` field or a special first-Admin account type. Once the first Admin account exists, it is simply an Admin account like any later Admin account. The setup procedure belongs in `BUILD_PLAN.md` and `SECURITY_NOTES.md`, not in the database schema.
+There is no need for an `is_first_admin` field or a special first-Admin account type. Once the first Admin account exists, it is simply an Admin account like any later Admin account. Its bootstrap password is established through the controlled setup process, so the later D044 mandatory-change migration initializes it at `must_change_password = 0`. This is not a permanent reset exemption: a later Admin-assisted reset by another authenticated Active Admin explicitly sets it to `1`. The setup procedure belongs in `BUILD_PLAN.md` and `SECURITY_NOTES.md`, not in the database schema.
 
 ### 4.4 Account provisioning accountability
 
 The system must be able to preserve accountability for account-related administrative actions, such as:
 
-* creating Teacher/Instructor, Moderator, or Admin accounts,
+* creating Student, Teacher/Instructor, Moderator, or additional Admin accounts,
 * disabling or re-enabling accounts,
 * changing account roles,
-* resetting account passwords through Admin assistance, if implemented.
+* resetting account passwords through Admin assistance.
 
-This can be handled through the general audit log data area. The account record itself does not need to store every administrative event directly, as long as the audit log records actor, target, action, timestamp, and relevant note where needed.
+This is handled through the general audit log data area. Provisioning uses `action_type = 'account_created'` and `target_type = 'account'`; Admin-assisted reset uses `action_type = 'password_reset'` and `target_type = 'account'`. The account write or update and its required audit row must commit or roll back together. Audit notes must never contain a temporary credential or password hash.
 
 ### 4.5 Password recovery and password reset
 
 BPC LearnShare v1.0 does not include self-service password recovery.
 
-For ordinary accounts, password reset is Admin-assisted. An Admin may reset the password of a Student, Teacher/Instructor, Moderator, or another Admin through account management, subject to role and audit rules.
+For ordinary accounts, password reset is Admin-assisted and restricted to an authenticated Active Admin. The reset replaces the stored password hash with the hash of a temporary credential, explicitly sets `must_change_password = 1`, and records the required audit entry in the same transaction.
 
-For the first Admin account, recovery is a local setup/database maintenance concern because no earlier Admin exists to assist. The exact procedure should be documented later in `BUILD_PLAN.md` and `SECURITY_NOTES.md`.
+For the first Admin account, Admin-assisted reset follows the normal audited account-management workflow whenever another authenticated Active Admin exists. Only when no other authenticated Active Admin is available does recovery become a controlled local setup/database-maintenance concern. The exact sole-Admin recovery procedure should be documented in `BUILD_PLAN.md` and `SECURITY_NOTES.md`.
 
-**Schema consequence:** v1.0 does not need a password-reset token table, email-reset token fields, or expiring reset-token mechanism. Admin-assisted reset only requires the account record to store an updated password hash and the audit log to record the administrative action.
+**Schema consequence:** v1.0 does not need a password-reset token table, email-reset token fields, or expiring reset-token mechanism. The accepted later D044 direction adds only `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0`; no new table or physical identifier-column rename is required. Adding the column alone does not enforce the workflow: every protected request must recheck the live account, status, role, and flag, and a flagged account may access only password change and logout.
 
 ---
 
-## 5. Student Registration and Admin-Provisioned Account Data
+## 5. Institution-Provisioned Account Data
 
-### 5.1 Login identifier
+### 5.1 Account Identifier
 
-For BPC LearnShare v1.0, the login identifier is a unique self-chosen username.
+The user-facing login value is **Account Identifier**. The existing physical `accounts.username` column remains its storage field; D044 does not authorize a physical rename.
 
-The username is provided during Student registration or Admin account provisioning and is validated for uniqueness. It is not treated as proof of official institutional identity.
+Account Identifiers originate from authorized institutional records and must be globally unique across Student, Teacher/Instructor, Moderator, and Admin accounts. The existing bounded identifier validation remains unless authoritative institutional evidence later requires a minimal adjustment.
 
-Student number or institutional ID must not be used as the login identifier in v1.0 because the system has no confirmed roster or enrollment validation source. Without such validation, a self-registering Student could enter another person’s student number and the system would have no reliable way to detect it.
+The design must not hardcode a BPC-specific Student ID or employee ID format without an authoritative institutional specification. MIS personnel or other authorized institutional staff may supply account information as an external organizational authority, but MIS is not a LearnShare role and D044 does not create an automated MIS integration.
 
-Institutional email is also not selected as the v1.0 login identifier because there is no confirmed source document stating that every BPC student and teacher has an institutional email address. Personal email is not required because v1.0 does not require email verification or email notifications.
+Institutional email is not required because institutional-email verification, SSO, and full MIS integration remain deferred. Personal email is also not required because v1.0 does not require email verification or email notifications.
 
-A student number, institutional ID, or email address may be considered later as an optional profile field if a future workflow needs it. It must not be used as the authentication identifier unless a future decision defines reliable validation.
+A student number, institutional ID, or email address may be considered later only through another explicit decision if a future workflow needs it. D044 changes account origin and provisioning authority without adding those profile fields.
 
-### 5.2 Minimum Student registration data
+### 5.2 Minimum ordinary-account data
 
-Student self-registration requires only:
+Except for the controlled first-Admin setup exception, an authenticated Active Admin provisions every ordinary account using only:
 
-* username,
-* password,
-* display name.
+* Account Identifier, stored in `accounts.username`;
+* temporary credential, stored only as a password hash;
+* display name;
+* one allowed role;
+* Active account status;
+* the mandatory-change state after the separately approved D044 migration.
 
-Course/program, year level, section, student number, institutional email, and personal email are not required for v1.0 registration unless a later confirmed workflow uses them.
+Course/program, year level, section, student number, institutional email, and personal email are not required account-profile fields unless a later confirmed workflow and schema decision add them.
 
-This keeps registration simple and avoids collecting personal data that no confirmed workflow reads. In the confirmed v1.0 design, year level is used as resource metadata, not as a required attribute of the registering Student.
+This keeps account provisioning bounded and avoids collecting personal data that no confirmed workflow reads. In the confirmed v1.0 design, year level is resource metadata, not a required attribute of an account holder.
 
-### 5.3 Admin-provisioned account data
+### 5.3 Manual Admin provisioning and deferred integrations
 
-Teacher/Instructor, Moderator, and Admin accounts are provisioned by an Admin. These accounts use the same username-based login identifier for consistency.
+Student, Teacher/Instructor, Moderator, and additional Admin accounts originate from authorized institutional records and are provisioned by an authenticated Active Admin. Manual Admin provisioning is the required v1.0 minimum.
 
-Admin-provisioned account creation requires:
+The Admin must validate the Account Identifier, global uniqueness, display name, temporary credential, and one of the four allowed roles before writing the account.
 
-* username,
-* password or temporary credential,
-* display name,
-* role.
+After successful creation, the temporary credential may be displayed once and communicated outside LearnShare. Only its password hash is stored; neither the credential nor the hash may be copied into an audit note or ordinary application log. The account and `account_created` audit entry succeed or fail together.
 
-The selected role must be one of the four confirmed v1.0 role values. Teacher/Instructor, Moderator, and Admin users do not self-register and do not submit their own role value.
+CSV or batch import, full MIS integration, SSO, institutional-email verification, and any additional role are deferred. The database design adds no import table or fifth role.
 
-Temporary credential handling, first-login password change, and password-reset procedure belong in `SECURITY_NOTES.md` and `BUILD_PLAN.md`.
+### 5.4 Public registration removal
+
+Public self-registration is unavailable. `GET /register` redirects to login with a neutral message that accounts are institution-issued. `POST /register` is rejected before account-creation logic and creates no account, role assignment, session, or audit row.
+
+### 5.5 Mandatory password-change persistence and application guard
+
+The verified current baseline remains 22 tables. A later, separately reviewed migration may add only `must_change_password TINYINT(1) NOT NULL DEFAULT 0` to `accounts`.
+
+The default `0` preserves access for existing rows and initializes the controlled first Admin at migration time. Every newly provisioned or Admin-reset account, including the first Admin when reset by another authenticated Active Admin, must be written explicitly with `1`. A successful mandatory password change stores only the new hash, clears the flag to `0`, and regenerates the authenticated session identifier.
+
+The field does not enforce itself. Every protected request must reload the authoritative account and recheck account existence, Active/Disabled status, current role, and `must_change_password`. A flagged account may use only password change and logout, including when an already-authenticated account was reset after its session began.
 
 ---
 
@@ -1157,7 +1167,7 @@ Some rules are best enforced directly by database constraints or tracking struct
 Database-supported enforcement is required or recommended for:
 
 * valid closed-set values,
-* unique username,
+* global uniqueness of the Account Identifier stored in `accounts.username`,
 * one open replacement per original resource,
 * one unresolved report per user per resource,
 * unique bookmark per user-resource pair,
@@ -1165,6 +1175,9 @@ Database-supported enforcement is required or recommended for:
 
 Application-level enforcement is required for:
 
+* allowing only an authenticated Active Admin to provision ordinary accounts or reset credentials;
+* rechecking account existence, account status, role, and `must_change_password` on every protected request;
+* restricting a flagged account to password change and logout;
 * checking that only Student and Teacher/Instructor users can upload,
 * checking that Teacher/Instructor uploads still enter Pending,
 * checking that only Moderator/Admin can approve, reject, request correction, hide, or restrict,
@@ -1398,7 +1411,7 @@ This section stays narrow. It covers database design implications only. Full sec
 
 The account data area must store only password hashes.
 
-Plaintext passwords, reversible encrypted passwords, and password hints must not be stored.
+Plaintext passwords, temporary credentials, reversible encrypted passwords, and password hints must not be stored. Password hashes and temporary credentials must also never be copied into audit notes or application logs.
 
 Password hashing behavior belongs in implementation and security documentation, but the database design must assume that only a password hash is stored.
 
@@ -1413,13 +1426,16 @@ The original filename must not be used as the physical storage path. This helps 
 
 ### 21.3 Minimal account data collection
 
-Student registration requires only:
+Ordinary Admin provisioning requires only:
 
-* username,
-* password,
-* display name.
+* Account Identifier, physically stored in `accounts.username`;
+* password hash;
+* display name;
+* role;
+* account status;
+* mandatory-change state after the separately approved D044 migration.
 
-Course/program, year level, section, student number, and email are not required unless a future confirmed workflow needs them.
+Course/program, year level, section, student number, and email are not required account-profile fields unless a future confirmed workflow and schema decision need them.
 
 This reduces unnecessary personal data collection and supports basic data-privacy principles for a student-facing academic system.
 
@@ -1480,8 +1496,8 @@ These are not missing requirements. They are intentionally deferred because this
 The following belong in `SECURITY_NOTES.md` or `BUILD_PLAN.md`:
 
 * first Admin bootstrap procedure,
-* first Admin recovery procedure,
-* Admin-assisted password reset procedure,
+* sole-Admin recovery procedure when no other authenticated Active Admin exists,
+* exact Admin-provisioning, temporary-credential, mandatory-password-change, and Admin-assisted reset implementation,
 * session timeout value,
 * session cookie/security settings,
 * exact file-size limits,
@@ -1515,7 +1531,8 @@ The following are not part of v1.0 database design:
 * LMS features such as classes, quizzes, assignments, grades, attendance, or enrollment,
 * production-scale security monitoring,
 * encryption-at-rest infrastructure,
-* advanced institutional identity verification or roster integration.
+* advanced institutional identity verification or roster integration,
+* CSV or batch account import, full MIS integration, SSO, and institutional-email verification.
 
 These may be considered only through later formal scope decisions.
 
@@ -1523,7 +1540,9 @@ These may be considered only through later formal scope decisions.
 
 The following items were resolved during database-design drafting and should not remain open:
 
-* login identifier is a unique self-chosen username;
+* the user-facing login term is Account Identifier, stored in the existing `accounts.username` column and globally unique across all four roles;
+* ordinary accounts are provisioned manually by an authenticated Active Admin from authorized institutional records, with the controlled first Admin as the D019 exception;
+* CSV/batch provisioning, full MIS integration, SSO, and institutional-email verification are deferred;
 * topic is required uploader-entered resource metadata;
 * no separate categories table/module exists in v1.0;
 * resource corrections after approval use linked replacement records;
@@ -1540,7 +1559,7 @@ The following items were resolved during database-design drafting and should not
 
 ### 23.1 Document parts
 
-* **Part 1 — Sections 1–6:** Defined purpose, design principles, required data areas, accounts/roles/account status, first Admin setup implications, Student registration data, username login identifier, and academic taxonomy direction.
+* **Part 1 — Sections 1–6:** Defined purpose, design principles, required data areas, accounts/roles/account status, first Admin setup implications, institution-provisioned account data, Account Identifier direction, and academic taxonomy direction.
 * **Part 2 — Sections 7–11:** Defined resource core records, file storage metadata, resource statuses and visibility, resource action history, linked replacement-record design, and one-open-replacement enforcement.
 * **Part 3 — Sections 12–16:** Defined reports, active report tracking, bookmarks, Helpful marks, activity counts, AI output storage and lifecycle, in-app notifications, queue visibility, and general audit logs.
 * **Part 4 — Sections 17–23:** Defined system settings, data integrity rules, transaction and atomic write boundaries, indexing/search support, database-specific security/privacy implications, deferred database items, and revision history.
@@ -1549,7 +1568,7 @@ The following items were resolved during database-design drafting and should not
 
 This document incorporates the database-relevant decisions from `DECISIONS.md`, including:
 
-* Student self-registration and Admin-provisioned elevated roles,
+* D044 institution-provisioned ordinary accounts, mandatory temporary-password change, public-registration removal, and the controlled D019 first-Admin exception,
 * role and account-status separation,
 * Student/Teacher-only ordinary uploads,
 * Teacher uploads still requiring moderation,
@@ -1566,7 +1585,8 @@ This document incorporates the database-relevant decisions from `DECISIONS.md`, 
 * D030 open replacement handling when original status changes,
 * D031 lightweight in-app notifications and queue visibility,
 * D032 active report tracking for one unresolved report rule,
-* D040 removal-time content sanitization for Removed resources, including exact placeholder values, removal of `resource_tags`, preservation of required accountability relationships, and the explicit distinction from Withdrawn-resource retention.
+* D040 removal-time content sanitization for Removed resources, including exact placeholder values, removal of `resource_tags`, preservation of required accountability relationships, and the explicit distinction from Withdrawn-resource retention,
+* D044's later additive `accounts.must_change_password` direction while preserving the verified 22-table baseline and requiring fail-closed rollback handling.
 
 ### 23.3 Documentation Alignment Status
 
@@ -1580,7 +1600,7 @@ These items are no longer open cleanup tasks. Future documentation changes must 
 
 ### 23.4 Status
 
-`DATABASE_DESIGN.md` Sections 1–23 and Appendix A are complete at the conceptual database-design level through D043. On 2026-08-20, the approved migration and canonical schema update established and verified the 22-table SQL baseline on MariaDB 10.4.32.
+`DATABASE_DESIGN.md` Sections 1–23 and Appendix A are complete at the conceptual database-design level through D044. On 2026-08-20, the approved D043 migration and canonical schema update established and verified the 22-table SQL baseline on MariaDB 10.4.32. D044 preserves that table count and authorizes only a later, separately reviewed additive account-column direction.
 
 This document intentionally does not include SQL, exact column types, exact index definitions, foreign-key syntax, or full table definitions. Those belong in the later schema-drafting pass after the conceptual design is accepted.
 
@@ -1599,9 +1619,10 @@ It lists the proposed database tables and data structures, their purposes, main 
 #### 1. `accounts`
 
 * **Purpose:** Single table for all four roles.
-* **Fields:** username, password_hash, display_name, role, account_status, created_at, updated_at.
+* **Current verified fields:** username, password_hash, display_name, role, account_status, created_at, updated_at.
+* **Accepted later D044 field direction:** add `must_change_password` only through a separately reviewed migration and later `schema.sql` update; it is not yet part of the current verified schema.
 * **Relationships:** Referenced by resources as uploader, resource action history and audit logs as actor, reports as reporter, and notifications as recipient.
-* **Constraints:** Username must be unique. Role is restricted to Student, Teacher/Instructor, Moderator, and Admin. Account status is restricted to Active and Disabled.
+* **Constraints:** The Account Identifier stored in `username` must be globally unique. Role is restricted to Student, Teacher/Instructor, Moderator, and Admin. Account status is restricted to Active and Disabled. The later mandatory-change field is boolean-like and defaults to `0` for migration compatibility.
 * **Type:** Core table.
 
 #### 2–6. Academic Taxonomy Lookups: `courses`, `subjects`, `year_levels`, `resource_types`, `tags`
@@ -1753,7 +1774,7 @@ This pattern is used because the system needs uniqueness only while something is
 Database-level enforcement should cover:
 
 * closed-set values for role, account_status, resource status, report status, report reason, and file type;
-* unique username;
+* global uniqueness of the Account Identifier stored in `accounts.username`;
 * unique account_id/resource_id pair on `bookmarks`;
 * unique account_id/resource_id pair on `helpful_marks`;
 * unique original_resource_id on `open_replacement_tracking`;
@@ -1768,6 +1789,10 @@ Database-level enforcement should cover:
 Application-level enforcement remains required for:
 
 * allowing only Student and Teacher/Instructor accounts to upload ordinary resources;
+* allowing only an authenticated Active Admin to provision Student, Teacher/Instructor, Moderator, and additional Admin accounts or perform ordinary password reset;
+* assigning only the four allowed roles and rejecting public role selection;
+* explicitly writing `must_change_password = 1` for newly provisioned or reset accounts after the approved migration;
+* rechecking live account existence, status, role, and mandatory-change state on every protected request;
 * valid resource status transitions;
 * D030 live status re-check before approving a replacement;
 * preventing a user from reporting their own resource;
@@ -1775,7 +1800,7 @@ Application-level enforcement remains required for:
 * AI notice acknowledgment behavior;
 * ensuring AI notice refusal does not block the normal upload workflow;
 * role-gated actions such as Admin-only Remove and Moderator/Admin-only Hide, Restrict, Approve, or Reject;
-* server-side role assignment during registration and account provisioning;
+* fail-closed rejection of public `POST /register` and neutral redirection of `GET /register`;
 * taxonomy deactivation behavior in the Admin interface.
 
 #### Transactions
@@ -1787,7 +1812,9 @@ The following operations should be transaction-safe:
 * report resolution: report status changes and open report tracking row is cleared;
 * moderation decision: conditional status update and action-history write occur together;
 * direct Moderator/Admin action without a report: resource status update and action-history write occur together;
-* system setting change: setting update and audit-log entry occur together.
+* system setting change: setting update and audit-log entry occur together;
+* account provisioning: the account row and `account_created` audit row occur together;
+* Admin-assisted password reset: password hash, mandatory-change flag, and `password_reset` audit row occur together.
 
 ---
 
@@ -1796,12 +1823,13 @@ The following operations should be transaction-safe:
 The following items are intentionally deferred outside this appendix:
 
 * Admin taxonomy-management workflow behavior is already reflected in `WORKFLOWS.md`. Later implementation documents still need to preserve add/edit/deactivate/reactivate behavior through lookup tables with `is_active` and `ON DELETE RESTRICT` for referenced values.
-* Admin-assisted password reset details are deferred to `SECURITY_NOTES.md` and `BUILD_PLAN.md`.
+* Exact Admin-provisioning, mandatory-password-change, and Admin-assisted reset implementation details remain routed to `SECURITY_NOTES.md` and `BUILD_PLAN.md`.
 * Exact session timeout value is deferred to `SECURITY_NOTES.md`.
 * Exact MIME/content validation implementation is deferred to `SECURITY_NOTES.md`.
 * First-Admin bootstrap procedure is deferred to `BUILD_PLAN.md`.
 * Content-hash duplicate detection is not required for v1.0 and may be considered later only if testing shows a real need.
 * Exact column types, indexes, foreign-key syntax, backfill/rollback behavior, and full executable `CREATE TABLE`/`ALTER TABLE` statements belong to the separately reviewed migration pass.
+* CSV/batch provisioning, full MIS integration, SSO, and institutional-email verification remain deferred and add no v1.0 table.
 
 ---
 
@@ -1921,3 +1949,42 @@ On 2026-08-20, the corrected pre-live disposable run passed 51/51 checks on Mari
 The first harness attempt expected the wrong forward statement count and stopped after reporting 8 rather than 10. Cleanup succeeded. Correcting only the harness count to the actual 8 forward and 8 rollback statements did not change or weaken the SQL package.
 
 The separately approved live gate then restore-verified the ignored local backup, applied the exact forward SQL, preserved all original row counts, left the four new tables empty, verified all required constraints and table checks, and established the exact 22-table live set. The canonical fresh-import verifier now passes 60/60 checks. Application repositories/processors and user-facing AI features remain separate implementation gates.
+
+---
+
+### A.8 D044 Mandatory-Password-Change Column Direction
+
+#### A.8.1 Current baseline and permitted additive change
+
+The current verified schema remains 22 tables and does not yet include the D044 account flag. A later, separately reviewed up migration may add only:
+
+`must_change_password TINYINT(1) NOT NULL DEFAULT 0`
+
+to `accounts`. No new table, role, account status, import structure, or physical rename of `accounts.username` is required.
+
+#### A.8.2 Existing, bootstrap, provisioned, and reset accounts
+
+The default `0` intentionally preserves existing account access during migration. The controlled first Admin is also initialized at `0` because its private password is established during D019 bootstrap rather than through the ordinary temporary-credential workflow. This migration/bootstrap initialization is not a permanent password-reset exemption.
+
+After the migration is approved and implemented, application code must explicitly write `must_change_password = 1` for every newly provisioned or Admin-reset account, including the first Admin when another authenticated Active Admin performs the reset. A successful required password change stores only the new password hash and clears the flag to `0`.
+
+For fresh installations, the column belongs in `database/schema.sql` only after the versioned migration and its rollback have passed their separate review and execution gates. This documentation propagation does not modify SQL or the live database.
+
+#### A.8.3 Live enforcement remains application-level
+
+The column alone does not enforce D044. Every protected request must reload the authoritative account row and recheck account existence, Active/Disabled status, current role, and `must_change_password`. While the flag is `1`, only password change and logout are available. This also applies to an already-authenticated account reset after its session began.
+
+Provisioning must commit the account row and `account_created` audit entry together. Reset must commit the new password hash, `must_change_password = 1`, and `password_reset` audit entry together. Temporary credentials and password hashes must never appear in plaintext fields, logs, audit notes, or permanent display records.
+
+#### A.8.4 Verification and fail-closed rollback
+
+Before and after any later migration, the reviewed process must capture and compare:
+
+* exact table count and ordered table names;
+* exact `accounts` row count and relevant account-status/role counts;
+* schema definition or schema hash;
+* migration-file hashes;
+* the count of rows by `must_change_password` value after the column exists;
+* confirmation that unrelated tables and account data are unchanged.
+
+Rollback removes only the additive column, but it must first count rows where `must_change_password = 1`. If any flagged row exists, rollback must stop until a separately approved process establishes private passwords or otherwise resolves those accounts. Dropping the column while temporary-password accounts remain is prohibited.

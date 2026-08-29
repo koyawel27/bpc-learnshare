@@ -2,10 +2,10 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0
-**Last Updated:** 2026-07-12
+**Last Updated:** 2026-08-28
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted role and permission baseline through D042
+**Status:** Draft v1.0 — accepted role and permission baseline through D044
 
 ---
 
@@ -28,7 +28,7 @@ Where a permission is not yet decided, it is explicitly marked **Future decision
 | **Moderator** | Reviews, approves, rejects, and manages resources and reports; no system/user administration authority. |
 | **Admin** | Manages users, taxonomy (courses/programs, subjects, year levels, resource types, and controlled tags), system settings, and can perform moderation actions; the only role with destructive/system-level authority. |
 
-No role beyond these four is defined for v1.0. See Section 14 for a flagged potential future role.
+No role beyond these four is defined for v1.0. MIS personnel or other authorized institutional staff may supply authorized account records externally, but MIS is not a LearnShare role. See Section 14 for a separately flagged potential future role.
 
 ---
 
@@ -36,8 +36,9 @@ No role beyond these four is defined for v1.0. See Section 14 for a flagged pote
 
 | Permission | Student | Teacher / Instructor | Moderator | Admin |
 |---|---|---|---|---|
-| Student self-registration | Allowed | Not allowed | Not allowed | Not allowed |
+| Public self-registration | Not allowed | Not allowed | Not allowed | Not allowed |
 | Log in to active account | Allowed | Allowed | Allowed | Allowed |
+| Create/manage Student accounts | Not allowed | Not allowed | Not allowed | Admin only |
 | Create/manage Teacher accounts | Not allowed | Not allowed | Not allowed | Admin only |
 | Create/manage Moderator accounts | Not allowed | Not allowed | Not allowed | Admin only |
 | Create/manage Admin accounts | Not allowed | Not allowed | Not allowed | Admin only |
@@ -67,7 +68,7 @@ No role beyond these four is defined for v1.0. See Section 14 for a flagged pote
 
 **Notes on permissions that may be misunderstood:**
 
-- **Teacher, Moderator, and Admin accounts are never self-selected by ordinary users.** Only Student accounts can be created through self-registration. Teacher, Moderator, and Admin accounts must be created and assigned by an existing Admin. This exists because allowing self-selection of elevated roles would let anyone grant themselves moderation or administrative trust — which defeats the purpose of having a moderation model at all.
+- **All ordinary accounts are institution-provisioned.** Student, Teacher/Instructor, Moderator, and additional Admin accounts originate from authorized institutional records and are provisioned in LearnShare only by an authenticated Active Admin. The controlled first Admin created during local setup remains the D019 exception because no earlier Admin exists. Institution-provisioning prevents public role self-selection and addresses the institutional-membership weakness identified during prototype evaluation.
 - **"Upload a new resource" is Not allowed for Moderator and Admin.** For v1.0, only Student and Teacher/Instructor accounts can initiate ordinary resource uploads. Moderator and Admin accounts manage, review, approve, restrict, remove, and configure resources, but they do not initiate normal resource submissions. This avoids self-review and keeps contributor roles separate from moderation and administration roles.
 - **"Withdraw own Pending, Needs Correction, or Rejected resource" is Not applicable for Moderator and Admin**, not "Not allowed" — the distinction matters. Since Moderator and Admin accounts cannot upload resources at all (see above), there is no scenario where they would hold uploader-level withdrawal rights over their own submission; the concept doesn't apply to these roles the way it applies to Student/Teacher. Their equivalent authority over any resource is exercised through the separate Hide/Restrict and Remove/Delete rows, not through this row.
 - **"Edit own resource after Approval" is Not allowed for Student and Teacher/Instructor.** Once a resource is Approved, the uploader cannot silently change it. Any correction must go through the linked replacement-record workflow, where the corrected upload creates a new Pending resource linked to the original Approved resource and re-enters moderation.
@@ -82,7 +83,8 @@ No role beyond these four is defined for v1.0. See Section 14 for a flagged pote
 ## 4. Student Role
 
 A Student may:
-- Self-register for a Student account, then log in
+- Use an institution-provisioned Student account and sign in with its globally unique Account Identifier
+- Change a temporary credential before accessing other protected functions when the account requires a mandatory password change
 - Browse, search, and filter approved resources
 - View and download approved resources
 - Bookmark resources
@@ -107,7 +109,7 @@ A Student may **not**:
 
 ## 5. Teacher / Instructor Role
 
-A Teacher/Instructor account is created and assigned by an Admin — Teachers do not self-register (see Section 3). Once logged in, a Teacher/Instructor has the same base actions as a Student (browse, search, view, download, bookmark, mark resources as helpful, report, and use AI-assisted semantic search, repository-grounded inquiry, session-scoped follow-up, and related-resource suggestions on eligible Approved resources) and additionally:
+A Teacher/Instructor account is institution-provisioned by an authenticated Active Admin (see Section 3). Once the temporary credential has been changed where required and the user is logged in, a Teacher/Instructor has the same base actions as a Student (browse, search, view, download, bookmark, mark resources as helpful, report, and use AI-assisted semantic search, repository-grounded inquiry, session-scoped follow-up, and related-resource suggestions on eligible Approved resources) and additionally:
 - Uploads official or recommended academic resources
 - Manages (edits/withdraws) their own uploaded resources while Pending, Needs Correction, or Rejected
 
@@ -125,7 +127,7 @@ A Teacher/Instructor may **not**:
 
 ## 6. Moderator Role
 
-A Moderator account is created and assigned by an Admin (see Section 3). A Moderator may:
+A Moderator account is institution-provisioned by an authenticated Active Admin (see Section 3). A Moderator may:
 - Review all Pending uploads
 - Approve, reject, or request correction on any resource
 - Review and act on reported resources (hide, restrict, escalate, or dismiss a report)
@@ -147,9 +149,9 @@ A Moderator may **not**:
 
 ## 7. Admin Role
 
-An Admin account is created and assigned by an existing Admin (see Section 3). An Admin may:
+Except for the first Admin created through the controlled local setup process under D019, an Admin account is institution-provisioned by an existing authenticated Active Admin (see Section 3). An Admin may:
 - Perform all Moderator actions
-- Manage user accounts (create, disable, change role assignment)
+- Manage user accounts (create, reset password, disable, change role assignment)
 - Manage courses/programs, subjects, year levels, resource types, and controlled tags
 - Manage system-wide settings, including enabling or disabling AI features
 - Remove a resource from the system or delete its stored file when necessary
@@ -269,7 +271,7 @@ This section defines *who* holds these permissions. The exact status flow and st
 
 ## 12. Access Restrictions
 
-**BPC LearnShare v1.0 requires users to log in before browsing, searching, viewing, downloading, bookmarking, reporting, uploading, or using AI-assisted search, inquiry, or related-resource suggestions.** Unauthenticated visitors may only access the login page, the Student registration page, and basic public information pages. Approved resources are visible only to authenticated active users — there is no public, logged-out catalog.
+**BPC LearnShare v1.0 requires users to log in before browsing, searching, viewing, downloading, bookmarking, reporting, uploading, or using AI-assisted search, inquiry, or related-resource suggestions.** Unauthenticated visitors may only access the login page and basic public information pages. `GET /register` redirects to login with a neutral institution-issued-account message, while `POST /register` is rejected and creates no account. Approved resources are visible only to authenticated Active users — there is no public, logged-out catalog.
 
 - Resources with status Pending, Needs Correction, Rejected, Withdrawn, Hidden, Restricted, or Replaced are not discoverable through normal search or browse. They are visible only according to the rules defined in WORKFLOWS.md.
 - Removed resources are not visible to normal users, including the original uploader. Under D040, removal overwrites the resource's `title`, `description`, `topic`, and `original_filename` with the confirmed placeholder values and removes its controlled-tag associations. The resource row and accepted historical relationships remain for Admin-only accountability and reference. The retained data is minimized within the accepted schema but is not anonymized because account references, required taxonomy references, technical file metadata, activity counts, timestamps, and historical relationships may remain.
@@ -298,7 +300,7 @@ If any future feature request would require a role to perform one of the above, 
 
 ## 14. Notes for Future Documents
 
-- **WORKFLOWS.md must treat the entire system as login-required.** Every resource-access workflow (browse, search, view, download, bookmark, report, upload, AI-assisted semantic search, repository-grounded inquiry, and related-resource suggestions) begins from an authenticated session; there is no anonymous/guest path to design for. The only pre-login screens are the login page, the Student registration page, and basic public information pages.
+- **WORKFLOWS.md must treat the entire system as login-required.** Every resource-access workflow (browse, search, view, download, bookmark, report, upload, AI-assisted semantic search, repository-grounded inquiry, and related-resource suggestions) begins from an authenticated session; there is no anonymous/guest path to design for. The only normal pre-login screens are the login page and basic public information pages. Account provisioning is Admin-only, and public registration is unavailable under D044.
 - **WORKFLOWS.md** must define the exact state machine for resource status, including Pending, Needs Correction, Approved, Rejected, Withdrawn, Hidden, Restricted, Removed, and Replaced. It must also define the linked replacement-record path for correcting an Approved resource and where each level of AI processing from Section 11 is permitted.
 - **DATABASE_DESIGN.md** must encode role as a single authoritative field (not a set of boolean flags), and must enforce that Admin and Moderator remain distinct role values, not a shared "staff" role. It must also reflect that only Student/Teacher roles can be an uploader of record for a resource.
 - **AI_FEATURES.md must define the Pending-resource AI-assistance gate** before implementation, including successful basic upload validation, the exact clear uploader notice, acknowledgment handling, the processing trigger, and the behavior when acknowledgment is not provided. Declining or withholding acknowledgment must not block the ordinary non-AI upload workflow.

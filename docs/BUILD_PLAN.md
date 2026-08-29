@@ -2,8 +2,8 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Planning horizon:** Two-week prototype and presentation checkpoint
-**Status:** Active implementation plan
-**Last updated:** 2026-08-20
+**Status:** Active implementation plan aligned through D044; migration, schema, application, and test gates remain pending
+**Last updated:** 2026-08-29
 **Scope authority:** This plan sequences accepted requirements. It does not replace `PROJECT_BRIEF.md`, `DECISIONS.md`, `USER_ROLES.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `SECURITY_NOTES.md`, `DATA_PRIVACY.md`, or `AI_FEASIBILITY_SPIKE.md`.
 
 ---
@@ -26,6 +26,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 - Accepted project scope, role model, workflows, database design, security rules, and privacy rules.
 - Verified MariaDB 10.4.32-compatible 22-table current schema. The guarded D043 live migration and canonical fresh-import update were completed on 2026-08-20 from the restore-verified 18-table legacy baseline.
+- Accepted D044 institution-provisioned account direction. It preserves the 22-table count and authorizes only a later, separately reviewed additive `accounts.must_change_password` migration; the migration, canonical schema update, PHP workflow, and D044 tests are not yet implemented.
 - Completed AI feasibility evidence for:
   - readable-text extraction;
   - corrected segmentation;
@@ -38,7 +39,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 ### 2.2 Current implementation reality
 
-- Gates 0–4 now have a working native-PHP core covering database connectivity, account registration and authentication, protected sessions and CSRF, non-public first-Admin bootstrap, guarded Student/Teacher upload, transactional `Pending` creation, staff moderation, Approved-only metadata discovery, resource details, and controlled protected downloads.
+- Gates 0–4 now have a working native-PHP core covering database connectivity, pre-D044 public Student registration and authentication, protected sessions and CSRF, non-public first-Admin bootstrap, guarded Student/Teacher upload, transactional `Pending` creation, staff moderation, Approved-only metadata discovery, resource details, and controlled protected downloads. **Passed under the pre-D044 baseline; superseded by D044.** The current application still needs the D044 provisioning, mandatory-password-change, registration-removal, migration, and rerun gates described below.
 - Gate 5A now has an unrouted, model-independent PHP safety-foundation candidate covering default-off AI configuration, active-account and Approved/available source revalidation, source-fingerprint and protected-file checks, second-point revalidation, protected citation-link shaping, bounded session-only context, and metadata-search fallback. Its deterministic CLI verification passed 18/18 checks with zero real model/provider requests and zero database writes.
 - Gate 5B reused that foundation against live MariaDB state and passed 19/19 rollback-based lifecycle and fallback checks. Hidden, Restricted, Removed, Replaced, deleted, invalidated, stale-reference, missing-file, size-drift, disabled-account, disabled-AI, unavailable-provider, and final-revalidation cases failed closed; metadata search and protected-download lookup remained available when AI was disabled. The transaction was rolled back, the protected file hash was unchanged, and no real provider was called.
 - Gate 5C added a shared-active-tag metadata-fallback candidate and passed 18/18 live PHP/MariaDB checks against two accepted synthetic Security resources and two accepted synthetic Usability resources. Expected-pair top-five coverage and reviewed top-three usefulness were both 4/4 (100%); self-results and same-subject cross-topic results were excluded; protected `/resources/{id}` links resolved through Approved-only lookup; and Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, and disabled-requester cases failed closed. All test mutations and view increments were rolled back in the accepted run. A later default-off resource-detail surface reused this exact candidate and passed 28/28 focused checks without a model call or database write.
@@ -56,7 +57,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 The presentation prototype should prove one complete, secure vertical slice:
 
-1. A Student can register and log in.
+1. An authenticated Active Admin can provision a Student account from an authorized institutional record; the Student can log in with the one-time temporary credential, must establish a private password, and can then use the protected prototype.
 2. An authorized Student or Teacher/Instructor can upload an allowed resource with required metadata.
 3. The upload is validated and stored outside the public web root.
 4. The resource enters `Pending`.
@@ -89,7 +90,7 @@ The presentation checkpoint does not redefine this final scope.
 2. **Work in vertical slices.** Finish and test one complete user path before starting another.
 3. **Enforce rules on the server.** Hidden buttons are not authorization.
 4. **Fail closed.** If identity, role, status, ownership, file availability, CSRF, or input validity cannot be confirmed, deny the operation.
-5. **Use the verified 22-table D043 schema as the current baseline.** Do not add provider-specific tables or bypass its source-version, readiness, freshness, and lifecycle controls.
+5. **Use the verified 22-table D043 schema as the current baseline.** D044 preserves that table count and requires a separately approved additive account-column migration; do not change `schema.sql` or the live database before that gate. Do not add provider-specific tables or bypass source-version, readiness, freshness, and lifecycle controls.
 6. **Keep uploaded files outside `public/`.** Serve them only through a checked PHP endpoint.
 7. **Use prepared statements and output escaping everywhere.**
 8. **Keep state-changing requests protected by CSRF tokens.**
@@ -154,27 +155,51 @@ The helper:
 * refuses to run after any Admin account exists; and
 * creates no default or placeholder credential.
 
-The first setup action cannot write a normal `audit_log` row because that table requires an existing actor account. The setup command itself is the local bootstrap record. Every later elevated account must be created by an authenticated Admin and audited through the normal account-management workflow.
+The first setup action cannot write a normal `audit_log` row because that table requires an existing actor account. The setup command itself is the local bootstrap record. Every later ordinary Student, Teacher/Instructor, Moderator, and additional Admin account must be provisioned by an authenticated Active Admin from an authorized institutional record and audited through the normal account-management workflow.
 
-### 5.2 Current protected-upload implementation
+When the separately approved D044 migration is later applied, existing accounts and the bootstrap-created first Admin are initialized at `must_change_password = 0`. This is initialization only, not a permanent first-Admin exemption. If another authenticated Active Admin later resets the first Admin, the normal audited reset workflow applies and explicitly sets the first Admin to `1`.
+
+Sole-Admin recovery is reserved for the case where no other authenticated Active Admin exists. The current `create_first_admin` helper cannot perform that recovery because it intentionally refuses to run after any Admin exists, and the accepted `audit_log` requires an actor account. Therefore, the exact accountable sole-Admin maintenance command and its audit treatment remain one explicit implementation decision. It must be resolved before implementation without adding a role, table, permanent first-Admin marker, or public recovery route.
+
+### 5.2 D044 account provisioning and mandatory-change implementation direction
+
+Except for the controlled D019 bootstrap Admin, every Student, Teacher/Instructor, Moderator, and additional Admin account originates from an authorized institutional record and is provisioned by an authenticated Active Admin. Manual Admin provisioning is the required v1.0 minimum. CSV/batch import, full MIS integration, SSO, institutional-email verification, and additional roles remain deferred.
+
+The implementation sequence is separately gated:
+
+1. review and apply the versioned additive migration that introduces `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0` while preserving all 22 tables;
+2. update `database/schema.sql` only after the migration and rollback package passes its own review;
+3. implement Admin-only provisioning, Admin-assisted reset, mandatory password change, and live protected-request enforcement;
+4. replace public account creation so `GET /register` redirects neutrally to login and `POST /register` fails closed without creating an account, session, role assignment, or audit row; and
+5. execute and independently review the D044 test set before describing the new workflow as working.
+
+Every provisioning or reset operation must generate its own cryptographically unpredictable temporary credential. Use at least 18 bytes from PHP `random_bytes()` and encode them as a 24-character unpadded Base64URL value that satisfies the accepted password input boundary. Never use a shared, reused, sequential, username-derived, or other predictable placeholder credential.
+
+The plaintext temporary credential is retained only for the minimum time necessary to validate it, hash it, and deliver it once; only its hash is stored in `accounts.password_hash`. The account write or update, explicit `must_change_password = 1`, and required `account_created` or `password_reset` audit row commit or roll back together. When a post/redirect/get workflow is used, the plaintext credential may exist temporarily only in the authenticated Admin's server-side one-use session flash between the successful transaction commit and the immediately following display response. That response reads and deletes the flash value as part of the one-time display and uses `Cache-Control: no-store`. The plaintext credential and its hash must never appear in a URL, application/server log, audit note, error, client-side local/session storage, browser cookie, or permanent display record. Apart from the bounded server-side session flash, the credential itself is not stored in an application database table or ordinary application file. The Admin communicates it privately outside LearnShare. If the one-time response is lost or interrupted, the old credential is not redisplayed; the Admin must perform another atomic audited reset, which replaces it with a newly generated credential and keeps `must_change_password = 1`.
+
+Every protected request must reload the authoritative account and recheck existence, Active/Disabled status, current role, and `must_change_password`. While the flag is `1`, only password change and logout are available. A successful mandatory password change stores a new private password hash, clears the flag to `0`, and regenerates the session identifier. An already-authenticated account reset by an Admin is restricted on its next protected request.
+
+The D044 rollback must count flagged accounts and stop when any `must_change_password = 1` row exists. No migration, `schema.sql`, live database, PHP, or test-harness change is authorized by this documentation propagation; each remains a later separately approved gate.
+
+### 5.3 Current protected-upload implementation
 
 The local prototype uses an idempotent command-line seed for demonstration taxonomy values. Those values support the presentation workflow and are not presented as the final official BPC course, subject, year-level, resource-type, or tag list.
 
 The upload path enforces the accepted 20 MB limit, extension and detected-MIME agreement, non-empty input, and format-specific structure checks. PDF files require a PDF header and completion marker; DOCX/PPTX files require a consistent ZIP package and their expected internal document entry; TXT files require UTF-8 text without NUL bytes; JPG/JPEG and PNG files require matching image signatures.
 
-`tests/upload/run_upload_limit_acceptance.php` passed its 17-check read-only preflight and a separately approved 45-check local HTTP apply run on 2026-08-24. A boundary derivative of the accepted image-only PDF fixture was accepted at exactly 20 MiB (20,971,520 bytes), an accepted PPTX base augmented with synthetic scan images was accepted between 15 MiB and 20 MiB, and an otherwise matching PDF one byte above the limit was rejected without a resource row. The accepted files became Pending, retained exact recorded sizes, used randomized protected filenames outside `public/`, and were not directly web-accessible. The temporary Student, two resource rows, generated files, and protected copies were removed; all 22 table counts and the complete protected-storage size/hash manifest matched the pre-run baseline.
+`tests/upload/run_upload_limit_acceptance.php` passed its 17-check read-only preflight and a separately approved 45-check local HTTP apply run on 2026-08-24. A boundary derivative of the accepted image-only PDF fixture was accepted at exactly 20 MiB (20,971,520 bytes), an accepted PPTX base augmented with synthetic scan images was accepted between 15 MiB and 20 MiB, and an otherwise matching PDF one byte above the limit was rejected without a resource row. The accepted files became Pending, retained exact recorded sizes, used randomized protected filenames outside `public/`, and were not directly web-accessible. The temporary Student, two resource rows, generated files, and protected copies were removed; all 22 table counts and the complete protected-storage size/hash manifest matched the pre-run baseline. Its registration-based fixture setup **Passed under the pre-D044 baseline; superseded by D044.** The upload, size, storage, Pending-state, and cleanup evidence remains valid, but a future rerun must provision its Student fixture through the D044 workflow.
 
 This validates the implementation boundary and representative local handling without claiming that every real BPC presentation or scanned handout will fit. Sampling actual institution-provided files may still inform a later documented limit change, but the 20 MiB implementation is no longer an untested default.
 
 Only an active Student or Teacher/Instructor may create an ordinary upload. Role, status, taxonomy availability, and selected controlled values are rechecked server-side, including a transaction-time uploader check. Accepted files receive a cryptographically random storage filename outside `public/`, and the database row is created as `Pending`. If the database write fails, the moved file is removed.
 
-`tests/presentation/run_core_journey_acceptance.php` passed a 24-check read-only preflight and a separately approved 66-check local HTTP apply run on 2026-08-24. The accepted run exercised public Student registration and login, a reviewed TXT upload, Pending-only exclusion from discovery/detail/download, staff moderation and approval history, Approved-only metadata search with all five filters, resource details, byte-matching protected download, logout, and protected-route denial. It also requested AI-assisted search while every AI feature was disabled and confirmed that standard metadata results remained available without a provider request.
+`tests/presentation/run_core_journey_acceptance.php` passed a 24-check read-only preflight and a separately approved 66-check local HTTP apply run on 2026-08-24. The accepted run exercised public Student registration and login, a reviewed TXT upload, Pending-only exclusion from discovery/detail/download, staff moderation and approval history, Approved-only metadata search with all five filters, resource details, byte-matching protected download, logout, and protected-route denial. **Passed under the pre-D044 baseline; superseded by D044.** Its upload, moderation, discovery, protected-download, logout, and AI-disabled fallback evidence remains valid, but its registration fixture and journey opening do not prove D044 and must be replaced before the target journey is accepted.
 
 Two earlier apply attempts were preserved as harness-correction evidence rather than application failures. The first mistook the echoed search-box value for a public result; the second passed every functional check but attempted cleanup before deleting the restrictive moderation-history child row. Exact targeted cleanup removed only the temporary rows and file. The final run used a result-link assertion and foreign-key-safe cleanup order, then restored all 22 table row counts and the protected-storage manifest. This proves the bounded presentation journey and AI-disabled continuity; it does not mark the remaining negative, role, status, or full-v1.0 cases as complete.
 
 The frontend should initially use server-rendered PHP, reusable HTML partials, CSS, and small vanilla-JavaScript enhancements. A single-page application or frontend framework is not required.
 
-### 5.3 Upload-form usability review (proposed; not implemented)
+### 5.4 Upload-form usability review (proposed; not implemented)
 
 **Status:** Recorded usability refinement. No metadata rule, schema, taxonomy authority, or application behavior is changed by this note. Changes that conflict with accepted source documents require an explicit decision before implementation.
 
@@ -241,7 +266,14 @@ Pass when:
 Pass when:
 
 - the first Admin is created by a non-public bootstrap or seed;
-- Student self-registration works;
+- an authenticated Active Admin can manually provision each of the four roles from authorized institutional records, and non-Admins cannot provision accounts;
+- each provisioning/reset uses a unique unpredictable one-time temporary credential and commits atomically with its audit entry;
+- `GET /register` redirects neutrally and `POST /register` creates no state;
+- newly provisioned/reset accounts are flagged `1`, while existing accounts and the first Admin are initialized at `0` only during migration;
+- another Active Admin can reset the first Admin through the normal audited workflow, while the unresolved controlled local procedure is limited to sole-Admin recovery;
+- every protected request rechecks live account, status, role, and mandatory-change state; flagged accounts can use only password change and logout;
+- successful mandatory password change clears the flag and regenerates the session identifier;
+- the migration and fresh schema preserve 22 tables, and rollback stops while any account remains flagged `1`;
 - login uses `password_hash()`/`password_verify()`;
 - session ID regenerates after login;
 - logout invalidates the session;
@@ -582,8 +614,8 @@ This is a priority order, not permission to mark incomplete work as complete. A 
 |---|---|---|---|
 | 1 | Confirm structure, local configuration, database import, and safe error handling | Finalize generation test design | Gate 0 |
 | 2 | Build database, session, CSRF, validation, response, and escaping foundations | Verify candidate availability without downloading automatically | Foundation review |
-| 3 | Implement Student registration, login, logout, timeout, and first-Admin seed | Run guarded generation preflight if approved | Gate 1 partial |
-| 4 | Implement live RBAC/account checks and Admin account provisioning baseline | Review preflight; prepare grounded run only if passed | Gate 1 |
+| 3 | Preserve the controlled first-Admin bootstrap; implement D044 migration/schema gates, neutral registration removal, and Admin provisioning for all four roles | Run guarded generation preflight if approved | Gate 1 partial |
+| 4 | Implement temporary credentials, mandatory password change, live flag enforcement, Admin reset, and atomic audits; resolve the sole-Admin maintenance decision | Review preflight; prepare grounded run only if passed | Gate 1 |
 | 5 | Implement metadata form, upload validation, and protected storage | Run bounded grounded inquiry evaluation | Gate 2 partial |
 | 6 | Finish Pending-resource creation and upload negative tests | Audit grounded evidence; preserve failures | Gate 2 |
 | 7 | Implement moderation queue and allowed decisions | Run lifecycle and fallback evaluation | Gate 3 |
@@ -604,7 +636,7 @@ If the schedule slips, preserve Gates 0–4 and the measured AI evidence before 
 ### P0 — Must work before presentation
 
 - database setup and clean local start;
-- Student registration and login;
+- Admin provisioning, temporary-credential login, mandatory first-login password change, and later normal login;
 - role/account authorization;
 - one authorized upload path;
 - file validation and protected storage;
@@ -667,7 +699,7 @@ Every Figma-only screen shown in the presentation must be labelled **Design prev
 5. Review `git diff` before staging.
 6. Commit only after the gate evidence is accepted.
 7. Use narrow commit messages such as:
-   - `feat(auth): add student registration and session login`
+   - `feat(accounts): add institution provisioning and mandatory password change`
    - `feat(resources): add guarded upload and pending workflow`
    - `feat(moderation): add pending review decisions`
    - `feat(search): add approved metadata discovery`

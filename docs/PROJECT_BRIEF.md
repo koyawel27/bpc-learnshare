@@ -2,10 +2,10 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System  
 **Version:** Draft v1.0  
-**Last Updated:** 2026-07-12
+**Last Updated:** 2026-08-28
 **Author:** Nepthalie Jezer B. Macaslang  
 **Course:** BS Information Systems — Bulacan Polytechnic College  
-**Status:** Draft — pending adviser review and official title wording confirmation
+**Status:** Draft v1.0 — accepted project baseline through D044; official title wording still pending adviser confirmation
 
 ---
 
@@ -241,9 +241,10 @@ Every resource-detail and file-serving request must apply the current authentica
 
 ## 14. Security and Privacy Considerations
 
-- **Authentication:** Passwords hashed (e.g., via PHP's `password_hash`), session management secured against fixation/hijacking.
-- **Authenticated resource access:** BPC LearnShare v1.0 requires users to log in before browsing, searching, viewing, downloading, bookmarking, reporting, or uploading resources. Unauthenticated visitors may only access the login page, the Student registration page, and basic public information pages.
-- **Authorization:** Role-based access control enforced server-side on every action, not only hidden in the UI.
+- **Authentication and account origin:** Except for the first Admin created through the controlled D019 local setup process, every Student, Teacher/Instructor, Moderator, and additional Admin account originates from authorized institutional records and is provisioned by an authenticated Active Admin. MIS may supply records as an external institutional authority but is not a LearnShare role. Manual Admin provisioning is the required v1.0 minimum; CSV/batch import, full MIS integration, SSO, and institutional-email verification are deferred.
+- **Account Identifier and temporary credentials:** The user-facing login value is an institution-issued **Account Identifier**, stored in the existing physical `accounts.username` column and globally unique across all four roles. Newly provisioned or reset accounts receive a temporary credential stored only through `password_hash()` and `must_change_password = 1`; existing accounts and the controlled first Admin initialize at `0` during migration. This initialization is not a permanent reset exemption: a later Admin-assisted reset, including reset of the first Admin by another authenticated Active Admin, sets the affected account to `1`. Temporary credentials and password hashes must never be stored or logged in plaintext.
+- **Authenticated resource access:** BPC LearnShare v1.0 requires users to log in before browsing, searching, viewing, downloading, bookmarking, reporting, or uploading resources. Unauthenticated visitors may access only the login page and basic public information pages. `GET /register` redirects to login with a neutral institution-issued-account message, while `POST /register` is rejected and creates no account.
+- **Authorization and mandatory-change enforcement:** Role-based access control is enforced server-side on every action, not only hidden in the UI. Every protected request rechecks the account's existence, Active/Disabled status, current role, and `must_change_password`; while the flag is `1`, only password change and logout are available. Admin provisioning or reset and its required audit entry must succeed or fail together.
 - **File upload safety:** Strict allow-list of academic file types (PDF, DOCX, PPTX, TXT, JPG/JPEG, PNG); no executable or script file types accepted; server-side MIME/content validation in addition to extension checks; uploaded files stored outside the public web root or with randomized non-guessable filenames; file size limits enforced.
 - **Moderation gate:** No uploaded resource is visible through normal browse or search until approved by a Moderator or Admin.
 - **Input validation:** All user input server-side validated; prepared statements used for all database queries to prevent SQL injection; output escaped to prevent XSS.
@@ -286,7 +287,7 @@ A functional web-based prototype of BPC LearnShare, demonstrable on a local XAMP
 
 The project will be considered successful if:
 
-1. Students can self-register and log in, while Teacher/Instructor accounts can be created by an Admin. Active Student and Teacher/Instructor users can upload resources with correct metadata, and uploaded resources go through moderation before becoming publicly visible.
+1. Except for the controlled first-Admin setup exception, an authenticated Active Admin can provision ordinary Student, Teacher/Instructor, Moderator, and additional Admin accounts from authorized institutional records. Newly provisioned or reset users must replace their temporary credential before other protected access. Active Student and Teacher/Instructor users can then upload resources with correct metadata, and uploaded resources go through moderation before becoming visible to eligible authenticated users.
 2. Users can search and filter resources by course, subject, year level, topic, resource type, and tags without needing any AI feature enabled.
 3. Moderators can approve, reject, or request correction on pending resources, and manage reported resources, through a working dashboard.
 4. Admins can manage users, courses/programs, subjects, year levels, resource types, and controlled tags.

@@ -2,10 +2,10 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0
-**Last Updated:** 2026-08-20
+**Last Updated:** 2026-08-28
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Status:** Draft v1.0 — accepted workflow baseline through D043
+**Status:** Draft v1.0 — accepted workflow baseline through D044
 
 **D043 execution note:** The separately approved migration established the verified 22-table persistence baseline on 2026-08-20. This changes storage availability only; no AI route, provider/model, generated inquiry, or automated authority was enabled.
 
@@ -13,7 +13,7 @@
 
 ## 1. Purpose of the Document
 
-This document defines the concrete workflows for BPC LearnShare v1.0. It explains how the system behaves when users register, log in, upload resources, moderate submissions, access approved resources, report resources, and handle status changes.
+This document defines the concrete workflows for BPC LearnShare v1.0. It explains how the system behaves when institution-provisioned users log in, change temporary credentials, upload resources, moderate submissions, access approved resources, report resources, and handle status changes.
 
 Where `USER_ROLES.md` defines **who is allowed to do what**, this document defines **how those actions happen step by step**. Each workflow identifies the actor, required preconditions, user actions, server-side validations, system responses, and possible outcomes.
 
@@ -64,8 +64,9 @@ BPC LearnShare requires users to log in before browsing, searching, viewing, dow
 Unauthenticated visitors may access only:
 
 1. The login page.
-2. The Student registration page.
-3. Basic public information pages, if included.
+2. Basic public information pages, if included.
+
+`GET /register` redirects to login with a neutral message explaining that accounts are institution-issued. `POST /register` is rejected and creates no account.
 
 There is no public logged-out resource catalog in v1.0.
 
@@ -163,8 +164,9 @@ Disabling an account affects login access only. It does not automatically hide, 
 Allowed unauthenticated access:
 
 1. Login page.
-2. Student registration page.
-3. Basic public information pages, if included.
+2. Basic public information pages, if included.
+
+Public registration is unavailable. `GET /register` redirects to login with a neutral institution-issued-account message. `POST /register` is rejected before account creation.
 
 Disallowed unauthenticated access:
 
@@ -196,11 +198,13 @@ Disallowed unauthenticated access:
 
 1. **User Action** — User opens the login page.
 2. **User Action** — User submits login credentials.
-3. **System Validation** — System checks whether the submitted identifier exists.
+3. **System Validation** — System checks whether the submitted Account Identifier exists.
 4. **System Validation** — System verifies the submitted password against the stored password hash.
 5. **System Validation** — System checks whether the account status is Active.
-6. **System Response — Success** — System creates an authenticated session and redirects the user to the appropriate area based on role.
-7. **System Response — Failure** — If the identifier is invalid, the password is incorrect, or the account is Disabled, the system shows a generic login failure message.
+6. **System Validation** — System reloads the authoritative account record and checks `must_change_password`.
+7. **System Response — Temporary credential** — If `must_change_password = 1`, the system creates the authenticated session but redirects the user to the mandatory password-change flow instead of any other protected area.
+8. **System Response — Success** — If `must_change_password = 0`, the system creates an authenticated session and redirects the user to the appropriate area based on role.
+9. **System Response — Failure** — If the Account Identifier is invalid, the password is incorrect, or the account is Disabled, the system shows a generic login failure message.
 
 For v1.0, Disabled accounts receive the same generic failure message as invalid credentials. This reduces account-status disclosure and keeps the login behavior simple.
 
@@ -242,105 +246,131 @@ The exact timeout value and session security details belong in `SECURITY_NOTES.m
 
 ---
 
-## 5. Student Self-Registration Workflow
+## 5. Institution-Provisioned Account Onboarding and Credential Workflows
+
+Except for the first Admin created through the controlled local setup process in Section 6.1 under D019, every Student, Teacher/Instructor, Moderator, and additional Admin account originates from authorized institutional records and is provisioned in LearnShare by an authenticated Active Admin.
+
+MIS personnel or other authorized institutional staff may supply account information as an external organizational authority. MIS is not a LearnShare role. The four v1.0 roles remain Student, Teacher/Instructor, Moderator, and Admin.
+
+The user-facing login field is **Account Identifier**. Account Identifiers are institution-issued and globally unique across all four roles. The existing bounded identifier validation remains unless authoritative institutional evidence later requires a minimal adjustment. The workflow must not hardcode a BPC-specific Student ID or employee ID pattern without that evidence.
+
+### 5.1 Public registration removal
 
 **Actor:** Unauthenticated Visitor
-**Preconditions:** None. Student self-registration is enabled and guaranteed-on in v1.0.
+**Preconditions:** No authenticated session.
 
-### 5.1 Registration rules
+1. **User Action** — Visitor requests `GET /register`.
+2. **System Response** — System redirects to the login page with a neutral message that LearnShare accounts are institution-issued.
+3. **User Action** — Visitor or automated client submits `POST /register`.
+4. **System Validation** — System rejects the request before account creation logic is reached.
+5. **System Response** — No account, role assignment, session, audit row, or other state change is created.
 
-Only Student accounts can be created through public self-registration.
+Public self-registration and public role selection are unavailable for all four roles.
 
-Teacher/Instructor, Moderator, and Admin accounts cannot self-register. They must be created or assigned by an Admin through the Admin account provisioning workflow.
+### 5.2 Admin account provisioning
 
-The Student registration workflow must never accept a role value from the submitted form. The system must assign the Student role server-side.
+**Actor:** Admin
+**Preconditions:** Actor is logged in as an Active Admin and is authorized to use account management.
 
-### 5.2 Student registration workflow
+Manual Admin provisioning is the required v1.0 account-onboarding method.
 
-**Steps:**
+1. **User Action** — Admin opens the account management area and selects Create account.
+2. **User Action** — Admin enters the authorized Account Identifier, display name, temporary credential, and one allowed role: Student, Teacher/Instructor, Moderator, or Admin.
+3. **System Validation** — System rechecks that the acting account exists, is Active, and currently has the Admin role.
+4. **System Validation** — System validates the Account Identifier using the accepted bounded rules and checks global uniqueness across every role.
+5. **System Validation** — System validates required fields and rejects any role outside the four-role allowlist.
+6. **System Validation** — System validates the temporary credential and hashes it using PHP `password_hash()`.
+7. **System Response — Atomic success** — In one transaction, system creates the Active account with `must_change_password = 1` and records `action_type = 'account_created'` with `target_type = 'account'` in `audit_log`.
+8. **System Response — Atomic failure** — If account creation or audit insertion fails, both fail and no partial account or audit row remains.
+9. **System Response — One-time credential** — After successful commit, system may display the temporary credential once so the Admin can communicate it to the intended user outside LearnShare.
 
-1. **User Action** — Visitor opens the Student registration page.
-2. **User Action** — Visitor submits required registration information.
-3. **System Validation** — System checks that required fields are present.
-4. **System Validation** — System checks that the chosen account identifier is not already in use.
-5. **System Validation** — System checks that the password meets the minimum password requirement.
-6. **System Validation** — System forces the role value to Student on the server side.
-7. **System Response — Success** — System creates a new Active Student account.
-8. **System Response — Success** — User is redirected to the login page and must log in manually.
-9. **System Response — Failure** — If validation fails, the system shows a validation error and does not create the account.
+Temporary credentials and password hashes must never be written to application logs, audit notes, error messages, database plaintext fields, or permanent display records.
 
-### 5.3 Minimum registration data
+### 5.3 Temporary-credential login
 
-Exact registration fields belong in `DATABASE_DESIGN.md`, but the workflow requires at least:
+**Actor:** Institution-provisioned Student, Teacher/Instructor, Moderator, or Admin
+**Preconditions:** Account exists, is Active, and has a temporary credential.
 
-* an account identifier,
-* password,
-* basic student profile information required by the final database design.
+1. **User Action** — User opens login and submits the Account Identifier and temporary credential.
+2. **System Validation** — System validates the credentials through the normal generic login process.
+3. **System Validation** — System loads the current account status, role, and `must_change_password` value from the database.
+4. **System Response — Required change** — When `must_change_password = 1`, system creates the authenticated session but redirects to the mandatory password-change flow instead of the dashboard or another protected function.
+5. **System Response — Failure** — Invalid, unknown, or Disabled account credentials use the same generic login failure behavior as ordinary login.
 
-The registration form may later include fields such as name, course/program, year level, section, or institutional email if these are required by the final data model.
+### 5.4 Mandatory first-login password change
 
-### 5.4 Duplicate account handling
+**Actor:** Authenticated user whose `must_change_password = 1`
+**Preconditions:** Account exists and remains Active.
 
-If the submitted identifier is already in use:
+While the flag remains set, the only available authenticated actions are password change and logout.
 
-1. The system rejects the registration.
-2. The system shows a generic duplicate-account validation message.
-3. The system must not reveal whether the identifier belongs to a Student, Teacher/Instructor, Moderator, or Admin account.
+1. **System Validation** — Every attempted protected request reloads the current account and checks `must_change_password`.
+2. **System Response — Guard** — Requests for the dashboard, repository, upload, moderation, administration, AI-assisted features, or any other protected function redirect to the mandatory password-change flow.
+3. **User Action** — User submits a new password and confirmation through the password-change form.
+4. **System Validation** — System verifies the authenticated session, Active account status, CSRF token, accepted password rules, and matching confirmation.
+5. **System Response — Success** — System hashes the new password, updates the account password hash, and sets `must_change_password = 0`.
+6. **System Response — Session safety** — System regenerates the authenticated session identifier before normal role-authorized access begins.
+7. **System Response — Failure** — Invalid input changes neither the password hash nor the mandatory-change flag.
 
-### 5.5 Email verification
+The temporary credential and both password hashes must never be logged or included in an audit note.
 
-Email verification is not required for v1.0. It may be considered as future hardening if the project later moves toward a wider pilot or production deployment.
+### 5.5 Admin-assisted password reset
+
+**Actor:** Admin
+**Preconditions:** Actor is logged in as an Active Admin and the target account exists.
+
+1. **User Action** — Admin selects Reset password for the target account and supplies or generates a temporary credential.
+2. **System Validation** — System rechecks that the acting account exists, is Active, and currently has the Admin role.
+3. **System Validation** — System validates and hashes the temporary credential.
+4. **System Response — Atomic success** — In one transaction, system replaces the target password hash, sets `must_change_password = 1`, and records `action_type = 'password_reset'` with `target_type = 'account'` in `audit_log`.
+5. **System Response — Atomic failure** — If either the account update or audit insertion fails, both fail and the previous account credential state remains.
+6. **System Response — One-time credential** — After successful commit, system may display the temporary credential once so the Admin can communicate it outside LearnShare.
+
+The temporary credential and password hash must never be written to application logs, audit notes, error messages, database plaintext fields, or permanent display records.
+
+### 5.6 Live mandatory-change enforcement after reset
+
+Resetting a password does not rely on stale session-cached account data.
+
+1. Every protected request reloads the authoritative account record.
+2. System rechecks account existence, account status, current role, and `must_change_password`.
+3. If an already-authenticated user's password is reset, their next protected request sees `must_change_password = 1` and redirects to mandatory password change.
+4. Until the change succeeds, only password change and logout remain available.
+5. Existing role, resource, file, and AI authorization checks still apply after the flag is cleared; password change never expands access.
+
+### 5.7 Deferred batch or CSV provisioning
+
+Actual batch or CSV account import is deferred until manual Admin provisioning is implemented, secured, and tested. D044 does not add a CSV module, import table, full MIS integration, SSO, institutional-email verification, or additional role.
 
 ---
 
-## 6. Admin Account Provisioning Workflow
+## 6. Admin Account Management Workflow
 
 **Actor:** Admin
 **Preconditions:** Actor is logged in as an Active Admin account.
 
-This workflow is used for creating and managing Teacher/Instructor, Moderator, and Admin accounts after the first Admin account already exists.
+Section 5.2 defines ordinary account provisioning and Section 5.5 defines Admin-assisted password reset. This section preserves the controlled first-Admin exception and the remaining Admin account-management actions.
 
 ### 6.1 First Admin setup boundary
 
 The first Admin account cannot be created through the normal in-app Admin provisioning workflow because that workflow requires an existing Admin.
 
-For v1.0, the first Admin account is created during initial setup only, outside the normal application workflow. The recommended approach is a one-time database seed or manual setup step during local XAMPP setup.
+For v1.0, the first Admin account is created during initial setup only, outside the normal application workflow. The recommended approach is a one-time database seed or manual setup step during local XAMPP setup. Its password is established through the controlled bootstrap process, so it receives `must_change_password = 0`.
 
 Rules for first Admin creation:
 
-1. There must be no public “create first Admin” registration page.
+1. There must be no public Create first Admin page.
 2. There must be no permanently reachable setup endpoint for creating Admin accounts.
 3. Exact setup steps belong in `BUILD_PLAN.md`.
 4. Security handling for setup credentials belongs in `SECURITY_NOTES.md`.
-5. After the first Admin exists, all Teacher/Instructor, Moderator, and additional Admin accounts must be created or assigned by an existing Admin.
+5. After the first Admin exists, every ordinary Student, Teacher/Instructor, Moderator, and additional Admin account must follow the institution-provisioning workflow in Section 5.2.
 
-This keeps first Admin creation as a setup/bootstrap procedure, not an ordinary user-facing workflow.
+This keeps first Admin creation as a setup/bootstrap exception, not an ordinary user-facing workflow.
 
-### 6.2 Create Teacher/Instructor, Moderator, or Admin account
-
-**Actor:** Admin
-**Preconditions:** Admin is logged in and has access to account management.
-
-**Steps:**
-
-1. **User Action** — Admin opens the account management area.
-2. **User Action** — Admin selects “Create account” or equivalent action.
-3. **User Action** — Admin enters required account details and selects one of the allowed roles: Teacher/Instructor, Moderator, or Admin.
-4. **System Validation** — System checks that the acting user is an Active Admin.
-5. **System Validation** — System checks that required account fields are present.
-6. **System Validation** — System checks that the account identifier is not already in use.
-7. **System Validation** — System rejects any role value outside the allowed v1.0 role list.
-8. **System Response — Success** — System creates the account with the selected role and Active status.
-9. **System Response — Failure** — If validation fails, the system shows an error and does not create the account.
-
-The exact onboarding method for the new account, such as temporary password or manual password setting, belongs in `SECURITY_NOTES.md` and `BUILD_PLAN.md`.
-
-### 6.3 Change an account role
+### 6.2 Change an account role
 
 **Actor:** Admin
 **Preconditions:** Admin is logged in and the target account exists.
-
-**Steps:**
 
 1. **User Action** — Admin selects an existing account.
 2. **User Action** — Admin changes the account role.
@@ -352,12 +382,10 @@ The exact onboarding method for the new account, such as temporary password or m
 
 Role changes must be handled carefully because they affect permissions immediately.
 
-### 6.4 Disable or re-enable an account
+### 6.3 Disable or re-enable an account
 
 **Actor:** Admin
 **Preconditions:** Admin is logged in and the target account exists.
-
-**Steps:**
 
 1. **User Action** — Admin selects an existing account.
 2. **User Action** — Admin disables or re-enables the account.
@@ -1797,6 +1825,7 @@ This applies to:
 * report actions,
 * direct hide/restrict/remove actions,
 * bookmark/helpful actions,
+* account provisioning and password-reset actions,
 * account disable/enable actions.
 
 If two users attempt conflicting actions at the same time, the first valid committed action wins. The second action must fail cleanly with a message that the target has already changed.
@@ -1809,7 +1838,7 @@ Examples:
 
 * invalid login,
 * disabled account login attempt,
-* duplicate registration identifier.
+* duplicate Account Identifier during Admin provisioning.
 
 Ordinary validation failures may use specific messages.
 
@@ -1948,9 +1977,11 @@ The database must support:
 * one authoritative role value per account,
 * account status separate from role,
 * Active and Disabled account states,
-* Admin-created Teacher/Instructor, Moderator, and Admin accounts,
-* Student self-registration,
-* audit trail for account creation, disabling, re-enabling, and role changes.
+* institution-provisioned Student, Teacher/Instructor, Moderator, and additional Admin accounts,
+* the controlled D019 first-Admin setup exception,
+* one globally unique institution-issued Account Identifier across all four roles,
+* temporary credentials and a mandatory-change flag for newly provisioned or reset accounts,
+* audit trail for account creation, password reset, disabling, re-enabling, and role changes.
 
 ### 22.2 Resources
 
@@ -2128,24 +2159,32 @@ Audit logs should not store full sensitive file contents or unnecessary personal
 
 This section is a seed checklist for `TESTING_CHECKLIST.md`. It is not the full testing document.
 
-### 23.1 Authentication and registration
+### 23.1 Authentication and institution-provisioned onboarding
 
 * Valid login succeeds.
 * Wrong password fails with a generic message.
 * Nonexistent identifier fails with the same generic message.
 * Disabled account fails with the same generic message.
-* Student registration succeeds.
-* Duplicate registration identifier fails safely.
-* Injected role value during registration does not create elevated role.
+* `GET /register` redirects to login with a neutral institution-issued-account message.
+* `POST /register` is rejected and creates no account, session, role assignment, or audit row.
+* Valid temporary-credential login redirects to mandatory password change.
+* While `must_change_password = 1`, only password change and logout are available.
+* Successful mandatory password change stores a new hash, clears the flag, and regenerates the session identifier.
+* Admin-assisted password reset sets the flag to `1`, and an already-authenticated user is redirected on the next protected request.
 * Session expiration blocks protected access.
 
 ### 23.2 Account provisioning
 
-* Non-Admin cannot create Teacher/Moderator/Admin accounts.
+* Non-Admin cannot create any account.
+* Admin can create Student account.
 * Admin can create Teacher/Instructor account.
 * Admin can create Moderator account.
-* Admin can create Admin account.
+* Admin can create an additional Admin account.
+* Duplicate Account Identifier across any role is rejected safely.
 * Invalid role value is rejected.
+* Account creation and its audit row succeed or fail together.
+* Password reset and its audit row succeed or fail together.
+* Temporary credentials and password hashes never appear in logs or audit notes.
 * Disabled account cannot log in.
 * Disabling an account does not automatically hide Approved resources.
 
@@ -2330,7 +2369,7 @@ These are planned v1.0 enhancements after the required minimum package is stable
 
 The following decisions were resolved while drafting `WORKFLOWS.md` and were later recorded as D019–D029 in `DECISIONS.md`. They are now reflected in the current `DATABASE_DESIGN.md` and `SECURITY_NOTES.md` baselines where applicable. Their remaining AI-, implementation-, and testing-specific consequences must be carried into `AI_FEATURES.md`, `BUILD_PLAN.md`, and `TESTING_CHECKLIST.md`:
 
-* First Admin account is created during setup only, not through public registration.
+* First Admin account is created during the controlled D019 setup process only, not through ordinary institution provisioning.
 * Admin taxonomy management covers add, edit, deactivate, and reactivate behavior for courses/programs, subjects, year levels, resource types, and controlled tags.
 * Hidden and Restricted have distinct meanings.
 * Withdrawn is a resource status for uploader-withdrawn non-public resources.
@@ -2345,7 +2384,7 @@ The following decisions were resolved while drafting `WORKFLOWS.md` and were lat
 
 ### 24.2 Revision history
 
-* **Part 1 — Sections 1–7:** Defined workflow purpose, notation, global rules, authentication, registration, Admin provisioning, Admin taxonomy management, and resource status definitions.
+* **Part 1 — Sections 1–7:** Defined workflow purpose, notation, global rules, authentication, institution-provisioned account onboarding, Admin account management, Admin taxonomy management, and resource status definitions.
 * **Part 2 — Sections 8–17:** Defined upload, validation, Pending-file AI assistance, moderation, Needs Correction, Approved access, bookmarking/helpful feedback, reporting, report review, and replacement workflow.
 * **Part 3 — Sections 18–24:** Defined post-approval status handling, AI output lifecycle, invalid action behavior, edge cases, database implications, testing checklist seed, and document status.
 

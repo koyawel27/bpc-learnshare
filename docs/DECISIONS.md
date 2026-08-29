@@ -1496,6 +1496,73 @@ The targeted MariaDB design is the smallest evidence-supported option that keeps
 
 ---
 
+### D044 — Institution-Provisioned Accounts and Mandatory Temporary-Password Change
+
+**Decision:**
+
+Except for the first Admin created through the controlled local setup process under D019, all BPC LearnShare accounts are institution-provisioned. Student, Teacher/Instructor, Moderator, and additional Admin accounts must originate from authorized institutional records and be provisioned inside LearnShare by an authenticated, Active Admin.
+
+MIS personnel or other authorized institutional staff may act as the external organizational source of account information. MIS is not a LearnShare system role. The only LearnShare roles remain Student, Teacher/Instructor, Moderator, and Admin.
+
+Each provisioned user receives an institution-issued **Account Identifier**. Account Identifiers must be globally unique across all four roles. The existing physical `accounts.username` column remains the storage field for this identifier. User interfaces and current documentation should use the term **Account Identifier** without renaming the database column.
+
+The existing bounded identifier validation remains in effect unless authoritative institutional evidence later establishes a required minimal adjustment. BPC-specific Student ID or employee ID patterns must not be hardcoded without an authoritative institutional format.
+
+Manual Admin provisioning is the required minimum implementation for v1.0. A batch or CSV provisioning workflow is deferred until manual provisioning is implemented, secured, and tested. D044 does not authorize a CSV-import module, import table, full MIS integration, SSO, institutional-email verification, or an additional role.
+
+An Admin provisions an ordinary account using an authorized Account Identifier, display name, one of the four allowed roles, and a temporary credential. The temporary credential may be displayed once after successful provisioning and communicated to the intended user outside LearnShare. It must be stored only as a hash created through PHP `password_hash()` and must never be written to application logs, audit notes, error messages, database plaintext fields, or permanent display records.
+
+Every newly provisioned ordinary account must be stored with `must_change_password = 1`. Existing accounts receive `must_change_password = 0` during migration so they are not accidentally locked out. The first Admin created through the controlled local setup process also receives `0` because its password is established during bootstrap rather than issued through the ordinary temporary-credential workflow.
+
+After successful authentication with a temporary credential, the user must change the password before accessing the dashboard, repository, upload, moderation, administration, AI-assisted features, or any other protected function. While `must_change_password = 1`, the account may access only the mandatory password-change flow and logout.
+
+Every protected request must reload the authoritative account record and recheck account existence, account status, current role, and `must_change_password`. If an Admin resets the password of an account that already has an authenticated session, the user must be redirected to the mandatory password-change flow on the next protected request.
+
+A successful required password change must validate the new password using the accepted password rules, store only the new password hash, set `must_change_password = 0`, regenerate the authenticated session identifier, and permit normal role-authorized access afterward.
+
+Admin-assisted password reset must be restricted to an authenticated, Active Admin. It must replace the password hash with the temporary credential's hash, set `must_change_password = 1`, and record an `audit_log` entry using `action_type = 'password_reset'` and `target_type = 'account'`. Account provisioning must record `action_type = 'account_created'` and `target_type = 'account'`. Provisioning or reset and its corresponding audit record must succeed or fail together. Temporary credentials and password hashes must never be included in an audit note.
+
+`GET /register` redirects to the login page with a neutral message explaining that accounts are institution-issued. `POST /register` is rejected and must never create an account.
+
+D044 preserves the four confirmed roles, Active and Disabled account statuses, login-required resource access, Student/Teacher-only ordinary uploads, Moderator/Admin moderation authority, the local/LAN capstone scope, the native PHP and MariaDB stack, the verified 22-table database structure, D019's controlled first-Admin setup exception, D039's audit support, and D043's AI persistence and architecture boundaries.
+
+The separately reviewed migration may add only `must_change_password TINYINT(1) NOT NULL DEFAULT 0` to `accounts`; no new table or physical rename of `accounts.username` is required. Migration design, rollback, implementation, live-database execution, testing, commit, and push remain separate approval gates. Before any live rollback drops `must_change_password`, the rollback procedure must count rows where `must_change_password = 1`. If any exist, rollback must stop until an approved process establishes private passwords or otherwise resolves those accounts. Dropping the column while temporary-password accounts remain is prohibited.
+
+**Supersedes:**
+
+* D006 — Student Self-Registration Is Guaranteed-On. D006 remains as historical decision evidence and is not deleted or rewritten.
+
+**Amends:**
+
+* D005 — unauthenticated access no longer includes a public Student-registration page;
+* D007 — Admin provisioning now applies to Student accounts as well as Teacher/Instructor, Moderator, and additional Admin accounts.
+
+**Alternatives considered:**
+
+* Retain public Student self-registration.
+* Add a fifth MIS system role.
+* Require a full MIS integration.
+* Implement CSV import before securing manual provisioning.
+* Rename `accounts.username`.
+* Add a new account-identifier table.
+* Introduce SSO, institutional-email verification, or two-factor authentication.
+
+**Reason:**
+
+Prototype evaluation identified that public Student self-registration could not reliably verify institutional membership. A person who was not an enrolled student could create a Student account and access Approved institutional resources.
+
+Institution-provisioned accounts address this weakness by making authorized institutional records the source of Account Identifiers. Manual Admin provisioning is the smallest implementable local/LAN solution. Mandatory temporary-password change prevents a provisioned or reset credential from remaining the user's long-term private password.
+
+Retaining `accounts.username` avoids a risky and unnecessary physical-column rename. Adding one bounded `must_change_password` field supplies the minimum persistent state needed to enforce first-login and post-reset password change without adding a table or altering the verified 22-table structure.
+
+**Affects:**
+
+`DECISIONS.md`, `PROJECT_BRIEF.md`, `USER_ROLES.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `SECURITY_NOTES.md`, `DATA_PRIVACY.md`, `BUILD_PLAN.md`, `TESTING_CHECKLIST.md`, `PROJECT_HANDOFF.md`, authentication/application files, `database/schema.sql`, a separately reviewed migration/rollback package, and affected test harnesses.
+
+**Status:** Accepted account-policy direction. Supersedes D006; amends D005 and D007; preserves D019, D039, D043, and the verified 22-table baseline. Documentation propagation, migration, application implementation, live-database execution, test changes and reruns, commit, and push remain separately reviewed gates.
+
+---
+
 ## Notes on Using This Document
 
 1. Future documents must check this decision log before redefining scope, roles, workflows, AI behavior, deployment assumptions, access rules, resource statuses, moderation behavior, or report behavior.
@@ -1504,13 +1571,13 @@ The targeted MariaDB design is the smallest evidence-supported option that keeps
 
 3. Decisions marked as deferred are not forgotten. They are intentionally postponed to the document where the implementation detail belongs.
 
-4. `WORKFLOWS.md` must follow D005, D006, D008, D009, D010, D011, D012, D019, D020, D021, D022, D023, D024, D026, D027, D029, D030, D031, D032, D034, D036, D038, D040, D041, D042, and D043 when defining registration, upload, moderation, correction, replacement, withdrawal, reporting, notification, taxonomy-management, resource-status, Removed-resource sanitization, AI processing and retrieval, repository-grounded inquiry, graceful fallback, persistent derived-data lifecycle, and AI-related workflows.
+4. `WORKFLOWS.md` must follow D005, D007, D008, D009, D010, D011, D012, D019, D020, D021, D022, D023, D024, D026, D027, D029, D030, D031, D032, D034, D036, D038, D040, D041, D042, D043, and D044 when defining institution-provisioned account onboarding, upload, moderation, correction, replacement, withdrawal, reporting, notification, taxonomy-management, resource-status, Removed-resource sanitization, AI processing and retrieval, repository-grounded inquiry, graceful fallback, persistent derived-data lifecycle, and AI-related workflows. D006 remains historical and is superseded by D044.
 
 5. `AI_FEATURES.md`, `DATA_PRIVACY.md`, and `SECURITY_NOTES.md` must follow D014, D015, D018, D025, D028, D035, D037, D040, D041, D042, and D043 when defining AI eligibility, required and planned AI capabilities, AI-output and retrieval-derived-data lifecycle, AI user notice, AI-assisted moderation, repository-grounded inquiry, external-provider handling, AI-related privacy safeguards, image-resource limitations, validation boundaries, and Removed-resource minimization. D016 is retained only as a superseded historical decision and must not be used as the active v1.0 inquiry-scope rule.
 
-6. `DATABASE_DESIGN.md` and later migration/schema work must follow D006, D007, D008, D010, D012, D014, D018, D019, D020, D021, D022, D023, D024, D026, D027, D028, D029, D030, D031, D032, D033, D034, D035, D036, D037, D038, D039, D040, D041, D042, and D043. D043 authorizes the four-table conceptual target and source-bound `ai_outputs` identity direction. The executable migration, rollback, backfill, and update to `schema.sql` remain a separate reviewed implementation gate.
+6. `DATABASE_DESIGN.md` and later migration/schema work must follow D007, D008, D010, D012, D014, D018, D019, D020, D021, D022, D023, D024, D026, D027, D028, D029, D030, D031, D032, D033, D034, D035, D036, D037, D038, D039, D040, D041, D042, D043, and D044. D043 authorizes the four-table conceptual target and source-bound `ai_outputs` identity direction. D044 authorizes only the later separately reviewed additive `accounts.must_change_password` direction while preserving the 22-table count and requiring fail-closed rollback handling for flagged accounts. Executable migration, rollback, backfill, and `schema.sql` updates remain separate reviewed implementation gates.
 
-7. `BUILD_PLAN.md` must preserve the existing implementation requirements from D019 and D033–D040 and must also reflect D041–D043. It must preserve the independently functional non-AI core, implement D043 in reviewed stages, keep provider/model selection separate, keep generated inquiry unavailable until a candidate passes, and carry forward migration, rollback, lifecycle, privacy, fallback, and integration tests.
+7. `BUILD_PLAN.md` must preserve the existing implementation requirements from D019 and D033–D040 and must also reflect D041–D044. It must preserve the independently functional non-AI core, implement D043 and D044 in separately reviewed stages, keep provider/model selection separate, keep generated inquiry unavailable until a candidate passes, and carry forward migration, rollback, lifecycle, privacy, fallback, account-provisioning, mandatory-password-change, and integration tests.
 
 8. Production deployment concerns listed in D017 are deferred hardening work. They should not be treated as v1.0 requirements unless the project scope is formally changed.
 

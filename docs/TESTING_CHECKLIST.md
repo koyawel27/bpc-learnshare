@@ -2,8 +2,8 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Checkpoint:** Two-week working prototype and presentation
-**Status:** Active verification checklist
-**Last updated:** 2026-08-20
+**Status:** Active verification checklist aligned through D044; D044 implementation tests remain unexecuted
+**Last updated:** 2026-08-29
 **Companion:** `BUILD_PLAN.md`
 
 ---
@@ -68,7 +68,7 @@ All final v1.0 requirements remain governed by the source documents even when th
 | ENV-001 | P0 | Run `git status -sb` before a checkpoint | Correct branch and understood working-tree state | Passed for the core-journey checkpoint — clean synchronized `main` before harness creation |
 | ENV-002 | P0 | Confirm PHP/XAMPP runtime | Required PHP extensions load without fatal error | Passed — PHP 8.2.12 with cURL and Fileinfo |
 | ENV-003 | P0 | Confirm MariaDB runtime and database connection | Application connects using local ignored configuration | Passed — live local connection with 22 accepted tables |
-| ENV-004 | P0 | Import `database/schema.sql` into a clean test database | All 18 accepted tables are created | Not run |
+| ENV-004 | P0 | Import the current `database/schema.sql` into a clean test database | All 22 accepted tables are created | Passed for the D043 canonical-schema checkpoint; D044 column migration/schema update remains a separate unexecuted gate |
 | ENV-005 | P0 | Inspect browser-accessible document root | Only intended `public/` content is exposed | Not run |
 | ENV-006 | P0 | Request a storage/config/internal path through the browser | Access is denied; no source, file, or secret is exposed | Partial — generated protected resource URL returned 404; broader config/internal-path set remains |
 | ENV-007 | P0 | Run with missing/invalid database configuration | Safe error response; no credential or stack trace disclosure | Not run |
@@ -81,10 +81,10 @@ All final v1.0 requirements remain governed by the source documents even when th
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| AUTH-001 | P0 | Register a Student with valid minimum data | Active Student account is created; password is hashed | Passed through the live core journey — registration and subsequent password login succeeded |
-| AUTH-002 | P0 | Attempt public registration as Teacher, Moderator, or Admin | Request is rejected | Not run |
-| AUTH-003 | P0 | Register duplicate student number/identifier | Safe validation error; no duplicate account | Not run |
-| AUTH-004 | P0 | Register with a password shorter than 8 characters | Request is rejected | Not run |
+| AUTH-001 | P0 | Historical: register a Student with valid minimum data under the former public-registration workflow | Historical Active Student creation and hashed-password behavior only; not evidence for D044 | Passed under the pre-D044 baseline; superseded by D044. |
+| AUTH-002 | P0 | Request `GET /register` | Neutral redirect to login with an institution-issued-account message; no account state changes | Not run |
+| AUTH-003 | P0 | Submit `POST /register` directly with otherwise valid or manipulated role data | Request fails closed; no account, session, role assignment, or audit row is created | Not run |
+| AUTH-004 | P0 | Provision a Student as an authenticated Active Admin | Account is created from an authorized institutional record with a unique Account Identifier, hashed temporary credential, `must_change_password = 1`, and atomic `account_created` audit row | Not run |
 | AUTH-005 | P0 | Log in with correct Active credentials | Session is created and ID is regenerated | Partial — Student and temporary Moderator authenticated through HTTP; explicit session-ID comparison remains |
 | AUTH-006 | P0 | Log in with wrong password, unknown identifier, and Disabled account | Same generic failure message; no session | Not run |
 | AUTH-007 | P0 | Access a protected route without a session | Redirect or access-denied response | Passed — repository redirected after logout |
@@ -92,9 +92,25 @@ All final v1.0 requirements remain governed by the source documents even when th
 | AUTH-009 | P0 | Log out and reuse the prior session | Prior session is invalid | Passed for the live browser session — logout succeeded and the next protected request redirected |
 | AUTH-010 | P0 | Change/disable an account after login, then make a protected request | Live database role/status is enforced immediately | Not run |
 | AUTH-011 | P0 | Attempt login with SQL metacharacters | No injection; generic failure | Not run |
-| AUTH-012 | P1 | Create Teacher/Instructor, Moderator, and Admin accounts as Admin | Accounts are created with valid role and audit evidence | Not run |
+| AUTH-012 | P1 | Provision Student, Teacher/Instructor, Moderator, and additional Admin accounts as an authenticated Active Admin | Each allowed role is created with valid role, globally unique Account Identifier, mandatory-change flag, and audit evidence | Not run |
 | AUTH-013 | P1 | Attempt account provisioning as Student/Teacher/Moderator | Request is rejected server-side | Not run |
 | AUTH-014 | P0 | Inspect first-Admin setup after bootstrap | No public or permanently reachable Admin-creation endpoint remains | Not run |
+| AUTH-015 | P0 | Provision an Account Identifier already used by any of the four roles | Safe validation error; no duplicate account or audit row | Not run |
+| AUTH-016 | P0 | Perform multiple provisioning and reset operations and inspect the credential-generation path | Every temporary credential is distinct and generated from the approved cryptographic random source; no shared, reused, sequential, or account-derived placeholder | Not run |
+| AUTH-017 | P0 | Inspect URLs, logs, audit notes, errors, cookies, browser storage, cached/back-navigation responses, and permanent pages after provisioning/reset | No temporary credential or password hash is retained or redisplayed; the credential appears once only after successful commit | Not run |
+| AUTH-018 | P0 | Force failure of account insertion or `account_created` audit insertion | Provisioning and audit insertion roll back together; no partial account or audit record remains | Not run |
+| AUTH-019 | P0 | Force failure during Admin-assisted reset, flag update, or `password_reset` audit insertion | Password hash, `must_change_password = 1`, and audit insertion succeed or roll back together | Not run |
+| AUTH-020 | P0 | Log in with a newly provisioned temporary credential | User is sent to mandatory password change before any other protected function | Not run |
+| AUTH-021 | P0 | Request protected routes while `must_change_password = 1` | Only password change and logout are available; every other protected request is denied or redirected safely | Not run |
+| AUTH-022 | P0 | Reset an already-authenticated account, then make its next protected request | Live revalidation observes `must_change_password = 1` and restricts the existing session immediately | Not run |
+| AUTH-023 | P0 | Complete mandatory password change with valid confirmation | New private hash is stored, flag clears to `0`, session identifier regenerates, and the temporary credential no longer authenticates | Not run |
+| AUTH-024 | P0 | Reset the bootstrap-created first Admin while another authenticated Active Admin exists | Normal atomic audited reset succeeds and explicitly sets the first Admin to `must_change_password = 1` | Not run |
+| AUTH-025 | P0 | Exercise recovery when the affected Admin is the sole remaining Admin and no other authenticated Active Admin exists | Only the separately approved controlled local maintenance procedure can act; no public/runtime recovery route exists | Not implemented — exact accountable sole-Admin procedure remains an approved Build Plan decision gate |
+| AUTH-026 | P0 | Apply the D044 migration to a disposable copy containing existing accounts and the bootstrap Admin | Table count remains 22; existing rows and the first Admin initialize at `must_change_password = 0`; no account password or other row is silently changed | Not run |
+| AUTH-027 | P0 | Attempt D044 rollback while at least one account has `must_change_password = 1` | Rollback stops before dropping the column and preserves all account state | Not run |
+| AUTH-028 | P0 | Apply D044 rollback to a disposable copy only after all flagged accounts are safely resolved | Only the additive column is removed; table/account counts and unrelated schema/data remain intact | Not run |
+
+`AUTH-001` preserves historical evidence only. It **Passed under the pre-D044 baseline; superseded by D044.** None of `AUTH-002` through `AUTH-028` may be marked Passed until the applicable migration, schema, application, and controlled-recovery implementation has been separately approved, executed, and independently reviewed.
 
 ---
 
@@ -135,7 +151,7 @@ All final v1.0 requirements remain governed by the source documents even when th
 | UPL-016 | P1 | Upload a representative image-heavy PPTX below 20 MiB | Valid package is accepted without size drift | Passed — accepted PPTX base with synthetic scan images between 15 and 20 MiB |
 | UPL-017 | P0 | Complete and clean the live upload acceptance run | Test rows/files are removed; database and storage return to baseline | Passed — temporary Student and two resources removed; 22 table counts and storage manifest restored exactly |
 
-`tests/upload/run_upload_limit_acceptance.php --mode=apply --approve=UPLOAD-LIMIT-LIVE-ACCEPTANCE` passed 45/45 checks on 2026-08-24 after a 17/17 read-only preflight. The first apply attempt stopped after registration because the harness expected HTTP 302 while the application correctly uses 303; emergency cleanup removed the temporary Student, and no file upload had started. Only the harness expectation was corrected. The accepted run then completed the exact-limit PDF, image-heavy PPTX, one-byte-oversized rejection, protected-path, Pending-state, exact-size, and full cleanup checks. No AI/model request, schema/register change, commit, or push occurred.
+`tests/upload/run_upload_limit_acceptance.php --mode=apply --approve=UPLOAD-LIMIT-LIVE-ACCEPTANCE` passed 45/45 checks on 2026-08-24 after a 17/17 read-only preflight. The first apply attempt stopped after registration because the harness expected HTTP 302 while the application correctly uses 303; emergency cleanup removed the temporary Student, and no file upload had started. Only the harness expectation was corrected. **Passed under the pre-D044 baseline; superseded by D044.** The accepted upload-limit, format, protected-path, Pending-state, exact-size, and cleanup evidence remains valid, but its account-fixture setup must change before a D044 rerun. No AI/model request, schema/register change, commit, or push occurred.
 
 ---
 
@@ -172,7 +188,7 @@ All final v1.0 requirements remain governed by the source documents even when th
 | RES-009 | P0 | Change resource status after obtaining an old link | Next request enforces the new live status | Not run |
 | RES-010 | P0 | Change filename/path parameters in download request | Server ignores unsafe client path and resolves stored metadata safely | Not run |
 
-`tests/presentation/run_core_journey_acceptance.php --mode=apply --approve=CORE-JOURNEY-LIVE-ACCEPTANCE` passed 66/66 checks on 2026-08-24 after a 24/24 read-only preflight. It completed the real local HTTP journey from Student registration through Pending upload, staff approval, Approved-only discovery, protected byte-matching download, AI-disabled metadata fallback, and logout. The first two apply attempts stopped on harness-only result-detection and cleanup-order defects. Both were reviewed transparently; exact temporary cleanup was confirmed, and only the harness was corrected. The final accepted run restored all 22 table row counts and the protected-storage manifest and left zero temporary accounts, resources, history rows, tag links, or files. No provider request, schema/register change, commit, or push occurred.
+`tests/presentation/run_core_journey_acceptance.php --mode=apply --approve=CORE-JOURNEY-LIVE-ACCEPTANCE` passed 66/66 checks on 2026-08-24 after a 24/24 read-only preflight. It completed the real local HTTP journey from Student registration through Pending upload, staff approval, Approved-only discovery, protected byte-matching download, AI-disabled metadata fallback, and logout. **Passed under the pre-D044 baseline; superseded by D044.** Its upload, moderation, discovery, protected-download, fallback, logout, restoration, and cleanup evidence remains valid; its registration-based opening does not prove D044 and must be replaced with provisioned-account and mandatory-change steps before the target journey is accepted. The first two apply attempts stopped on harness-only result-detection and cleanup-order defects. Both were reviewed transparently; exact temporary cleanup was confirmed, and only the harness was corrected. The final accepted run restored all 22 table row counts and the protected-storage manifest and left zero temporary accounts, resources, history rows, tag links, or files. No provider request, schema/register change, commit, or push occurred.
 
 ---
 
@@ -235,7 +251,7 @@ These checks extend the accepted feasibility package. Raw detailed evidence rema
 | AI-LIFE-003 | P0 | Change source version/file hash | Old derived data is stale and cannot be used as current | Passed at live Gate 5B control seam — 2026-08-13 |
 | AI-LIFE-004 | P0 | Make file unavailable while resource row remains | File and dependent AI behavior fail closed | Passed at live Gate 5B control seam — 2026-08-13 |
 | AI-FALL-001 | P0 | Stop/unreach Ollama during an AI action | AI feature reports unavailability; core workflow continues | Partial — unavailable-provider contract passed; real Ollama interruption not run |
-| AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Passed through the 66/66 core journey — registration, upload, moderation, browse, metadata fallback, details, and download continued with all AI controls disabled |
+| AI-FALL-002 | P0 | Disable AI configuration | Metadata search, upload, moderation, browse, and download continue | Core fallback behavior Passed; its registration-based journey setup **Passed under the pre-D044 baseline; superseded by D044.** Upload, moderation, browse, metadata fallback, details, and download remained available with all AI controls disabled. |
 | AI-FOLL-001 | P1 | Ask context-dependent follow-up in active session | Uses bounded session context and repository evidence | Not run |
 | AI-FOLL-002 | P1 | Start new session and refer to old conversation | No unauthorized permanent memory | Not run |
 | AI-REL-001 | P1 | Request related resources | Small relevant Approved-only set with live filters | Passed for bounded integration; broader offline reconciliation passed 44/44 at 100% precision, 72% recall, and 83.72% F1, but representative broader live quality remains unverified |
@@ -443,7 +459,7 @@ The default-off semantic-search route and interface passed the bounded live owne
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
 | DEMO-001 | P0 | Restart XAMPP/database and launch from documented steps | Prototype starts without hidden manual repair | Not run |
-| DEMO-002 | P0 | Execute Student upload-to-Approved-to-search/download journey | Complete real vertical slice succeeds | Not run |
+| DEMO-002 | P0 | Execute Admin provisioning, temporary login, mandatory password change, Student upload-to-Approved-to-search/download journey | Complete D044-aligned real vertical slice succeeds | Not run |
 | DEMO-003 | P0 | Demonstrate direct unauthorized request | Server rejects it | Not run |
 | DEMO-004 | P0 | Demonstrate AI-disabled core | Core journey remains usable | Not run |
 | DEMO-005 | P0 | Demonstrate accepted semantic retrieval | Real preserved evidence; no fake response | Not run |
