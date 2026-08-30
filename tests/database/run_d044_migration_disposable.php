@@ -291,6 +291,41 @@ function d044SchemaColumnExists(
 }
 
 /** @return array<string, string|null> */
+function d044SchemaColumnMetadata(
+    PDO $server,
+    string $schema,
+    string $table,
+    string $column
+): array {
+    $statement = $server->prepare(
+        'SELECT column_type, is_nullable, column_default, extra
+         FROM information_schema.columns
+         WHERE table_schema = :schema_name
+           AND table_name = :table_name
+           AND column_name = :column_name'
+    );
+    $statement->execute([
+        'schema_name' => $schema,
+        'table_name' => $table,
+        'column_name' => $column,
+    ]);
+    $row = $statement->fetch();
+
+    if (!is_array($row)) {
+        throw new RuntimeException('Expected live column metadata was not found.');
+    }
+
+    return [
+        'column_type' => (string) $row['column_type'],
+        'is_nullable' => (string) $row['is_nullable'],
+        'column_default' => $row['column_default'] === null
+            ? null
+            : (string) $row['column_default'],
+        'extra' => (string) $row['extra'],
+    ];
+}
+
+/** @return array<string, string|null> */
 function d044ColumnMetadata(PDO $database, string $table, string $column): array
 {
     $statement = $database->prepare(
@@ -390,10 +425,14 @@ function d044Hash(string $path): string
     return $hash;
 }
 
-/** @return array{mode: string, approval_token: string} */
+/** @return array{mode: string, approval_token: string, expected_live_state: string} */
 function d044Options(): array
 {
-    $options = getopt('', ['mode:', 'approval-token::']);
+    $options = getopt('', [
+        'mode:',
+        'approval-token::',
+        'expected-live-state::',
+    ]);
 
     if (!is_array($options)) {
         throw new RuntimeException('Unable to parse command-line options.');
@@ -401,9 +440,18 @@ function d044Options(): array
 
     $mode = (string) ($options['mode'] ?? 'validate');
     $approvalToken = (string) ($options['approval-token'] ?? '');
+    $expectedLiveState = (string) (
+        $options['expected-live-state'] ?? 'pre-d044'
+    );
 
     if (!in_array($mode, ['validate', 'apply'], true)) {
         throw new RuntimeException('Mode must be exactly validate or apply.');
+    }
+
+    if (!in_array($expectedLiveState, ['pre-d044', 'post-d044'], true)) {
+        throw new RuntimeException(
+            'Expected live state must be exactly pre-d044 or post-d044.'
+        );
     }
 
     if ($mode === 'apply' && !hash_equals(D044_APPLY_APPROVAL, $approvalToken)) {
@@ -415,6 +463,7 @@ function d044Options(): array
     return [
         'mode' => $mode,
         'approval_token' => $approvalToken,
+        'expected_live_state' => $expectedLiveState,
     ];
 }
 
@@ -429,7 +478,11 @@ $database = null;
 $created = false;
 $failed = false;
 $disposableDatabase = '';
-$options = ['mode' => 'validate', 'approval_token' => ''];
+$options = [
+    'mode' => 'validate',
+    'approval_token' => '',
+    'expected_live_state' => 'pre-d044',
+];
 
 $expectedTables = [
     'accounts',
@@ -455,6 +508,12 @@ $expectedTables = [
     'tags',
     'year_levels',
 ];
+$expectedFlagMetadata = [
+    'column_type' => 'tinyint(1)',
+    'is_nullable' => 'NO',
+    'column_default' => '0',
+    'extra' => '',
+];
 
 try {
     $options = d044Options();
@@ -463,9 +522,14 @@ try {
     $downHashBefore = d044Hash($downPath);
     $upSql = file_get_contents($upPath);
     $downSql = file_get_contents($downPath);
+    $schemaSql = file_get_contents($schemaPath);
 
     fwrite(STDOUT, "=== D044 MIGRATION DISPOSABLE VERIFIER ===\n");
     fwrite(STDOUT, 'Mode: ' . $options['mode'] . "\n");
+    fwrite(
+        STDOUT,
+        'Expected live state: ' . $options['expected_live_state'] . "\n"
+    );
     fwrite(STDOUT, "Credential values: not displayed\n\n");
 
     d044Assert(is_file($schemaPath), 'Canonical schema file present');
@@ -473,6 +537,7 @@ try {
     d044Assert(is_file($downPath), 'D044 rollback migration file present');
     d044Assert(is_string($upSql) && trim($upSql) !== '', 'Forward migration is nonempty');
     d044Assert(is_string($downSql) && trim($downSql) !== '', 'Rollback migration is nonempty');
+    d044Assert(is_string($schemaSql) && trim($schemaSql) !== '', 'Canonical schema is nonempty');
     d044AssertSame(1, count(d044SqlFileStatements($upPath)), 'Forward migration statement count');
     d044AssertSame(4, count(d044SqlFileStatements($downPath)), 'Rollback migration statement count');
     d044Assert(
@@ -481,6 +546,13 @@ try {
             $upSql
         ) === 1,
         'Forward migration has the accepted additive column definition'
+    );
+    d044Assert(
+        preg_match(
+            '/must_change_password\s+TINYINT\(1\)\s+NOT\s+NULL\s+DEFAULT\s+0/i',
+            $schemaSql
+        ) === 1,
+        'Canonical schema has the accepted D044 account flag definition'
     );
     d044Assert(
         str_contains($downSql, 'WHERE must_change_password = 1'),
@@ -551,7 +623,25 @@ try {
         'accounts',
         'must_change_password'
     );
-    d044Assert(!$liveFlagBefore, 'Configured live database remains pre-D044');
+    $expectedLiveFlag = $options['expected_live_state'] === 'post-d044';
+    d044AssertSame(
+        $expectedLiveFlag,
+        $liveFlagBefore,
+        'Configured live database matches the explicitly expected D044 state'
+    );
+
+    if ($liveFlagBefore) {
+        d044AssertSame(
+            $expectedFlagMetadata,
+            d044SchemaColumnMetadata(
+                $server,
+                $liveDatabase,
+                'accounts',
+                'must_change_password'
+            ),
+            'Configured live account flag has exact accepted metadata'
+        );
+    }
 
     if ($options['mode'] === 'validate') {
         d044AssertSame($schemaHashBefore, d044Hash($schemaPath), 'schema.sql hash unchanged');
@@ -612,8 +702,34 @@ try {
         d044Assert($schemaStatements >= 22, 'Canonical schema statements executed');
         d044AssertTables($database, $expectedTables, 'Fresh schema has exact 22-table set');
         d044Assert(
+            d044ColumnExists($database, 'accounts', 'must_change_password'),
+            'Fresh canonical schema includes the D044 account flag'
+        );
+        d044AssertSame(
+            $expectedFlagMetadata,
+            d044ColumnMetadata($database, 'accounts', 'must_change_password'),
+            'Fresh canonical account flag has exact accepted metadata'
+        );
+        d044AssertSame(
+            0,
+            d044FlaggedAccountCount($database),
+            'Fresh canonical schema starts with no flagged accounts'
+        );
+
+        $canonicalDownStatements = d044ExecuteSqlFile($database, $downPath);
+        d044AssertSame(
+            4,
+            $canonicalDownStatements,
+            'Canonical schema derives the exact pre-D044 migration baseline'
+        );
+        d044Assert(
             !d044ColumnExists($database, 'accounts', 'must_change_password'),
-            'Fresh current schema remains pre-D044'
+            'Derived migration baseline has no D044 account flag'
+        );
+        d044AssertTables(
+            $database,
+            $expectedTables,
+            'Derived pre-D044 baseline preserves exact 22-table set'
         );
 
         $bootstrapHash = password_hash(bin2hex(random_bytes(18)), PASSWORD_DEFAULT);
@@ -671,12 +787,7 @@ try {
             'Forward migration added account flag'
         );
         d044AssertSame(
-            [
-                'column_type' => 'tinyint(1)',
-                'is_nullable' => 'NO',
-                'column_default' => '0',
-                'extra' => '',
-            ],
+            $expectedFlagMetadata,
             d044ColumnMetadata($database, 'accounts', 'must_change_password'),
             'Account flag has the exact accepted metadata'
         );
