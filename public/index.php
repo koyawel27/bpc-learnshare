@@ -10,7 +10,6 @@ use BpcLearnShare\Ai\LocalProcessingException;
 use BpcLearnShare\Ai\OllamaAllMiniLmEmbeddingAdapter;
 use BpcLearnShare\Ai\SemanticRetrievalRepository;
 use BpcLearnShare\Ai\SourceAttributionPresenter;
-use BpcLearnShare\Auth\AccountInput;
 use BpcLearnShare\Auth\AccountRepository;
 use BpcLearnShare\Auth\AuthService;
 use BpcLearnShare\Core\Database;
@@ -45,9 +44,32 @@ header(
     . "form-action 'self'"
 );
 
+$appName = Environment::get('APP_NAME', 'BPC LearnShare');
+$requestMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+$requestPath = parse_url(
+    $_SERVER['REQUEST_URI'] ?? '/',
+    PHP_URL_PATH
+);
+$path = is_string($requestPath)
+    ? '/' . trim($requestPath, '/')
+    : '/';
+$path = $path === '/' ? '/' : rtrim($path, '/');
+
+if ($path === '/register' && $requestMethod === 'POST') {
+    http_response_code(405);
+    header('Allow: GET');
+    render('error', [
+        'appName' => $appName,
+        'title' => 'Registration unavailable',
+        'heading' => 'Accounts are institution-issued',
+        'message' =>
+            'Public registration is not available. No account or session was created.',
+    ]);
+    exit;
+}
+
 Session::start();
 
-$appName = Environment::get('APP_NAME', 'BPC LearnShare');
 $database = Database::connection();
 $accounts = new AccountRepository($database);
 $auth = new AuthService($accounts);
@@ -61,16 +83,6 @@ $moderation = new ModerationRepository($database);
 $resourceDiscovery = new ResourceDiscoveryRepository($database);
 $resourceStorageDirectory =
     dirname(__DIR__) . '/storage/uploads/resources';
-$requestMethod = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
-$requestPath = parse_url(
-    $_SERVER['REQUEST_URI'] ?? '/',
-    PHP_URL_PATH
-);
-$path = is_string($requestPath)
-    ? '/' . trim($requestPath, '/')
-    : '/';
-$path = $path === '/' ? '/' : rtrim($path, '/');
-
 $renderPage = static function (
     string $view,
     array $data = []
@@ -147,8 +159,22 @@ $requireStaff = static function () use (
     return $account;
 };
 
+$currentAccount = $auth->currentAccount();
+$mandatoryPasswordPaths = [
+    '/account/change-password',
+    '/logout',
+];
+
+if (
+    $currentAccount !== null
+    && (int) $currentAccount['must_change_password'] === 1
+    && !in_array($path, $mandatoryPasswordPaths, true)
+) {
+    redirect('/account/change-password');
+}
+
 if ($path === '/' && $requestMethod === 'GET') {
-    redirect(Session::accountId() === null ? '/login' : '/dashboard');
+    redirect($currentAccount === null ? '/login' : '/dashboard');
 }
 
 if ($path === '/health' && $requestMethod === 'GET') {
@@ -167,7 +193,7 @@ if ($path === '/health' && $requestMethod === 'GET') {
 }
 
 if ($path === '/login' && $requestMethod === 'GET') {
-    if (Session::accountId() !== null) {
+    if ($currentAccount !== null) {
         redirect('/dashboard');
     }
 
@@ -193,6 +219,15 @@ if ($path === '/login' && $requestMethod === 'POST') {
         && $password !== ''
         && $auth->attempt($username, $password)
     ) {
+        $signedInAccount = $auth->currentAccount();
+
+        if (
+            $signedInAccount !== null
+            && (int) $signedInAccount['must_change_password'] === 1
+        ) {
+            redirect('/account/change-password');
+        }
+
         redirect('/dashboard');
     }
 
@@ -209,82 +244,72 @@ if ($path === '/login' && $requestMethod === 'POST') {
 }
 
 if ($path === '/register' && $requestMethod === 'GET') {
-    if (Session::accountId() !== null) {
+    if ($currentAccount !== null) {
         redirect('/dashboard');
     }
 
-    $renderPage('auth/register', [
-        'title' => 'Create Student account',
-        'errors' => [],
-        'old' => [
-            'username' => '',
-            'display_name' => '',
-        ],
+    Session::flash(
+        'notice',
+        'LearnShare accounts are issued by the institution. Contact an authorized Admin if you need access.'
+    );
+    redirect('/login');
+}
+
+if (
+    $path === '/account/change-password'
+    && in_array($requestMethod, ['GET', 'POST'], true)
+) {
+    $account = $auth->currentAccount();
+
+    if ($account === null) {
+        redirect('/login');
+    }
+
+    if ((int) $account['must_change_password'] !== 1) {
+        redirect('/dashboard');
+    }
+
+    $errors = [];
+
+    if ($requestMethod === 'POST') {
+        if (!Csrf::validate($_POST['_token'] ?? null)) {
+            $rejectInvalidCsrf();
+        }
+
+        $errors = $auth->changeMandatoryPassword(
+            (int) $account['id'],
+            (string) ($_POST['password'] ?? ''),
+            (string) ($_POST['password_confirmation'] ?? '')
+        );
+
+        if ($errors === []) {
+            Session::flash(
+                'success',
+                'Your private password has been saved.'
+            );
+            redirect('/dashboard');
+        }
+
+        $account = $auth->currentAccount();
+
+        if ($account === null) {
+            redirect('/login');
+        }
+
+        if ((int) $account['must_change_password'] !== 1) {
+            redirect('/dashboard');
+        }
+
+        http_response_code(422);
+    }
+
+    $renderPage('auth/change_password', [
+        'title' => 'Set your private password',
+        'account' => $account,
+        'errors' => $errors,
         'csrfToken' => Csrf::token(),
     ]);
     exit;
-}
-
-if ($path === '/register' && $requestMethod === 'POST') {
-    if (!Csrf::validate($_POST['_token'] ?? null)) {
-        $rejectInvalidCsrf();
-    }
-
-    $username = trim((string) ($_POST['username'] ?? ''));
-    $displayName = trim((string) ($_POST['display_name'] ?? ''));
-    $password = (string) ($_POST['password'] ?? '');
-    $passwordConfirmation =
-        (string) ($_POST['password_confirmation'] ?? '');
-    $errors = AccountInput::validate(
-        $username,
-        $displayName,
-        $password,
-        $passwordConfirmation
-    );
-
-    if (array_key_exists('role', $_POST)) {
-        $errors['role'] =
-            'Public registration cannot select an account role.';
-    }
-
-    if ($errors === []) {
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-        if (!is_string($passwordHash)) {
-            throw new RuntimeException('Password hashing failed.');
-        }
-
-        if (
-            !$accounts->createStudent(
-                $username,
-                $passwordHash,
-                $displayName
-            )
-        ) {
-            $errors['username'] =
-                'Registration could not be completed with those details.';
-        }
-    }
-
-    if ($errors !== []) {
-        http_response_code(422);
-        $renderPage('auth/register', [
-            'title' => 'Create Student account',
-            'errors' => $errors,
-            'old' => [
-                'username' => $username,
-                'display_name' => $displayName,
-            ],
-            'csrfToken' => Csrf::token(),
-        ]);
-        exit;
-    }
-
-    Session::flash(
-        'success',
-        'Student account created. You can now sign in.'
-    );
-    redirect('/login');
 }
 
 if ($path === '/resources/upload'
@@ -1062,7 +1087,8 @@ if ($path === '/logout' && $requestMethod === 'POST') {
 
 $allowedMethodsByPath = [
     '/login' => ['GET', 'POST'],
-    '/register' => ['GET', 'POST'],
+    '/register' => ['GET'],
+    '/account/change-password' => ['GET', 'POST'],
     '/logout' => ['POST'],
     '/dashboard' => ['GET'],
     '/resources' => ['GET'],

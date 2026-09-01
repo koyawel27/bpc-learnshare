@@ -2,10 +2,10 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Version:** Draft v1.0
-**Last Updated:** 2026-08-29
+**Last Updated:** 2026-09-01
 **Author:** Nepthalie Jezer B. Macaslang
 **Course:** BS Information Systems — Bulacan Polytechnic College
-**Purpose:** Reflect the current accepted planning, account-policy, AI-scope, verified schema, security, privacy, and feasibility-spike state through D044 so a new Claude or GPT conversation can continue without reopening settled decisions or re-deriving context from old chat history. This document distinguishes accepted target documentation from current pre-D044 application/database behavior and remaining implementation gates; it does not itself introduce new decisions.
+**Purpose:** Reflect the current accepted planning, account-policy, AI-scope, verified schema, security, privacy, and feasibility-spike state through D044 so a new Claude or GPT conversation can continue without reopening settled decisions or re-deriving context from old chat history. This document distinguishes completed D044 migration/schema and bounded authentication-foundation evidence from the remaining provisioning/reset and other D044 gates; it does not itself introduce new decisions.
 
 ---
 
@@ -59,16 +59,16 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 | `PROJECT_BRIEF.md`   | Accepted and aligned through D044. Reflects institution-provisioned ordinary accounts, public-registration removal, temporary credentials, mandatory password change, and the required AI package without changing unrelated scope. |
 | `USER_ROLES.md`      | Accepted and aligned through D044. Preserves exactly four roles; only an authenticated Active Admin provisions ordinary accounts, with D019 limited to first-Admin bootstrap. |
 | `WORKFLOWS.md`       | Accepted and aligned through D044. Defines Admin provisioning, temporary login, mandatory change, Admin reset, live flag enforcement, and fail-closed public-registration removal while preserving D043 AI lifecycle rules. |
-| `DATABASE_DESIGN.md` | Accepted conceptual direction through D044. It preserves the verified 22-table D043 baseline and authorizes only a later separately gated additive `accounts.must_change_password` migration; current `schema.sql` and the live database do not yet include that column. |
+| `DATABASE_DESIGN.md` | Accepted direction through D044. The additive `accounts.must_change_password` migration is applied and verified while preserving the 22-table baseline. |
 | `DECISIONS.md`       | Complete through **D044**. D044 supersedes D006, amends D005 and D007, preserves D019/D039/D043, and establishes institution-provisioned accounts plus mandatory password change without adding a role or table. |
-| `schema.sql`         | Accepted and verified current 22-table D043 SQL baseline on MariaDB 10.4.32. It remains pre-D044 and does not yet contain `accounts.must_change_password`; migration and canonical-schema changes remain separately gated. |
+| `schema.sql`         | Accepted and verified current 22-table D044 SQL baseline on MariaDB 10.4.32, including `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0`. |
 | `AI_FEASIBILITY_SPIKE.md` | Complete and accepted. Final reconciliation remains **Partially feasible — alternative or mixed architecture required**, with Moderate confidence and 6/4/2/0 capability results. D043 uses that evidence without rewriting it. |
 | `AI_FEATURES.md`     | Accepted D043 AI behavior/architecture baseline. Storage, provider-neutral persistence, guarded local processing, the guarded semantic-retrieval backend, and browser acceptance of the default-off public search surface are complete; generation selection and generated inquiry remain pending. |
 | `SECURITY_NOTES.md`  | Accepted through D044. Adds account-origin, one-time-credential, live mandatory-change, atomic-audit, first-Admin reset, sole-Admin recovery, and rollback guards while preserving D043 controls. |
 | `DATA_PRIVACY.md`    | Accepted through D044. Adds institution-record, credential-minimization, mandatory-change, audit, first-Admin reset, and rollback privacy boundaries while preserving D043 lifecycle rules. |
-| `PROJECT_HANDOFF.md` | This D044-propagated version. It records the accepted target separately from the still pre-D044 application and schema behavior. |
+| `PROJECT_HANDOFF.md` | This D044 status version. It separates the completed migration/schema and accepted registration-removal/mandatory-change authentication evidence from still-pending provisioning/reset and other D044 work. |
 
-**Completed:** accepted D044 target-document propagation, restore-verified D043 migration, canonical 22-table schema, provider-neutral persistence, guarded local processing/retrieval, default-off semantic-search and related-resource surfaces, their recorded browser acceptances, and the historical 66/66 AI-disabled core journey. **Still pending:** the D044 versioned migration/rollback, `schema.sql` update, live database execution, Admin-provisioning and mandatory-change application work, sole-Admin recovery decision, D044 test implementation/rerun, remaining negative/status presentation cases, complete provider-interruption/application fallback, and a passing generated-inquiry candidate. `CHANGELOG.md` also remains outside this pass.
+**Completed:** accepted D044 target-document propagation; D044 disposable migration/rollback, guarded live migration, and canonical 22-table schema alignment; the 26/26 read-only authentication-foundation validator, 57/57 live-harness validator, and accepted 169/169 local live authentication run; provider-neutral AI persistence and guarded local processing/retrieval; default-off semantic-search and related-resource surfaces and their recorded browser acceptances; and the historical 66/66 AI-disabled core journey. **Still pending:** Admin provisioning/reset with atomic audits and one-time credential delivery, the sole-Admin recovery decision, complete D044-aligned journey reruns, remaining negative/status presentation cases, complete provider-interruption/application fallback, and a passing generated-inquiry candidate. The 169-check run does not prove those pending D044 account-management gates. `CHANGELOG.md` also remains outside this pass.
 
 `AI_FEASIBILITY_SPIKE.md` is complete and accepted. Final reconciliation covers all 12 Required capabilities and records **Partially feasible — alternative or mixed architecture required**, with Moderate confidence within tested conditions. D043 now accepts the smallest persistent architecture direction supported by that evidence. It still does not select a provider/model, repair the grounded-answer failure, or authorize generated inquiry/application integration.
 
@@ -81,7 +81,7 @@ Separately, under `DECISIONS.md` D041–D042, the completed v1.0 capstone protot
 * login-required access;
 * institution-provisioned Student, Teacher/Instructor, Moderator, and additional Admin accounts created by an authenticated Active Admin from authorized institutional records, except for the controlled D019 first-Admin bootstrap;
 * Account Identifier stored in the existing `accounts.username` field and globally unique across all four roles;
-* temporary credentials and mandatory first-login password change after the separately approved D044 migration/application gates;
+* temporary credentials and mandatory first-login password change under D044; the database flag and application enforcement foundation are present, while Admin provisioning/reset remains a separate pending gate;
 * ordinary uploads by Students and Teachers/Instructors only;
 * file validation and protected file storage;
 * mandatory moderation before normal visibility;
@@ -137,7 +137,7 @@ Rules:
 * The first Admin account is created through the controlled non-public D019 command-line bootstrap only. Once created, it is an ordinary Admin account; no `is_first_admin` field or permanent special account type exists.
 * `GET /register` redirects neutrally to login with an institution-issued-account message. `POST /register` fails closed and creates no account, session, role assignment, or audit row.
 * Every provisioning or reset operation uses a different cryptographically unpredictable temporary credential, stores only its hash, displays it once after successful commit, and communicates it privately outside LearnShare. Credentials and hashes never belong in URLs, logs, audit notes, errors, browser-persistent storage, or permanent display records.
-* After the separately gated migration, newly provisioned and Admin-reset accounts are explicitly written with `must_change_password = 1`; existing accounts and the bootstrap first Admin initialize at `0` during migration.
+* The applied D044 migration initialized existing accounts and the bootstrap first Admin at `must_change_password = 0`. Future newly provisioned and Admin-reset accounts must be explicitly written with `1` by the still-pending Admin workflow.
 * The first Admin has no permanent reset exemption. Another authenticated Active Admin may reset it through the normal atomic audited workflow, setting it to `1`. Controlled local maintenance applies only when no other authenticated Active Admin exists; the exact accountable sole-Admin procedure remains an implementation decision because the current bootstrap helper refuses to run after an Admin exists and the accepted audit schema requires an actor.
 * Every protected request rechecks live account existence, Active/Disabled status, current role, and `must_change_password`. A flagged account may access only password change and logout. Successful mandatory change stores a new private hash, clears the flag, and regenerates the session identifier.
 * Provisioning/reset and the required audit row succeed or fail together. A D044 rollback must stop while any account remains flagged `1`.
@@ -528,7 +528,7 @@ Accepted controls include:
 
 `SECURITY_NOTES.md` now carries the targeted D043 AI persistence, retrieval, external-payload, lifecycle, and fallback controls. Its earlier security principles remain controlling.
 
-Its accepted D044 propagation separately carries institution-record account origin, temporary credentials, mandatory password change, live flag enforcement, first-Admin normal reset, sole-Admin recovery boundaries, atomic auditing, and fail-closed rollback. These are accepted target requirements, not evidence that the still pre-D044 application/schema currently implements them.
+Its accepted D044 propagation separately carries institution-record account origin, temporary credentials, mandatory password change, live flag enforcement, first-Admin normal reset, sole-Admin recovery boundaries, atomic auditing, and fail-closed rollback. The migration/schema and authentication-foundation portions now have the bounded evidence recorded here; provisioning/reset, one-time credential delivery, atomic account/audit transactions, and sole-Admin recovery must not be claimed from that evidence.
 
 The D043 propagation covers, where necessary:
 
@@ -630,7 +630,7 @@ D040 did not add a table or column. It uses existing `resources` columns, remove
 
 D041–D042 did not themselves change the historical 18-table count. D043 and its separately approved migration package later established the verified 22-table baseline.
 
-D044 preserves the 22-table count. The accepted target adds only `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0` through a later versioned migration and subsequent canonical-schema gate. The current live database and `database/schema.sql` remain pre-D044 and do not yet contain that column. Existing accounts and the bootstrap first Admin will initialize at `0`; later provisioning/reset explicitly writes `1`, including a first-Admin reset by another Active Admin. Rollback must stop while any flagged row exists.
+D044 preserves the 22-table count. The versioned migration and canonical-schema gates added `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0` and passed disposable, guarded-live, and post-live verification. Existing accounts and the bootstrap first Admin initialized at `0`; later provisioning/reset must explicitly write `1`, including a first-Admin reset by another Active Admin. Rollback stops while any flagged row exists.
 
 The current baseline contains dedicated structures for:
 
@@ -723,11 +723,11 @@ The following remain open and must not be treated as already resolved:
 
   * Resolve in `BUILD_PLAN.md`.
 
-* **D044 migration, application, and testing remain separately gated.**
+* **D044 application and testing remain partially gated.**
 
-  * The current 22-table schema/application remains pre-D044: public Student registration exists and `accounts.must_change_password` does not.
-  * Required later gates are the versioned migration/rollback, `schema.sql` update, live database execution, PHP provisioning/reset/mandatory-change/public-registration-removal work, test implementation, live rerun, and independent review.
-  * No new D044 test is Passed yet.
+  * The versioned migration/rollback, canonical `schema.sql`, and guarded live database execution are complete with 22 tables preserved.
+  * Public registration removal, pre-session `POST /register` rejection, live flag loading, mandatory-change routing, guarded password replacement, CSRF rotation, and the password-change view passed 26/26 read-only validation, 57/57 live-harness validation, and 169/169 accepted local live checks with zero functional failures.
+  * The live run removed its controlled fixture and sessions and restored all 22 logical database states and protected-file baselines. Its consumed `AUTO_INCREMENT` value is an expected harmless database artifact and was not rewound. Admin provisioning/reset, atomic audit insertion, one-time credential delivery, and the sole-Admin procedure remain separate work.
 
 * **The exact accountable sole-Admin recovery procedure remains open.**
 
@@ -1006,25 +1006,25 @@ Any older D016-based optional inquiry wording is superseded by D041 and must be 
 
 ## 15. Guidance for the Next Claude Conversation
 
-Use this when beginning the D044 implementation-design phase after the complete documentation patch is independently accepted and committed:
+Use this when continuing after the accepted D044 registration-removal and mandatory-password-change authentication-foundation checkpoint:
 
 ```text
 I am continuing the BPC LearnShare capstone project. Read the latest accepted source documents through D044 and inspect the repository before recommending any implementation.
 
 Current accepted state:
 
-- Decisions are accepted through D044, and the D044 documentation direction is accepted subject to the final correction review.
-- The current application and database remain pre-D044. Public Student registration still exists in the implementation.
-- The verified current schema contains 22 tables and does not yet contain `accounts.must_change_password`.
-- No D044 migration, canonical-schema update, application implementation, live database operation, or D044 test has been completed.
+- Decisions and documentation are accepted through D044.
+- The verified 22-table live database and canonical schema contain `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0`; the migration/rollback package and guarded live application are complete.
+- Public registration removal and mandatory-change enforcement passed 26/26 read-only checks, 57/57 live-harness validation checks, and 169/169 accepted local live checks with zero functional failures. The test-owned fixture and sessions were removed; all 22 logical database states and protected-file baselines were restored. The consumed `AUTO_INCREMENT` value is an expected harmless database artifact and was intentionally not rewound.
+- Admin provisioning/reset, one-time credential delivery, atomic account/audit transactions, and their tests are not yet implemented.
 - The exact accountable sole-Admin recovery procedure remains unresolved.
 - Existing D043 AI evidence and architecture boundaries remain accepted and unchanged.
 
 Immediate task:
 
-Perform a read-only D044 implementation preflight. Inspect the existing account schema, authentication routes, registration implementation, first-Admin CLI helper, account-management code, `audit_log` constraints, migration conventions, and relevant test-harness structure. Confirm the exact affected files; propose the smallest ordered implementation gates; preview the versioned up/down migration and fail-closed rollback verification; present defensible sole-Admin recovery options with truthful audit treatment; and identify unresolved choices or blockers before implementation.
+Inspect the committed authentication foundation and its recorded evidence, then prepare only the next separately approved Admin-provisioning/reset design gate. Keep one-time temporary-credential delivery, atomic account/audit transactions, first-Admin reset by another Active Admin, and sole-Admin recovery explicitly separated where their implementation or evidence differs. Do not rerun the completed 169-check authentication journey merely for convenience and do not treat it as provisioning/reset evidence.
 
-During this initial preflight, do not modify files, apply migrations, change the live database, execute `tests/security/`, or implement D044.
+Do not implement or live-test provisioning/reset, display a temporary credential, or mutate account state without its own exact approval and verified cleanup guards.
 
 Enforce these boundaries: exactly four roles; MIS remains external; no public registration; D019 bootstrap is the only account-creation exception; 22 tables remain; only the separately approved `accounts.must_change_password` column may be added; every provisioning/reset uses a unique unpredictable temporary credential; provisioning/reset and audit insertion are atomic; mandatory-change state is rechecked live; another Active Admin may reset the first Admin normally; local maintenance applies only to the sole-Admin case; no D044 behavior is described as implemented or Passed without verified evidence; and D001–D044 are not reopened without a direct source conflict.
 ```
@@ -1033,18 +1033,18 @@ Enforce these boundaries: exactly four roles; MIS remains external; no public re
 
 ## 16. Guidance for the Next GPT Review Conversation
 
-Use this for an independent review of the read-only D044 implementation preflight:
+Use this for an independent review before the next D044 account-management gate:
 
 ```text
 Act as the critical architecture, security, migration, testing, and documentation reviewer for BPC LearnShare. Read the accepted sources through D044 and inspect the repository before evaluating the preflight.
 
-The accepted target replaces public Student registration with institution-provisioned accounts, but the current application/database remain pre-D044. The verified schema has 22 tables and no `accounts.must_change_password` column. No D044 migration, schema update, application change, live database operation, or D044 test is complete. Sole-Admin recovery remains unresolved. Preserve all accepted D043 AI evidence and architecture boundaries unchanged.
+The D044 migration and canonical schema are applied and verified with 22 tables preserved. Public registration removal and mandatory-password-change enforcement passed 26/26 read-only checks, 57/57 live-harness validation checks, and 169/169 accepted local live checks with zero functional failures and exact logical-state/protected-file restoration. Admin provisioning/reset, one-time credential delivery, atomic account/audit transactions, and sole-Admin recovery remain unresolved separate gates. Preserve all accepted D043 AI evidence and architecture boundaries unchanged.
 
-Review only the proposed read-only D044 implementation preflight: exact affected files, ordered gates, versioned up/down migration, fail-closed rollback, application enforcement, test impact, and defensible sole-Admin recovery options with truthful auditing. Flag every unresolved choice before implementation.
+Review only the proposed next D044 account-management gate against the accepted authentication foundation: authorized Admin provisioning/reset, unique temporary credentials, one-time delivery, atomic account/audit transactions, and the correct separation of normal first-Admin reset from sole-Admin recovery. Identify exact corrections before implementation or live acceptance.
 
 Enforce exactly four roles, external MIS authority, no public registration, the D019-only bootstrap exception, the unchanged 22-table count, only the separately approved `accounts.must_change_password` column, unique unpredictable temporary credentials, atomic provisioning/reset plus audit insertion, live mandatory-change enforcement, normal first-Admin reset by another Active Admin, and local maintenance only for the sole-Admin case. Do not describe D044 as implemented or Passed without evidence, and do not reopen D001–D044 without a direct source conflict.
 
-For this initial review, do not modify files, run or apply migrations, change the live database, execute `tests/security/`, or implement D044.
+For this review, do not modify files, run live HTTP tests, change the database, begin provisioning/reset, stage, commit, or push.
 ```
 
 ---
@@ -1234,9 +1234,9 @@ BPC LearnShare v1.0 currently has:
 * `PROJECT_BRIEF.md` — accepted and aligned through D044;
 * `USER_ROLES.md` — accepted and aligned through D044 while preserving exactly four roles;
 * `WORKFLOWS.md` — accepted and aligned through D044;
-* `DATABASE_DESIGN.md` — accepted conceptual direction through D044 with the verified 22-table D043 baseline preserved;
+* `DATABASE_DESIGN.md` — accepted direction through D044 with the verified 22-table baseline preserved;
 * `DECISIONS.md` — accepted through D044;
-* `schema.sql` — accepted and verified current pre-D044 22-table MariaDB 10.4.32 baseline after the guarded D043 migration; the D044 flag is not yet present;
+* `schema.sql` — accepted and verified current D044 22-table MariaDB 10.4.32 baseline including `accounts.must_change_password`;
 * `SECURITY_NOTES.md` — complete and accepted through D044 targeted propagation;
 * `DATA_PRIVACY.md` — complete and accepted through D044 targeted propagation;
 * `AI_FEATURES.md` — drafted as the D043 AI behavior/architecture baseline;
@@ -1272,10 +1272,14 @@ Completed verification:
 * restore-verified pre-migration backup preserved under the ignored local evidence directory;
 * live 18-to-22 migration preserved every original row count and left the four new tables empty;
 * revised canonical/fresh/forward/rollback verifier passed 60/60 checks.
+* the D044 disposable migration/rollback package passed 59/59 checks, the guarded live migration passed post-live verification with 22 tables and existing accounts initialized at `0`, and the canonical schema was aligned;
+* the D044 registration-removal/mandatory-change source validator passed 26/26 read-only checks, the corrected live-harness validator passed 57/57, and the accepted owner-side live run passed 169/169 checks with zero functional failures;
+* the live fixture and sessions were removed, all 22 logical database states and protected-file baselines were restored, and the recovery marker plus all nine recorded temporary files were removed; the consumed `AUTO_INCREMENT` value was accepted as an expected harmless artifact and was not rewound;
+* the final reviewed live-harness SHA-256 is `B11C1858F6C18687444165BC3A38D8D2C6355D809674E8065AECB89341B6D395`.
 
 Known scheduled implementation remains:
 
-* D044 versioned migration/rollback review, canonical `schema.sql` update, live database execution, Admin provisioning/reset/mandatory-change implementation, public-registration removal, sole-Admin recovery resolution, and independently reviewed D044 test reruns;
+* Admin provisioning/reset with one-time temporary-credential delivery and atomic audits; sole-Admin recovery resolution; and independently reviewed complete D044 journey reruns;
 * broader live related-resource quality evidence after the repository contains enough independently reviewed Approved resources and content-justified tags; the completed 25-resource offline reconciliation must not be presented as a representative live score;
 * remaining negative, role, status, and environment presentation acceptance beyond the completed upload-limit and 66/66 core-journey checkpoints.
 
@@ -1283,7 +1287,7 @@ Any older pre-D041/D042 wording that describes repository-grounded inquiry as op
 
 Important remaining items:
 
-* replace the current pre-D044 public-registration opening with Admin provisioning, one-time temporary login, mandatory password change, and the same upload-to-Approved journey; preserve the old result only as historical evidence labelled **Passed under the pre-D044 baseline; superseded by D044.**;
+* complete Admin provisioning and the one-time temporary-login journey, then rerun the same upload-to-Approved path under D044; preserve the old public-registration result only as historical evidence labelled **Passed under the pre-D044 baseline; superseded by D044.**;
 * complete the remaining negative and alternate-role/status presentation cases; the representative 20 MiB upload-limit and 66/66 core-journey checkpoints are complete;
 * integrate and validate the audited source-attribution contract against live PHP/database state and protected resource links;
 * preserve the completed 25-resource Gate 5C relation-metadata reconciliation and defer representative live scoring until the repository contains enough independently reviewed Approved resources and content-justified tags;

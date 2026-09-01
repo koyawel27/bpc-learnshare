@@ -34,6 +34,26 @@ final class AccountInput
                 'Display name must be between 2 and 100 characters.';
         }
 
+        if ($passwordConfirmation === null) {
+            $passwordConfirmation = $password;
+        }
+
+        $errors = array_merge(
+            $errors,
+            self::validatePasswordChange($password, $passwordConfirmation)
+        );
+
+        return $errors;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function validatePasswordChange(
+        string $password,
+        string $passwordConfirmation
+    ): array {
+        $errors = [];
         $passwordLength = mb_strlen($password);
 
         if ($passwordLength < 8 || $passwordLength > 255) {
@@ -41,10 +61,7 @@ final class AccountInput
                 'Password must be between 8 and 255 characters.';
         }
 
-        if (
-            $passwordConfirmation !== null
-            && !hash_equals($password, $passwordConfirmation)
-        ) {
+        if (!hash_equals($password, $passwordConfirmation)) {
             $errors['password_confirmation'] =
                 'Password confirmation does not match.';
         }

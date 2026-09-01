@@ -2,8 +2,8 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Planning horizon:** Two-week prototype and presentation checkpoint
-**Status:** Active implementation plan aligned through D044; migration, schema, application, and test gates remain pending
-**Last updated:** 2026-08-29
+**Status:** Active implementation plan aligned through D044; migration, canonical schema, and the registration-removal/mandatory-change authentication foundation are accepted, while provisioning/reset and the remaining D044 gates are pending
+**Last updated:** 2026-09-01
 **Scope authority:** This plan sequences accepted requirements. It does not replace `PROJECT_BRIEF.md`, `DECISIONS.md`, `USER_ROLES.md`, `WORKFLOWS.md`, `DATABASE_DESIGN.md`, `SECURITY_NOTES.md`, `DATA_PRIVACY.md`, or `AI_FEASIBILITY_SPIKE.md`.
 
 ---
@@ -26,7 +26,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 - Accepted project scope, role model, workflows, database design, security rules, and privacy rules.
 - Verified MariaDB 10.4.32-compatible 22-table current schema. The guarded D043 live migration and canonical fresh-import update were completed on 2026-08-20 from the restore-verified 18-table legacy baseline.
-- Accepted D044 institution-provisioned account direction. It preserves the 22-table count and authorizes only a later, separately reviewed additive `accounts.must_change_password` migration; the migration, canonical schema update, PHP workflow, and D044 tests are not yet implemented.
+- Accepted D044 institution-provisioned account direction. The additive `accounts.must_change_password` migration and canonical schema update are applied and verified while preserving 22 tables. The registration-removal and mandatory-password-change authentication foundation is implemented, passed its 26/26 source validator and 57/57 live-harness validator, and passed one accepted 169-check local live run with zero functional failures. Admin provisioning/reset, one-time credential delivery, atomic account/audit transactions, and sole-Admin recovery remain pending separate gates.
 - Completed AI feasibility evidence for:
   - readable-text extraction;
   - corrected segmentation;
@@ -39,7 +39,7 @@ Figma may supplement the presentation for screens that are not yet implemented, 
 
 ### 2.2 Current implementation reality
 
-- Gates 0–4 now have a working native-PHP core covering database connectivity, pre-D044 public Student registration and authentication, protected sessions and CSRF, non-public first-Admin bootstrap, guarded Student/Teacher upload, transactional `Pending` creation, staff moderation, Approved-only metadata discovery, resource details, and controlled protected downloads. **Passed under the pre-D044 baseline; superseded by D044.** The current application still needs the D044 provisioning, mandatory-password-change, registration-removal, migration, and rerun gates described below.
+- Gates 0–4 retain the accepted native-PHP resource core covering database connectivity, authentication, protected sessions and CSRF, non-public first-Admin bootstrap, guarded Student/Teacher upload, transactional `Pending` creation, staff moderation, Approved-only metadata discovery, resource details, and controlled protected downloads. Their registration-based journey evidence **Passed under the pre-D044 baseline; superseded by D044.** Public Student registration is removed and the mandatory-password-change authentication foundation passed its bounded live acceptance. Admin provisioning/reset and a complete D044-aligned end-to-end journey remain incomplete.
 - Gate 5A now has an unrouted, model-independent PHP safety-foundation candidate covering default-off AI configuration, active-account and Approved/available source revalidation, source-fingerprint and protected-file checks, second-point revalidation, protected citation-link shaping, bounded session-only context, and metadata-search fallback. Its deterministic CLI verification passed 18/18 checks with zero real model/provider requests and zero database writes.
 - Gate 5B reused that foundation against live MariaDB state and passed 19/19 rollback-based lifecycle and fallback checks. Hidden, Restricted, Removed, Replaced, deleted, invalidated, stale-reference, missing-file, size-drift, disabled-account, disabled-AI, unavailable-provider, and final-revalidation cases failed closed; metadata search and protected-download lookup remained available when AI was disabled. The transaction was rolled back, the protected file hash was unchanged, and no real provider was called.
 - Gate 5C added a shared-active-tag metadata-fallback candidate and passed 18/18 live PHP/MariaDB checks against two accepted synthetic Security resources and two accepted synthetic Usability resources. Expected-pair top-five coverage and reviewed top-three usefulness were both 4/4 (100%); self-results and same-subject cross-topic results were excluded; protected `/resources/{id}` links resolved through Approved-only lookup; and Hidden, file-unavailable, missing-file, inactive-tag, ineligible-target, and disabled-requester cases failed closed. All test mutations and view increments were rolled back in the accepted run. A later default-off resource-detail surface reused this exact candidate and passed 28/28 focused checks without a model call or database write.
@@ -90,7 +90,7 @@ The presentation checkpoint does not redefine this final scope.
 2. **Work in vertical slices.** Finish and test one complete user path before starting another.
 3. **Enforce rules on the server.** Hidden buttons are not authorization.
 4. **Fail closed.** If identity, role, status, ownership, file availability, CSRF, or input validity cannot be confirmed, deny the operation.
-5. **Use the verified 22-table D043 schema as the current baseline.** D044 preserves that table count and requires a separately approved additive account-column migration; do not change `schema.sql` or the live database before that gate. Do not add provider-specific tables or bypass source-version, readiness, freshness, and lifecycle controls.
+5. **Use the verified 22-table D044 schema as the current baseline.** The additive account-column migration is applied and canonical `schema.sql` is aligned. Do not add another table/column or bypass source-version, readiness, freshness, and lifecycle controls without a separate decision and migration gate.
 6. **Keep uploaded files outside `public/`.** Serve them only through a checked PHP endpoint.
 7. **Use prepared statements and output escaping everywhere.**
 8. **Keep state-changing requests protected by CSRF tokens.**
@@ -157,7 +157,7 @@ The helper:
 
 The first setup action cannot write a normal `audit_log` row because that table requires an existing actor account. The setup command itself is the local bootstrap record. Every later ordinary Student, Teacher/Instructor, Moderator, and additional Admin account must be provisioned by an authenticated Active Admin from an authorized institutional record and audited through the normal account-management workflow.
 
-When the separately approved D044 migration is later applied, existing accounts and the bootstrap-created first Admin are initialized at `must_change_password = 0`. This is initialization only, not a permanent first-Admin exemption. If another authenticated Active Admin later resets the first Admin, the normal audited reset workflow applies and explicitly sets the first Admin to `1`.
+The applied D044 migration initialized existing accounts and the bootstrap-created first Admin at `must_change_password = 0`. This is initialization only, not a permanent first-Admin exemption. If another authenticated Active Admin later resets the first Admin, the normal audited reset workflow applies and explicitly sets the first Admin to `1`.
 
 Sole-Admin recovery is reserved for the case where no other authenticated Active Admin exists. The current `create_first_admin` helper cannot perform that recovery because it intentionally refuses to run after any Admin exists, and the accepted `audit_log` requires an actor account. Therefore, the exact accountable sole-Admin maintenance command and its audit treatment remain one explicit implementation decision. It must be resolved before implementation without adding a role, table, permanent first-Admin marker, or public recovery route.
 
@@ -165,13 +165,13 @@ Sole-Admin recovery is reserved for the case where no other authenticated Active
 
 Except for the controlled D019 bootstrap Admin, every Student, Teacher/Instructor, Moderator, and additional Admin account originates from an authorized institutional record and is provisioned by an authenticated Active Admin. Manual Admin provisioning is the required v1.0 minimum. CSV/batch import, full MIS integration, SSO, institutional-email verification, and additional roles remain deferred.
 
-The implementation sequence is separately gated:
+The implementation sequence remains separately gated:
 
-1. review and apply the versioned additive migration that introduces `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0` while preserving all 22 tables;
-2. update `database/schema.sql` only after the migration and rollback package passes its own review;
-3. implement Admin-only provisioning, Admin-assisted reset, mandatory password change, and live protected-request enforcement;
-4. replace public account creation so `GET /register` redirects neutrally to login and `POST /register` fails closed without creating an account, session, role assignment, or audit row; and
-5. execute and independently review the D044 test set before describing the new workflow as working.
+1. **Completed:** review and apply the versioned additive migration that introduces `accounts.must_change_password TINYINT(1) NOT NULL DEFAULT 0` while preserving all 22 tables;
+2. **Completed:** align `database/schema.sql` after the migration and rollback package passed review;
+3. **Completed authentication-foundation checkpoint:** mandatory password change, live protected-request flag enforcement, and public-registration removal are implemented and passed the accepted bounded live run; Admin-only provisioning and Admin-assisted reset remain pending;
+4. **Completed registration-removal checkpoint:** `GET /register` redirects neutrally to login and `POST /register` fails closed without creating an account, session, role assignment, or audit row; and
+5. implement and independently review the separate provisioning/reset, one-time credential delivery, atomic audit, and sole-Admin recovery gates before describing all of D044 as complete.
 
 Every provisioning or reset operation must generate its own cryptographically unpredictable temporary credential. Use at least 18 bytes from PHP `random_bytes()` and encode them as a 24-character unpadded Base64URL value that satisfies the accepted password input boundary. Never use a shared, reused, sequential, username-derived, or other predictable placeholder credential.
 
@@ -179,7 +179,7 @@ The plaintext temporary credential is retained only for the minimum time necessa
 
 Every protected request must reload the authoritative account and recheck existence, Active/Disabled status, current role, and `must_change_password`. While the flag is `1`, only password change and logout are available. A successful mandatory password change stores a new private password hash, clears the flag to `0`, and regenerates the session identifier. An already-authenticated account reset by an Admin is restricted on its next protected request.
 
-The D044 rollback must count flagged accounts and stop when any `must_change_password = 1` row exists. No migration, `schema.sql`, live database, PHP, or test-harness change is authorized by this documentation propagation; each remains a later separately approved gate.
+The D044 rollback counts flagged accounts and stops when any `must_change_password = 1` row exists. That migration/rollback behavior and the canonical schema are verified. The PHP authentication foundation passed 169 live checks with zero functional failures; the temporary fixture and sessions were removed, all 22 logical database states and protected-file baselines were restored, and the consumed `AUTO_INCREMENT` value was accepted as a harmless database artifact and was not rewound. The separate provisioning/reset transaction, one-time credential delivery, audit workflow, and sole-Admin recovery procedure are not yet implemented or proved by that run.
 
 ### 5.3 Current protected-upload implementation
 
@@ -280,6 +280,8 @@ Pass when:
 - the 30-minute idle timeout works;
 - every protected request reloads live account status and role;
 - direct unauthorized requests are rejected.
+
+Current D044 Gate 1 evidence remains partial overall. The migration/canonical-schema package is complete; `tests/security/run_d044_auth_foundation.php --mode=validate` passed 26/26 read-only checks; the live harness validator passed 57/57; and one accepted local run passed 169/169 live checks with zero functional failures for registration removal, generic login failures, temporary-credential login, mandatory-route restriction, flagged-account logout, CSRF and confirmation failures, temporary-password reuse rejection, successful mandatory change, session/CSRF rotation, old-token and old-credential rejection, new-password login, normal Student access, and live Disabled-account invalidation. Cleanup removed the controlled fixture, sessions, recovery marker, and all nine recorded temporary files; all 22 logical database states and protected-file baselines were restored. The consumed `accounts` `AUTO_INCREMENT` value is an expected harmless artifact and was intentionally not rewound. Gate 1 is not fully Passed because Admin provisioning/reset, one-time temporary-credential delivery, atomic account/audit transactions, and sole-Admin recovery remain separate pending gates.
 
 ### Gate 2 — Upload and protected storage
 

@@ -25,7 +25,7 @@ use function BpcLearnShare\Support\e;
 
         <dl class="account-summary">
             <div>
-                <dt>Username</dt>
+                <dt>Account Identifier</dt>
                 <dd><?= e((string) $account['username']) ?></dd>
             </div>
             <div>

@@ -67,4 +67,70 @@ final class AuthService
 
         return $account;
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function changeMandatoryPassword(
+        int $accountId,
+        string $newPassword,
+        string $passwordConfirmation
+    ): array {
+        $errors = AccountInput::validatePasswordChange(
+            $newPassword,
+            $passwordConfirmation
+        );
+
+        if ($errors !== []) {
+            return $errors;
+        }
+
+        $credentialState = $this->accounts->findCredentialStateById(
+            $accountId
+        );
+
+        if (
+            !is_array($credentialState)
+            || $credentialState['account_status'] !== 'active'
+            || (int) $credentialState['must_change_password'] !== 1
+        ) {
+            return [
+                'password_change' =>
+                    'The required password change is no longer available. Please sign in again.',
+            ];
+        }
+
+        $currentPasswordHash = (string) $credentialState['password_hash'];
+
+        if (password_verify($newPassword, $currentPasswordHash)) {
+            return [
+                'password' =>
+                    'Choose a new private password that is different from the temporary password.',
+            ];
+        }
+
+        $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        if (!is_string($newPasswordHash)) {
+            return [
+                'password_change' =>
+                    'The password could not be updated. Please try again.',
+            ];
+        }
+
+        if (!$this->accounts->replaceMandatoryPassword(
+            $accountId,
+            $currentPasswordHash,
+            $newPasswordHash
+        )) {
+            return [
+                'password_change' =>
+                    'The account changed before the password could be updated. Please try again.',
+            ];
+        }
+
+        Session::authenticate($accountId);
+
+        return [];
+    }
 }

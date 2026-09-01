@@ -2,8 +2,8 @@
 
 **Project:** BPC LearnShare — AI-Assisted Collaborative Academic Resource Sharing and Management System
 **Checkpoint:** Two-week working prototype and presentation
-**Status:** Active verification checklist aligned through D044; D044 implementation tests remain unexecuted
-**Last updated:** 2026-08-29
+**Status:** Active verification checklist aligned through D044; migration/schema and bounded live authentication-foundation checks are complete, while provisioning/reset and the remaining D044 tests are pending
+**Last updated:** 2026-08-30
 **Companion:** `BUILD_PLAN.md`
 
 ---
@@ -68,7 +68,7 @@ All final v1.0 requirements remain governed by the source documents even when th
 | ENV-001 | P0 | Run `git status -sb` before a checkpoint | Correct branch and understood working-tree state | Passed for the core-journey checkpoint — clean synchronized `main` before harness creation |
 | ENV-002 | P0 | Confirm PHP/XAMPP runtime | Required PHP extensions load without fatal error | Passed — PHP 8.2.12 with cURL and Fileinfo |
 | ENV-003 | P0 | Confirm MariaDB runtime and database connection | Application connects using local ignored configuration | Passed — live local connection with 22 accepted tables |
-| ENV-004 | P0 | Import the current `database/schema.sql` into a clean test database | All 22 accepted tables are created | Passed for the D043 canonical-schema checkpoint; D044 column migration/schema update remains a separate unexecuted gate |
+| ENV-004 | P0 | Import the current `database/schema.sql` into a clean test database | All 22 accepted tables are created | Passed for the D044 canonical-schema checkpoint; fresh schema, forward migration, guarded rollback, and post-live state were verified |
 | ENV-005 | P0 | Inspect browser-accessible document root | Only intended `public/` content is exposed | Not run |
 | ENV-006 | P0 | Request a storage/config/internal path through the browser | Access is denied; no source, file, or secret is exposed | Partial — generated protected resource URL returned 404; broader config/internal-path set remains |
 | ENV-007 | P0 | Run with missing/invalid database configuration | Safe error response; no credential or stack trace disclosure | Not run |
@@ -82,15 +82,15 @@ All final v1.0 requirements remain governed by the source documents even when th
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
 | AUTH-001 | P0 | Historical: register a Student with valid minimum data under the former public-registration workflow | Historical Active Student creation and hashed-password behavior only; not evidence for D044 | Passed under the pre-D044 baseline; superseded by D044. |
-| AUTH-002 | P0 | Request `GET /register` | Neutral redirect to login with an institution-issued-account message; no account state changes | Not run |
-| AUTH-003 | P0 | Submit `POST /register` directly with otherwise valid or manipulated role data | Request fails closed; no account, session, role assignment, or audit row is created | Not run |
+| AUTH-002 | P0 | Request `GET /register` | Neutral redirect to login with an institution-issued-account message; no account state changes | Passed — accepted D044 live authentication run |
+| AUTH-003 | P0 | Submit `POST /register` directly with otherwise valid or manipulated role data | Request fails closed; no account, session, role assignment, or audit row is created | Passed — accepted D044 live authentication run |
 | AUTH-004 | P0 | Provision a Student as an authenticated Active Admin | Account is created from an authorized institutional record with a unique Account Identifier, hashed temporary credential, `must_change_password = 1`, and atomic `account_created` audit row | Not run |
-| AUTH-005 | P0 | Log in with correct Active credentials | Session is created and ID is regenerated | Partial — Student and temporary Moderator authenticated through HTTP; explicit session-ID comparison remains |
-| AUTH-006 | P0 | Log in with wrong password, unknown identifier, and Disabled account | Same generic failure message; no session | Not run |
+| AUTH-005 | P0 | Log in with correct Active credentials | Session is created and ID is regenerated | Passed — controlled temporary and replacement credentials authenticated, with session-ID regeneration verified |
+| AUTH-006 | P0 | Log in with wrong password, unknown identifier, and Disabled account | Same generic failure message; no session | Passed — accepted D044 live authentication run |
 | AUTH-007 | P0 | Access a protected route without a session | Redirect or access-denied response | Passed — repository redirected after logout |
 | AUTH-008 | P0 | Remain idle past 30 minutes | Session expires and protected requests fail | Not run |
-| AUTH-009 | P0 | Log out and reuse the prior session | Prior session is invalid | Passed for the live browser session — logout succeeded and the next protected request redirected |
-| AUTH-010 | P0 | Change/disable an account after login, then make a protected request | Live database role/status is enforced immediately | Not run |
+| AUTH-009 | P0 | Log out and reuse the prior session | Prior session is invalid | Passed — accepted D044 run verified logout while flagged and invalidation of the prior session |
+| AUTH-010 | P0 | Change/disable an account after login, then make a protected request | Live database role/status is enforced immediately | Partial — live Disabled-account invalidation Passed; an in-session role-change case was not part of this run |
 | AUTH-011 | P0 | Attempt login with SQL metacharacters | No injection; generic failure | Not run |
 | AUTH-012 | P1 | Provision Student, Teacher/Instructor, Moderator, and additional Admin accounts as an authenticated Active Admin | Each allowed role is created with valid role, globally unique Account Identifier, mandatory-change flag, and audit evidence | Not run |
 | AUTH-013 | P1 | Attempt account provisioning as Student/Teacher/Moderator | Request is rejected server-side | Not run |
@@ -100,17 +100,17 @@ All final v1.0 requirements remain governed by the source documents even when th
 | AUTH-017 | P0 | Inspect URLs, logs, audit notes, errors, cookies, browser storage, cached/back-navigation responses, and permanent pages after provisioning/reset | No temporary credential or password hash is retained or redisplayed; the credential appears once only after successful commit | Not run |
 | AUTH-018 | P0 | Force failure of account insertion or `account_created` audit insertion | Provisioning and audit insertion roll back together; no partial account or audit record remains | Not run |
 | AUTH-019 | P0 | Force failure during Admin-assisted reset, flag update, or `password_reset` audit insertion | Password hash, `must_change_password = 1`, and audit insertion succeed or roll back together | Not run |
-| AUTH-020 | P0 | Log in with a newly provisioned temporary credential | User is sent to mandatory password change before any other protected function | Not run |
-| AUTH-021 | P0 | Request protected routes while `must_change_password = 1` | Only password change and logout are available; every other protected request is denied or redirected safely | Not run |
+| AUTH-020 | P0 | Log in with a newly provisioned temporary credential | User is sent to mandatory password change before any other protected function | Passed with one directly inserted, test-owned flagged Student fixture; this does not prove Admin provisioning or credential delivery |
+| AUTH-021 | P0 | Request protected routes while `must_change_password = 1` | Only password change and logout are available; every other protected request is denied or redirected safely | Passed — representative dashboard, repository, upload, moderation, administration, and AI-assisted routes were restricted |
 | AUTH-022 | P0 | Reset an already-authenticated account, then make its next protected request | Live revalidation observes `must_change_password = 1` and restricts the existing session immediately | Not run |
-| AUTH-023 | P0 | Complete mandatory password change with valid confirmation | New private hash is stored, flag clears to `0`, session identifier regenerates, and the temporary credential no longer authenticates | Not run |
+| AUTH-023 | P0 | Complete mandatory password change with valid confirmation | New private hash is stored, flag clears to `0`, session identifier regenerates, and the temporary credential no longer authenticates | Passed — accepted D044 live authentication run, including CSRF rotation and old-token rejection |
 | AUTH-024 | P0 | Reset the bootstrap-created first Admin while another authenticated Active Admin exists | Normal atomic audited reset succeeds and explicitly sets the first Admin to `must_change_password = 1` | Not run |
 | AUTH-025 | P0 | Exercise recovery when the affected Admin is the sole remaining Admin and no other authenticated Active Admin exists | Only the separately approved controlled local maintenance procedure can act; no public/runtime recovery route exists | Not implemented — exact accountable sole-Admin procedure remains an approved Build Plan decision gate |
-| AUTH-026 | P0 | Apply the D044 migration to a disposable copy containing existing accounts and the bootstrap Admin | Table count remains 22; existing rows and the first Admin initialize at `must_change_password = 0`; no account password or other row is silently changed | Not run |
-| AUTH-027 | P0 | Attempt D044 rollback while at least one account has `must_change_password = 1` | Rollback stops before dropping the column and preserves all account state | Not run |
-| AUTH-028 | P0 | Apply D044 rollback to a disposable copy only after all flagged accounts are safely resolved | Only the additive column is removed; table/account counts and unrelated schema/data remain intact | Not run |
+| AUTH-026 | P0 | Apply the D044 migration to a disposable copy containing existing accounts and the bootstrap Admin | Table count remains 22; existing rows and the first Admin initialize at `must_change_password = 0`; no account password or other row is silently changed | Passed — included in the accepted 59/59 disposable migration verification |
+| AUTH-027 | P0 | Attempt D044 rollback while at least one account has `must_change_password = 1` | Rollback stops before dropping the column and preserves all account state | Passed — guarded rollback stopped with the flag/column preserved |
+| AUTH-028 | P0 | Apply D044 rollback to a disposable copy only after all flagged accounts are safely resolved | Only the additive column is removed; table/account counts and unrelated schema/data remain intact | Passed — clean rollback and forward reapplication preserved the 22-table/account baseline |
 
-`AUTH-001` preserves historical evidence only. It **Passed under the pre-D044 baseline; superseded by D044.** None of `AUTH-002` through `AUTH-028` may be marked Passed until the applicable migration, schema, application, and controlled-recovery implementation has been separately approved, executed, and independently reviewed.
+`AUTH-001` preserves historical evidence only. It **Passed under the pre-D044 baseline; superseded by D044.** `AUTH-026` through `AUTH-028` preserve the accepted migration/rollback evidence. `tests/security/run_d044_auth_foundation.php --mode=validate` passed 26/26 read-only source and input checks, and the live-harness validator passed 57/57. The separately approved owner-side live run then passed 169/169 checks with zero functional failures. It proved only the authentication cases marked Passed above: the fixture was directly inserted by the bounded harness, so the run did not test Administrator provisioning/reset, one-time temporary-credential delivery, atomic account/audit transactions, or sole-Admin recovery. The fixture and sessions were removed; all 22 logical database states and protected-file baselines were restored; the recovery marker and all nine recorded temporary files were removed. The consumed `AUTO_INCREMENT` value is an expected harmless database behavior and was intentionally not rewound.
 
 ---
 
@@ -118,8 +118,8 @@ All final v1.0 requirements remain governed by the source documents even when th
 
 | ID | Priority | Test | Expected result | Status |
 |---|---|---|---|---|
-| SEC-001 | P0 | Submit each demonstrated state-changing request without CSRF token | Request is rejected and no state changes | Not run |
-| SEC-002 | P0 | Submit an invalid or reused CSRF token where rotation applies | Request is rejected | Not run |
+| SEC-001 | P0 | Submit each demonstrated state-changing request without CSRF token | Request is rejected and no state changes | Partial — missing/invalid CSRF was rejected for mandatory password change; other demonstrated actions retain their own checks |
+| SEC-002 | P0 | Submit an invalid or reused CSRF token where rotation applies | Request is rejected | Partial — the rotated-out password-change token was rejected; other rotation points retain their own checks |
 | SEC-003 | P0 | Call a role-restricted endpoint by direct URL/POST | Server denies the action regardless of UI | Not run |
 | SEC-004 | P0 | Change an object ID to another user's inaccessible object | No unauthorized data or action | Not run |
 | SEC-005 | P0 | Store HTML/script-like text in demonstrated text fields | Output is safely escaped; no script executes | Not run |

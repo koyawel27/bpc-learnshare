@@ -41,7 +41,7 @@ use function BpcLearnShare\Support\e;
         <form method="post" action="/login" novalidate>
             <input type="hidden" name="_token" value="<?= e($csrfToken) ?>">
 
-            <label for="username">Username</label>
+            <label for="username">Account Identifier</label>
             <input
                 id="username"
                 name="username"
@@ -67,7 +67,8 @@ use function BpcLearnShare\Support\e;
         </form>
 
         <p class="form-link">
-            New student? <a href="/register">Create a Student account</a>
+            LearnShare accounts are issued by the institution. Contact an
+            authorized Admin if you need access or account assistance.
         </p>
     </section>
 </main>

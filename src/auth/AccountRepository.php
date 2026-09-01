@@ -20,7 +20,8 @@ final class AccountRepository
     public function findByUsername(string $username): ?array
     {
         $statement = $this->database->prepare(
-            'SELECT id, username, password_hash, display_name, role, account_status
+            'SELECT id, username, password_hash, display_name, role,
+                    account_status, must_change_password
              FROM accounts
              WHERE username = :username
              LIMIT 1'
@@ -37,7 +38,8 @@ final class AccountRepository
     public function findById(int $accountId): ?array
     {
         $statement = $this->database->prepare(
-            'SELECT id, username, display_name, role, account_status
+            'SELECT id, username, display_name, role, account_status,
+                    must_change_password
              FROM accounts
              WHERE id = :id
              LIMIT 1'
@@ -46,19 +48,6 @@ final class AccountRepository
         $account = $statement->fetch();
 
         return is_array($account) ? $account : null;
-    }
-
-    public function createStudent(
-        string $username,
-        string $passwordHash,
-        string $displayName
-    ): bool {
-        return $this->createAccount(
-            $username,
-            $passwordHash,
-            $displayName,
-            'student'
-        );
     }
 
     public function createFirstAdmin(
@@ -117,6 +106,48 @@ final class AccountRepository
         return (int) $statement->fetchColumn();
     }
 
+    /**
+     * Keeps the password hash out of ordinary account/view data.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findCredentialStateById(int $accountId): ?array
+    {
+        $statement = $this->database->prepare(
+            'SELECT password_hash, account_status, must_change_password
+             FROM accounts
+             WHERE id = :id
+             LIMIT 1'
+        );
+        $statement->execute(['id' => $accountId]);
+        $state = $statement->fetch();
+
+        return is_array($state) ? $state : null;
+    }
+
+    public function replaceMandatoryPassword(
+        int $accountId,
+        string $expectedPasswordHash,
+        string $newPasswordHash
+    ): bool {
+        $statement = $this->database->prepare(
+            "UPDATE accounts
+             SET password_hash = :new_password_hash,
+                 must_change_password = 0
+             WHERE id = :id
+               AND account_status = 'active'
+               AND must_change_password = 1
+               AND BINARY password_hash = BINARY :expected_password_hash"
+        );
+        $statement->execute([
+            'id' => $accountId,
+            'expected_password_hash' => $expectedPasswordHash,
+            'new_password_hash' => $newPasswordHash,
+        ]);
+
+        return $statement->rowCount() === 1;
+    }
+
     private function createAccount(
         string $username,
         string $passwordHash,
@@ -129,13 +160,15 @@ final class AccountRepository
                 password_hash,
                 display_name,
                 role,
-                account_status
+                account_status,
+                must_change_password
             ) VALUES (
                 :username,
                 :password_hash,
                 :display_name,
                 :role,
-                :account_status
+                :account_status,
+                0
             )'
         );
 

@@ -47,7 +47,10 @@ final class Session
     public static function authenticate(int $accountId): void
     {
         session_regenerate_id(true);
-        unset($_SESSION['ai_inquiry_context']);
+        unset(
+            $_SESSION['ai_inquiry_context'],
+            $_SESSION['csrf_token']
+        );
         $_SESSION['account_id'] = $accountId;
         $_SESSION['authenticated_at'] = time();
         $_SESSION['last_activity'] = time();
